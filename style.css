@@ -1,0 +1,28 @@
+/* Simpel stijltje voor test */
+body {
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f7f7f7;
+  color: #222;
+  margin: 40px;
+}
+
+h1 {
+  color: darkred;
+}
+
+.kaart {
+  background: white;
+  border: 3px solid darkred;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  max-width: 300px;
+}
+
+footer {
+  margin-top: 40px;
+  font-size: 0.9em;
+  color: #666;
+  text-align: center;
+}
