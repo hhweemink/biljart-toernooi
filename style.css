@@ -1,103 +1,11 @@
 /* style.css */
-
-/* Alleen stijlen binnen het embedblok */
 #bcr-toernooi-app {
-  font-family: Arial, sans-serif;
-  max-width: 800px;
-  margin: auto;
+  font-family: system-ui, sans-serif;
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #fff;
   border: 1px solid #ccc;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.1);
-}
-
-#bcr-toernooi-app h2 {
-  text-align: center;
-  margin-bottom: 1em;
-}
-
-#bcr-toernooi-app .tabs {
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: space-between;
-  border-bottom: 2px solid #ccc;
-  overflow-x: auto;
-}
-
-#bcr-toernooi-app .tab {
-  flex: 1;
-  text-align: center;
-  padding: 10px;
-  cursor: pointer;
-  background-color: #f2f2f2;
-  white-space: nowrap;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-#bcr-toernooi-app .tab.active {
-  background-color: #007bff;
-  color: white;
-  font-weight: bold;
-}
-
-#bcr-toernooi-app .tab-content {
-  display: none;
-  padding: 20px 0;
-}
-
-#bcr-toernooi-app .tab-content.active {
-  display: block;
-}
-
-#bcr-toernooi-app input[type="text"],
-#bcr-toernooi-app input[type="number"],
-#bcr-toernooi-app textarea {
-  width: 100%;
-  padding: 6px;
-  margin: 4px 0 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-#bcr-toernooi-app textarea {
-  min-height: 3em;
-  resize: vertical;
-}
-
-#bcr-toernooi-app input[type="number"].small {
-  width: 60px;
-}
-
-#bcr-toernooi-app .readonly {
-  background-color: #eee;
-  color: #777;
-}
-
-#bcr-toernooi-app .feedback {
-  position: relative;
-  background-color: #e6f4ea;
-  border: 1px solid #a5d6a7;
-  color: #2e7d32;
-  padding: 10px 32px 10px 10px;
-  margin-bottom: 12px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-#bcr-toernooi-app .feedback.error {
-  background-color: #fdecea;
-  border-color: #f5c6cb;
-  color: #a94442;
-}
-
-#bcr-toernooi-app .feedback .close {
-  position: absolute;
-  right: 8px;
-  top: 6px;
-  cursor: pointer;
-  color: #555;
 }
