@@ -1,11 +1,168 @@
-/* style.css */
-#bcr-toernooi-app {
-  font-family: system-ui, sans-serif;
-  max-width: 1000px;
-  margin: 0 auto;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  overflow: hidden;
+/* Scoped styles */
+    #bcr-toernooi-app {
+      font-family: system-ui, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    #bcr-toernooi-app header {
+      background: #b30000;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      font-size: 1.4em;
+    }
+
+    #bcr-toernooi-app .active-tournament {
+      text-align: center;
+      font-weight: bold;
+      background: #f7f7f7;
+      color: #333;
+      padding: 6px;
+      border-bottom: 1px solid #ddd;
+    }
+
+#bcr-toernooi-app .tab-buttons {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  background: #eee;
+  border-bottom: 1px solid #ccc;
 }
+
+#bcr-toernooi-app .tab-buttons button {
+  flex: 1;
+  min-width: 100px;
+  background: none;
+  border: none;
+  padding: 8px 6px;
+  font-size: 0.9em;
+  cursor: pointer;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+
+
+    #bcr-toernooi-app .tab-buttons button.active {
+      background: #b30000;
+      color: #fff;
+      border-radius: 4px 4px 0 0;
+    }
+
+    #bcr-toernooi-app .tab-content {
+      display: none;
+      padding: 20px;
+    }
+
+    #bcr-toernooi-app .tab-content.active {
+      display: block;
+    }
+
+    #bcr-toernooi-app form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    #bcr-toernooi-app label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    #bcr-toernooi-app input[type="text"],
+    #bcr-toernooi-app input[type="number"],
+    #bcr-toernooi-app input[type="date"],
+    #bcr-toernooi-app textarea,
+    #bcr-toernooi-app select {
+      width: 100%;
+      padding: 6px;
+      font-size: 0.95em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    #bcr-toernooi-app input[type="number"].small {
+      width: 60px;
+      text-align: center;
+    }
+
+    #bcr-toernooi-app textarea {
+      min-height: 60px;
+      resize: vertical;
+    }
+
+    #bcr-toernooi-app .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 20px;
+    }
+
+    #bcr-toernooi-app .points-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    #bcr-toernooi-app .button-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #bcr-toernooi-app button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #b30000;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    #bcr-toernooi-app button:hover {
+      background: #d00000;
+    }
+
+    #bcr-toernooi-app .feedback {
+      margin-top: 10px;
+      text-align: center;
+      position: relative;
+    }
+
+    #bcr-toernooi-app .feedback .message {
+      display: inline-block;
+      background: #f8d7da;
+      color: #721c24;
+      padding: 8px 30px 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #f5c6cb;
+      position: relative;
+    }
+
+    #bcr-toernooi-app .feedback .close {
+      position: absolute;
+      right: 12px;
+      top: 6px;
+      cursor: pointer;
+      color: #721c24;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      #bcr-toernooi-app .form-grid {
+        grid-template-columns: 1fr;
+      }
+      #bcr-toernooi-app .points-grid {
+        grid-template-columns: 1fr;
+      }
+    }

@@ -1,108 +1,80 @@
-// script.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, getDoc, doc, deleteDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { firebaseConfig } from './firebase-config.js';
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    const firebaseConfig = {
+      apiKey: "AIzaSyAsg63E-lGgECsCxIfRJTFcTWB7LEGWNGc",
+      authDomain: "bcr-toernooi.firebaseapp.com",
+      projectId: "bcr-toernooi",
+      storageBucket: "bcr-toernooi.firebasestorage.app",
+      messagingSenderId: "856805712309",
+      appId: "1:856805712309:web:8adb4158d825630ce079fc",
+      measurementId: "G-ELH9TVY15L"
+    };
 
-const root = document.getElementById("bcr-toernooi-app");
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-root.innerHTML = `
-  <header>Biljarttoernooi Beheer</header>
-  <div class="banner" id="banner">Geen toernooi geselecteerd</div>
+    // Tab functionaliteit
+    document.querySelectorAll('#bcr-toernooi-app .tab-buttons button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#bcr-toernooi-app .tab-buttons button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('#bcr-toernooi-app .tab-content').forEach(tc => tc.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
 
-  <div class="tabs">
-    <button class="tab active" data-tab="toernooi">Toernooi</button>
-    <button class="tab" data-tab="spelers">Spelers</button>
-    <button class="tab" data-tab="finale">Finale</button>
-  </div>
+    // Niet van toepassing checkbox
+    const noMax = document.getElementById('noMaxTurns');
+    const maxInputs = ['pointsWinMax','pointsDrawMax','pointsLoseMax','maxTurns'].map(id => document.getElementById(id));
 
-  <div id="toernooi" class="tab-content active">
-    <form id="formToernooi">
-      <label>Naam toernooi *</label>
-      <input type="text" id="naam" required>
+    noMax.addEventListener('change', () => {
+      const disabled = noMax.checked;
+      maxInputs.forEach(i => {
+        i.disabled = disabled;
+        i.style.backgroundColor = disabled ? '#eee' : '';
+      });
+    });
 
-      <label>Jaar *</label>
-      <input type="number" id="jaar" min="1900" max="2099" required>
 
-      <label>Organisatie</label>
-      <textarea id="organisatie" rows="3" placeholder="Namen van organisatoren..."></textarea>
+// Validatie numerieke velden
+document.querySelectorAll('#bcr-toernooi-app input[type="number"]').forEach(inp => {
 
-      <label>Max beurten</label>
-      <input type="number" id="maxBeurten" min="0" max="999">
+  // Alleen check bij verlaten veld (blur)
+  inp.addEventListener('blur', () => {
+    const id = inp.id;
+    const val = parseInt(inp.value);
 
-      <div class="button-row">
-        <button type="button" id="opslaan">Opslaan</button>
-        <button type="button" id="laden">Laden</button>
-        <button type="button" id="verwijderen">Verwijderen</button>
-      </div>
-      <div id="feedback"></div>
-    </form>
-  </div>
-`;
-
-root.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    root.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-    root.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById(tab.dataset.tab).classList.add('active');
+    if (id === "tournamentYear") {
+      // Jaar: 1900–2099
+      if (!val) return;
+      if (val > 2099) inp.value = 2099;
+      if (val < 1900) inp.value = 1900;
+    } else {
+      // Andere velden: 0–999
+      if (!val && val !== 0) return;
+      if (val > 999) inp.value = 999;
+      if (val < 0) inp.value = 0;
+    }
   });
+
+  // Voor de overige velden blijft realtime maxlengte van 3 handig
+  if (inp.id !== "tournamentYear") {
+    inp.addEventListener('input', () => {
+      if (inp.value.length > 3) inp.value = inp.value.slice(0, 3);
+    });
+  }
 });
 
-function showFeedback(msg, type='success') {
-  const fb = document.getElementById('feedback');
-  fb.innerHTML = `<div class="feedback ${type === 'error' ? 'error' : ''}">${msg}<span class="close">×</span></div>`;
-  fb.querySelector('.close').addEventListener('click', () => fb.innerHTML = '');
-}
 
-async function opslaan() {
-  const naam = document.getElementById('naam').value.trim();
-  const jaar = document.getElementById('jaar').value.trim();
-  if (!naam || !jaar) {
-    showFeedback('Naam en jaar zijn verplicht.', 'error');
-    return;
-  }
-  const docRef = await addDoc(collection(db, 'toernooien'), {
-    naam, jaar,
-    organisatie: document.getElementById('organisatie').value,
-    maxBeurten: document.getElementById('maxBeurten').value,
-    aangemaaktOp: new Date()
-  });
-  localStorage.setItem('laatsteToernooi', docRef.id);
-  document.getElementById('banner').textContent = `Actief toernooi: ${naam} (${jaar})`;
-  showFeedback('Toernooi opgeslagen.');
-}
 
-async function laden() {
-  const q = query(collection(db, 'toernooien'), orderBy('aangemaaktOp', 'desc'));
-  const snap = await getDocs(q);
-  if (snap.empty) {
-    showFeedback('Geen toernooien gevonden.', 'error');
-    return;
-  }
-  const docSnap = snap.docs[0];
-  const d = docSnap.data();
-  document.getElementById('naam').value = d.naam;
-  document.getElementById('jaar').value = d.jaar;
-  document.getElementById('organisatie').value = d.organisatie;
-  document.getElementById('maxBeurten').value = d.maxBeurten;
-  document.getElementById('banner').textContent = `Actief toernooi: ${d.naam} (${d.jaar})`;
-  localStorage.setItem('laatsteToernooi', docSnap.id);
-  showFeedback(`Toernooi '${d.naam}' geladen.`);
-}
+    // Feedback melding
+    function showFeedback(msg) {
+      const fb = document.getElementById('feedback');
+      fb.innerHTML = `<div class="message">${msg}<span class="close" onclick="this.parentElement.remove()">×</span></div>`;
+    }
 
-async function verwijderen() {
-  if (!confirm('Weet je zeker dat je dit toernooi wilt verwijderen?')) return;
-  const q = await getDocs(collection(db, 'toernooien'));
-  for (const d of q.docs) {
-    await deleteDoc(doc(db, 'toernooien', d.id));
-  }
-  showFeedback('Alle toernooien verwijderd.');
-  document.getElementById('banner').textContent = 'Geen toernooi geselecteerd';
-}
-
-document.getElementById('opslaan').addEventListener('click', opslaan);
-document.getElementById('laden').addEventListener('click', laden);
-document.getElementById('verwijderen').addEventListener('click', verwijderen);
+    document.getElementById('tournamentForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      showFeedback("Opslaan...");
+    });
