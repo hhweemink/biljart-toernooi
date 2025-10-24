@@ -1,18 +1,16 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { firebaseConfig } from './firebase-config.js';
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAsg63E-lGgECsCxIfRJTFcTWB7LEGWNGc",
-      authDomain: "bcr-toernooi.firebaseapp.com",
-      projectId: "bcr-toernooi",
-      storageBucket: "bcr-toernooi.firebasestorage.app",
-      messagingSenderId: "856805712309",
-      appId: "1:856805712309:web:8adb4158d825630ce079fc",
-      measurementId: "G-ELH9TVY15L"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
     // Tab functionaliteit
     document.querySelectorAll('#bcr-toernooi-app .tab-buttons button').forEach(btn => {
