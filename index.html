@@ -1,4 +1,90 @@
 <!-- index.html -->
-<div id="bcr-toernooi-app"></div>
+<div id="bcr-toernooi-app">
+
+ <header>Biljarttoernooi Beheer</header>
+  <div class="active-tournament">Geen toernooi geselecteerd</div>
+
+  <div class="tab-buttons">
+    <button class="active" data-tab="toernooi">Toernooi</button>
+    <button data-tab="spelers">Spelers</button>
+    <button data-tab="r1poules">1e Ronde poules</button>
+    <button data-tab="r1resultaten">1e Ronde resultaten</button>
+    <button data-tab="r2poules">2e Ronde poules</button>
+    <button data-tab="r2resultaten">2e Ronde resultaten</button>
+    <button data-tab="finale">Finale</button>
+  </div>
+
+  <!-- Tab: Toernooi -->
+  <div id="toernooi" class="tab-content active">
+    <form id="tournamentForm">
+      <div class="form-grid">
+        <div>
+          <label>Naam toernooi *</label>
+          <input type="text" id="tournamentName" required>
+        </div>
+        <div>
+          <label>Jaar *</label>
+          <input type="number" id="tournamentYear" min="2000" max="2100" class="small" required>
+        </div>
+      </div>
+
+      <div>
+        <label>Organisatie</label>
+        <textarea id="tournamentOrg" rows="3" placeholder="Namen van organisatoren..."></textarea>
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label>Einde 1e ronde</label>
+          <input type="date" id="dateEndR1">
+        </div>
+        <div>
+          <label>Einde 2e ronde</label>
+          <input type="date" id="dateEndR2">
+        </div>
+        <div>
+          <label>Start finale</label>
+          <input type="date" id="dateStartFinale">
+        </div>
+        <div>
+          <label>Einde finale</label>
+          <input type="date" id="dateEndFinale">
+        </div>
+      </div>
+
+      <div>
+        <label>Maximaal aantal beurten</label>
+        <input type="number" id="maxTurns" class="small" min="0" max="999">
+        <label><input type="checkbox" id="noMaxTurns"> Niet van toepassing</label>
+      </div>
+
+      <div class="points-grid">
+        <div>
+          <h4>< kleiner dan max</h4>
+          <label>Overwinning</label><input type="number" class="small" id="pointsWinLess" min="0" max="999">
+          <label>Gelijkspel</label><input type="number" class="small" id="pointsDrawLess" min="0" max="999">
+          <label>Nederlaag</label><input type="number" class="small" id="pointsLoseLess" min="0" max="999">
+        </div>
+        <div>
+          <h4>= max</h4>
+          <label>Overwinning</label><input type="number" class="small" id="pointsWinMax" min="0" max="999">
+          <label>Gelijkspel</label><input type="number" class="small" id="pointsDrawMax" min="0" max="999">
+          <label>Nederlaag</label><input type="number" class="small" id="pointsLoseMax" min="0" max="999">
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button type="submit">Opslaan</button>
+        <button type="button" id="clearBtn">Alles wissen</button>
+        <button type="button" id="loadBtn">Toernooi laden</button>
+      </div>
+      <div class="feedback" id="feedback"></div>
+    </form>
+  </div>
+
+
+
+  
+</div>
 <link rel="stylesheet" href="style.css">
 <script type="module" src="script.js"></script>
