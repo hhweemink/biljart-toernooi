@@ -1,9 +1,9 @@
 /* Scoped styles */
     #bcr-toernooi-app {
       font-family: system-ui, sans-serif;
-      max-width: 900px;
+      max-width: 1000px;
       margin: 0 auto;
-      background: #fff;
+      background: #ddd;
       border: 1px solid #ccc;
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -11,7 +11,7 @@
     }
 
     #bcr-toernooi-app header {
-      background: #b30000;
+      background: #aa1f24;
       color: white;
       text-align: center;
       padding: 10px;
@@ -25,6 +25,7 @@
       color: #333;
       padding: 6px;
       border-bottom: 1px solid #ddd;
+      font-size: 1.4em;
     }
 
 #bcr-toernooi-app .tab-buttons {
@@ -40,6 +41,7 @@
   flex: 1;
   min-width: 100px;
   background: none;
+  color: #333;
   border: none;
   padding: 8px 6px;
   font-size: 0.9em;
