@@ -133,6 +133,7 @@
 
     #bcr-toernooi-app button:hover {
       background: #d00000;
+      color: #eee;
     }
 
     #bcr-toernooi-app .feedback {
