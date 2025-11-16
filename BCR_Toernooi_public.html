@@ -307,19 +307,31 @@
       </div>
 
       <div class="tabs">
-        <button type="button" class="tab-btn active" data-tab="tab-r1">
-          1e ronde
+        <button type="button" class="tab-btn active" data-tab="tab-r1p">
+          R1 poules
         </button>
-        <button type="button" class="tab-btn" data-tab="tab-r2">
-          2e ronde
+        <button type="button" class="tab-btn active" data-tab="tab-r1u">
+          R1 uitslagen
+        </button>
+        <button type="button" class="tab-btn active" data-tab="tab-r1s">
+          R1 stand
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-r2p">
+          R2 poules
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-r2u">
+          R2 Uitslagen
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-r2s">
+          R2 stand
         </button>
         <button type="button" class="tab-btn disabled" data-tab="tab-final">
           Finale (later)
         </button>
       </div>
 
-      <!-- TAB 1: 1e RONDE -->
-      <div id="tab-r1" class="tab-panel active">
+      <!-- TAB 1: 1e RONDE poules -->
+      <div id="tab-r1p" class="tab-panel active">
         <div class="card">
           <div class="round-section-title">1e ronde – poule-indeling</div>
           <div class="round-section-sub">
@@ -328,16 +340,22 @@
           <div id="r1IndelingNotice" class="notice"></div>
           <div id="r1IndelingContainer" class="poule-indeling-grid"></div>
         </div>
+      </div>
 
+      <!-- TAB 2: 1e RONDE uitslagen -->
+      <div id="tab-r1u" class="tab-panel">
         <div class="card">
-          <div class="round-section-title">1e ronde – poules & wedstrijden</div>
+          <div class="round-section-title">1e ronde – uitslagen</div>
           <div class="round-section-sub">
             Klik op een poule om de stand en alle wedstrijden te tonen of te
             verbergen.
           </div>
           <div id="r1PouleBlocks"></div>
         </div>
+      </div>
 
+      <!-- TAB 3: 1e RONDE stand -->
+      <div id="tab-r1s" class="tab-panel">
         <div class="card global-stand-card">
           <div class="round-section-title">Totaalstand 1e ronde</div>
           <div class="round-section-sub">
@@ -348,8 +366,8 @@
         </div>
       </div>
 
-      <!-- TAB 2: 2e RONDE -->
-      <div id="tab-r2" class="tab-panel">
+      <!-- TAB 4: 2e RONDE poules-->
+      <div id="tab-r2p" class="tab-panel">
         <div class="card">
           <div class="round-section-title">2e ronde – poule-indeling</div>
           <div class="round-section-sub">
@@ -359,16 +377,22 @@
           <div id="r2IndelingNotice" class="notice"></div>
           <div id="r2IndelingContainer" class="poule-indeling-grid"></div>
         </div>
+      </div>
 
+      <!-- TAB 5: 2e RONDE uitslagen-->
+      <div id="tab-r2u" class="tab-panel">
         <div class="card">
-          <div class="round-section-title">2e ronde – poules & wedstrijden</div>
+          <div class="round-section-title">2e ronde – uitslagen</div>
           <div class="round-section-sub">
             Klik op een poule om de stand en alle wedstrijden te tonen of te
             verbergen.
           </div>
           <div id="r2PouleBlocks"></div>
         </div>
+      </div>
 
+      <!-- TAB 5: 2e RONDE stand-->
+      <div id="tab-r2s" class="tab-panel">
         <div class="card global-stand-card">
           <div class="round-section-title">Totaalstand 2e ronde</div>
           <div class="round-section-sub">
@@ -379,7 +403,7 @@
         </div>
       </div>
 
-      <!-- TAB 3: FINALE (placeholder) -->
+      <!-- TAB 7: FINALE (placeholder) -->
       <div id="tab-final" class="tab-panel">
         <div class="card">
           <div class="round-section-title">Finale</div>
