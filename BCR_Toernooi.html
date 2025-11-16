@@ -391,14 +391,32 @@
             </div>
             <div>
               <label>Jaar *</label>
-              <input
-                type="number"
-                id="tournamentYear"
-                class="small"
-                min="1900"
-                max="2099"
-                required
-              />
+              <div style="display: flex; align-items: center; gap: 12px">
+                <input
+                  type="number"
+                  id="tournamentYear"
+                  class="small"
+                  min="1900"
+                  max="2099"
+                  required
+                />
+                <div style="display: flex; align-items: center; gap: 6px">
+                  <input type="checkbox" id="tournamentPublished" />
+                  <span
+                    id="tournamentPublishedBadge"
+                    style="
+                      padding: 2px 8px;
+                      border-radius: 999px;
+                      font-size: 0.8rem;
+                      background: #f8d7da;
+                      color: #842029;
+                      white-space: nowrap;
+                    "
+                  >
+                    Niet gepubliceerd
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -902,6 +920,9 @@
           <button type="button" id="clearR2PoulesBtn" class="btn btn-delete">
             🗑️ Alles wissen
           </button>
+          <button type="button" id="resetCarambolesR2Btn" class="btn btn-save">
+            Reset 2e ronde caramboles
+          </button>
         </div>
 
         <div
@@ -924,19 +945,37 @@
         >
           <!-- Linkerkant: ranglijst 1e ronde -->
           <div style="flex: 1; min-width: 280px">
-            <h4>Ranglijst 1e ronde</h4>
-            <div
-              id="r2AvailablePlayers"
-              class="list-box"
-              style="
-                border: 1px solid #ccc;
-                border-radius: 8px;
-                padding: 10px;
-                min-height: 250px;
-                background: #fafafa;
-              "
-            >
-              <p style="color: #777">Laden...</p>
+            <!-- ===== 2E RONDE POULES – LINKERKANT: RANGLIJST 1E RONDE ===== -->
+            <div style="flex: 1; min-width: 280px">
+              <h4>Ranglijst 1e ronde</h4>
+              <table
+                id="r2RankTable"
+                style="width: 100%; border-collapse: collapse; font-size: 0.9em"
+              >
+                <thead style="background: #f8f9fa">
+                  <tr>
+                    <th style="text-align: left; padding: 6px 4px">#</th>
+                    <th style="text-align: left; padding: 6px 4px">Speler</th>
+                    <th style="text-align: right; padding: 6px 4px">
+                      1e&nbsp;ronde
+                    </th>
+                    <th style="text-align: right; padding: 6px 4px">
+                      2e&nbsp;ronde
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="r2RankTableBody"></tbody>
+              </table>
+              <!-- Nieuwe knop onder de tabel -->
+              <div style="margin-top: 8px">
+                <button
+                  type="button"
+                  id="saveCarambolesR2Btn"
+                  class="btn btn-save"
+                >
+                  💾 Opslaan car. 2e ronde
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1069,14 +1108,16 @@
       const db = getFirestore(app);
 
       /* =========================================================
-                                           GLOBALE STATE VOOR ACTIEF TOERNOOI
-                                           ========================================================= */
+                                                 GLOBALE STATE VOOR ACTIEF TOERNOOI
+                                                 ========================================================= */
       let activeTournamentId = null; // bv. "OpenKampioenschap_2025"
+      const pouleOpenState = {}; // 1e ronde: poule-naam → boolean
+      const pouleOpenStateR2 = {}; // 2e ronde: poule-naam → boolean
       let playersFinalized = false; // of de spelerslijst op slot staat
 
       /* =========================================================
-                                           GEMEENSCHAPPELIJKE UI HELPERS
-                                           ========================================================= */
+                                                 GEMEENSCHAPPELIJKE UI HELPERS
+                                                 ========================================================= */
       function showConnectionBanner() {
         const host = document.getElementById("bcr-toernooi-app");
         const statusDiv = document.createElement("div");
@@ -1100,11 +1141,11 @@
             ? "#0f5132"
             : "#41464b";
         fb.innerHTML = `
-                                            <div class="message" style="background:${color};color:${textColor};">
-                                              ${msg}
-                                              <span class="close" onclick="this.parentElement.remove()">×</span>
-                                            </div>
-                                          `;
+                                                  <div class="message" style="background:${color};color:${textColor};">
+                                                    ${msg}
+                                                    <span class="close" onclick="this.parentElement.remove()">×</span>
+                                                  </div>
+                                                `;
         fb.scrollIntoView({ behavior: "smooth" });
       }
 
@@ -1123,11 +1164,11 @@
             ? "#0f5132"
             : "#41464b";
         pf.innerHTML = `
-                                            <div class="message" style="background:${color};color:${textColor};">
-                                              ${msg}
-                                              <span class="close" onclick="this.parentElement.remove()">×</span>
-                                            </div>
-                                          `;
+                                                  <div class="message" style="background:${color};color:${textColor};">
+                                                    ${msg}
+                                                    <span class="close" onclick="this.parentElement.remove()">×</span>
+                                                  </div>
+                                                `;
         pf.scrollIntoView({ behavior: "smooth" });
       }
 
@@ -1141,8 +1182,8 @@
       }
 
       /* =========================================================
-                                           TABS
-                                           ========================================================= */
+                                                 TABS
+                                                 ========================================================= */
       document
         .querySelectorAll("#bcr-toernooi-app .tab-buttons button")
         .forEach((btn) => {
@@ -1168,8 +1209,34 @@
         });
 
       /* =========================================================
-                                           FUNCTIES TAB TOERNOOI
-                                           ========================================================= */
+                                                 FUNCTIES TAB TOERNOOI
+                                                 ========================================================= */
+      /* Publicatie-status helper */
+      const publishedCheckbox = document.getElementById("tournamentPublished");
+      const publishedBadge = document.getElementById(
+        "tournamentPublishedBadge"
+      );
+
+      function updatePublishedBadge(checked) {
+        if (!publishedBadge) return;
+        if (checked) {
+          publishedBadge.textContent = "Gepubliceerd";
+          publishedBadge.style.backgroundColor = "#d1e7dd";
+          publishedBadge.style.color = "#0f5132";
+        } else {
+          publishedBadge.textContent = "Niet gepubliceerd";
+          publishedBadge.style.backgroundColor = "#f8d7da";
+          publishedBadge.style.color = "#842029";
+        }
+      }
+
+      if (publishedCheckbox) {
+        publishedCheckbox.addEventListener("change", () => {
+          updatePublishedBadge(publishedCheckbox.checked);
+        });
+        // default initialisatie
+        updatePublishedBadge(publishedCheckbox.checked);
+      }
 
       // Checkbox 'Niet van toepassing'
       const noMax = document.getElementById("noMaxTurns");
@@ -1226,11 +1293,17 @@
           return;
         }
 
+        const maxTurnsRaw = document.getElementById("maxTurns").value;
+        const maxBeurten =
+          maxTurnsRaw === "" || maxTurnsRaw == null
+            ? null
+            : Number(maxTurnsRaw);
+
         const data = {
           naam,
           jaar,
           organisatie: document.getElementById("tournamentOrg").value.trim(),
-          maxBeurten: document.getElementById("maxTurns").value || null,
+          maxBeurten,
           punten: {
             winLess: document.getElementById("pointsWinLess").value || 0,
             drawLess: document.getElementById("pointsDrawLess").value || 0,
@@ -1248,6 +1321,10 @@
           },
           aangemaaktOp: new Date().toISOString(),
           playersFinalized: playersFinalized || false,
+          aangemaaktOp: new Date().toISOString(),
+          playersFinalized: playersFinalized || false,
+          publiceerPubliek:
+            document.getElementById("tournamentPublished").checked || false,
         };
 
         try {
@@ -1278,10 +1355,10 @@
 
         if (snapshot.empty) {
           fb.innerHTML = `
-                                              <div class="message" style="background:#f8d7da;color:#842029;">
-                                                ⚠️ Er zijn nog geen toernooien opgeslagen.
-                                                <span class="close" onclick="this.parentElement.remove()">×</span>
-                                              </div>`;
+                                                    <div class="message" style="background:#f8d7da;color:#842029;">
+                                                      ⚠️ Er zijn nog geen toernooien opgeslagen.
+                                                      <span class="close" onclick="this.parentElement.remove()">×</span>
+                                                    </div>`;
           return null;
         }
 
@@ -1310,58 +1387,102 @@
       // Laden van een toernooi via dropdown
       async function loadTournamentList() {
         try {
-          const select = await buildTournamentSelect({ mode: "load" });
-          if (!select) return;
+          const snapshot = await getDocs(collection(db, "toernooien"));
+          const fb = document.getElementById("feedback");
+          fb.innerHTML = "";
 
-          select.addEventListener("change", async () => {
-            const id = select.value;
-            if (!id) return;
+          if (snapshot.empty) {
+            fb.innerHTML = `
+              <div class="message" style="background:#f8d7da;color:#842029;">
+                ⚠️ Er zijn nog geen toernooien opgeslagen.
+                <span class="close" onclick="this.parentElement.remove()">×</span>
+              </div>`;
+            return;
+          }
 
-            const ref = doc(db, "toernooien", id);
-            const dSnap = await getDoc(ref);
-            if (!dSnap.exists()) {
-              showFeedback("⚠️ Toernooi niet gevonden.", "error");
-              return;
-            }
+          // vaste dropdown hergebruiken
+          let select = document.getElementById("tournamentSelect");
+          if (!select) {
+            select = document.createElement("select");
+            select.id = "tournamentSelect";
+            select.style.marginTop = "10px";
+            select.style.padding = "6px";
+            select.style.borderRadius = "6px";
+            select.style.border = "1px solid #ccc";
+            select.style.minWidth = "250px";
+            fb.appendChild(select);
 
-            const t = dSnap.data();
-            document.getElementById("tournamentName").value = t.naam;
-            document.getElementById("tournamentYear").value = t.jaar;
-            document.getElementById("tournamentOrg").value =
-              t.organisatie || "";
-            document.getElementById("maxTurns").value = t.maxBeurten || "";
-            document.getElementById("dateEndR1").value = t.datums?.endR1 || "";
-            document.getElementById("dateEndR2").value = t.datums?.endR2 || "";
-            document.getElementById("dateStartFinale").value =
-              t.datums?.startFinale || "";
-            document.getElementById("dateEndFinale").value =
-              t.datums?.endFinale || "";
-            document.getElementById("pointsWinLess").value =
-              t.punten?.winLess || "";
-            document.getElementById("pointsDrawLess").value =
-              t.punten?.drawLess || "";
-            document.getElementById("pointsLoseLess").value =
-              t.punten?.loseLess || "";
-            document.getElementById("pointsWinMax").value =
-              t.punten?.winMax || "";
-            document.getElementById("pointsDrawMax").value =
-              t.punten?.drawMax || "";
-            document.getElementById("pointsLoseMax").value =
-              t.punten?.loseMax || "";
+            // één keer event vastmaken
+            select.addEventListener("change", async () => {
+              const id = select.value;
+              if (!id) return;
 
-            activeTournamentId = id;
-            playersFinalized = !!t.playersFinalized;
-            updateActiveTournament(t.naam, t.jaar);
-            showFeedback(
-              `✅ Toernooi "${t.naam}" (${t.jaar}) geladen.`,
-              "success"
-            );
-            guardSpelersTabAvailability();
+              const ref = doc(db, "toernooien", id);
+              const dSnap = await getDoc(ref);
+              if (!dSnap.exists()) {
+                showFeedback("⚠️ Toernooi niet gevonden.", "error");
+                return;
+              }
 
-            // ✅ Nieuw: spelers van dit toernooi laden
-            await loadPlayersForActiveTournament();
-            await loadPoulesForActiveTournament();
-            await loadR1ResultsTabForActiveTournament();
+              const t = dSnap.data();
+              document.getElementById("tournamentName").value = t.naam;
+              document.getElementById("tournamentYear").value = t.jaar;
+              document.getElementById("tournamentOrg").value =
+                t.organisatie || "";
+              document.getElementById("maxTurns").value = t.maxBeurten || "";
+              document.getElementById("dateEndR1").value =
+                t.datums?.endR1 || "";
+              document.getElementById("dateEndR2").value =
+                t.datums?.endR2 || "";
+              document.getElementById("dateStartFinale").value =
+                t.datums?.startFinale || "";
+              document.getElementById("dateEndFinale").value =
+                t.datums?.endFinale || "";
+              document.getElementById("pointsWinLess").value =
+                t.punten?.winLess || "";
+              document.getElementById("pointsDrawLess").value =
+                t.punten?.drawLess || "";
+              document.getElementById("pointsLoseLess").value =
+                t.punten?.loseLess || "";
+              document.getElementById("pointsWinMax").value =
+                t.punten?.winMax || "";
+              document.getElementById("pointsDrawMax").value =
+                t.punten?.drawMax || "";
+              document.getElementById("pointsLoseMax").value =
+                t.punten?.loseMax || "";
+
+              // Publicatie-status instellen
+              const pubCheckbox = document.getElementById(
+                "tournamentPublished"
+              );
+              if (pubCheckbox) {
+                pubCheckbox.checked = !!t.publiceerPubliek;
+                // badge mee updaten
+                if (typeof updatePublishedBadge === "function") {
+                  updatePublishedBadge(pubCheckbox.checked);
+                }
+              }
+
+              activeTournamentId = id;
+              playersFinalized = !!t.playersFinalized;
+              updateActiveTournament(t.naam, t.jaar);
+              showFeedback(
+                `✅ Toernooi "${t.naam}" (${t.jaar}) geladen.`,
+                "success"
+              );
+              guardSpelersTabAvailability();
+
+              await loadPlayersForActiveTournament();
+              await loadPoulesForActiveTournament();
+              await loadR1ResultsTabForActiveTournament();
+            });
+          }
+
+          // vul de dropdown
+          select.innerHTML = '<option value="">Kies een toernooi...</option>';
+          snapshot.forEach((d) => {
+            const t = d.data();
+            select.innerHTML += `<option value="${d.id}">${t.naam} (${t.jaar})</option>`;
           });
         } catch (err) {
           console.error("❌ Fout bij laden:", err);
@@ -1581,17 +1702,19 @@
         rows.forEach((player) => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
-                                          <td>${player.naam || ""}</td>
-                                          <td>${player.email || ""}</td>
-                                          <td>${player.telefoon || ""}</td>
-                                          <td class="num">${
-                                            player.caramboles ?? ""
-                                          }</td>
-                                          <td class="actions">
-                                            <button class="edit-player-btn" title="Wijzig speler" style="background:#0d6efd;color:#fff;border:none;border-radius:6px;cursor:pointer;padding:4px 8px;font-size:0.85rem;margin-right:4px;">✏️</button>
-                                            <button class="delete-player-btn" title="Verwijder speler" style="background:#dc3545;color:#fff;border:none;border-radius:6px;cursor:pointer;padding:4px 8px;font-size:0.85rem;">🗑️</button>
-                                          </td>
-                                        `;
+                                                <td>${player.naam || ""}</td>
+                                                <td>${player.email || ""}</td>
+                                                <td>${
+                                                  player.telefoon || ""
+                                                }</td>
+                                                <td class="num">${
+                                                  player.caramboles ?? ""
+                                                }</td>
+                                                <td class="actions">
+                                                  <button class="edit-player-btn" title="Wijzig speler" style="background:#0d6efd;color:#fff;border:none;border-radius:6px;cursor:pointer;padding:4px 8px;font-size:0.85rem;margin-right:4px;">✏️</button>
+                                                  <button class="delete-player-btn" title="Verwijder speler" style="background:#dc3545;color:#fff;border:none;border-radius:6px;cursor:pointer;padding:4px 8px;font-size:0.85rem;">🗑️</button>
+                                                </td>
+                                              `;
 
           const editBtn = tr.querySelector(".edit-player-btn");
           const delBtn = tr.querySelector(".delete-player-btn");
@@ -1765,28 +1888,28 @@
 
       function showPoulesFeedback(msg, type = "info") {
         poulesFeedback.innerHTML = `<div style="padding:6px 10px; border-radius:6px;
-                                        background:${
-                                          type === "error"
-                                            ? "#f8d7da"
-                                            : type === "success"
-                                            ? "#d1e7dd"
-                                            : "#e2e3e5"
-                                        };
-                                        color:${
-                                          type === "error"
-                                            ? "#842029"
-                                            : type === "success"
-                                            ? "#0f5132"
-                                            : "#41464b"
-                                        };
-                                        border:1px solid ${
-                                          type === "error"
-                                            ? "#f5c2c7"
-                                            : type === "success"
-                                            ? "#badbcc"
-                                            : "#d3d6d8"
-                                        };
-                                        margin-top:10px;">${msg}</div>`;
+                                              background:${
+                                                type === "error"
+                                                  ? "#f8d7da"
+                                                  : type === "success"
+                                                  ? "#d1e7dd"
+                                                  : "#e2e3e5"
+                                              };
+                                              color:${
+                                                type === "error"
+                                                  ? "#842029"
+                                                  : type === "success"
+                                                  ? "#0f5132"
+                                                  : "#41464b"
+                                              };
+                                              border:1px solid ${
+                                                type === "error"
+                                                  ? "#f5c2c7"
+                                                  : type === "success"
+                                                  ? "#badbcc"
+                                                  : "#d3d6d8"
+                                              };
+                                              margin-top:10px;">${msg}</div>`;
       }
 
       function updateSaveButtonState() {
@@ -1853,10 +1976,10 @@
           div.innerHTML = `<strong>${p.naam}</strong> (${p.caramboles || 0})`;
           div.dataset.id = p.id;
           div.style.cssText = `
-                                          padding:6px 8px; border:1px solid #ccc; border-radius:5px;
-                                          margin-bottom:4px; background:white; cursor:pointer;
-                                          transition:all 0.2s ease;
-                                        `;
+                                                padding:6px 8px; border:1px solid #ccc; border-radius:5px;
+                                                margin-bottom:4px; background:white; cursor:pointer;
+                                                transition:all 0.2s ease;
+                                              `;
           div.addEventListener("click", () => selectPlayer(p.id, div));
           availablePlayersDiv.appendChild(div);
         });
@@ -1886,21 +2009,21 @@
           const card = document.createElement("div");
           card.className = "poule-card";
           card.style.cssText = `
-                                          border:3px solid ${
-                                            isFull ? "#198754" : "#ccc"
-                                          };
-                                          border-radius:8px; padding:8px; background:#fff; min-height:120px; cursor:pointer;
-                                          transition:all 0.2s ease;
-                                        `;
+                                                border:3px solid ${
+                                                  isFull ? "#198754" : "#ccc"
+                                                };
+                                                border-radius:8px; padding:8px; background:#fff; min-height:120px; cursor:pointer;
+                                                transition:all 0.2s ease;
+                                              `;
 
           // header met aantallen
           const header = document.createElement("h5");
           header.innerHTML = `
-                                          ${poule.naam}
-                                          <span style="font-weight:normal;font-size:0.9em;color:#555;">
-                                            (${poule.spelers.length}/${poule.maxSpelers})
-                                          </span>
-                                        `;
+                                                ${poule.naam}
+                                                <span style="font-weight:normal;font-size:0.9em;color:#555;">
+                                                  (${poule.spelers.length}/${poule.maxSpelers})
+                                                </span>
+                                              `;
           card.appendChild(header);
 
           // lijst met spelers
@@ -1922,14 +2045,14 @@
             const delBtn = document.createElement("button");
             delBtn.title = "Verwijder speler uit poule";
             delBtn.style.cssText = `
-                                            background:#dc3545;
-                                            color:white;
-                                            border:none;
-                                            border-radius:4px;
-                                            cursor:pointer;
-                                            padding:2px 5px;
-                                            font-size:0.8rem;
-                                          `;
+                                                  background:#dc3545;
+                                                  color:white;
+                                                  border:none;
+                                                  border-radius:4px;
+                                                  cursor:pointer;
+                                                  padding:2px 5px;
+                                                  font-size:0.8rem;
+                                                `;
             delBtn.textContent = "🗑️";
             delBtn.addEventListener("click", (e) => {
               e.stopPropagation(); // voorkom dat klik op poule zelf ook triggert
@@ -2227,17 +2350,17 @@
         const popup = document.createElement("div");
         popup.id = "popupMsg";
         popup.style.cssText = `
-                position:fixed; top:20%; left:50%; transform:translateX(-50%);
-                background:${isError ? "#f8d7da" : "#d1e7dd"};
-                color:${isError ? "#842029" : "#0f5132"};
-                border:1px solid ${isError ? "#f5c2c7" : "#badbcc"};
-                border-radius:8px; padding:20px 25px; z-index:2000;
-                box-shadow:0 4px 12px rgba(0,0,0,0.3); text-align:center; min-width:280px;
-              `;
+                      position:fixed; top:20%; left:50%; transform:translateX(-50%);
+                      background:${isError ? "#f8d7da" : "#d1e7dd"};
+                      color:${isError ? "#842029" : "#0f5132"};
+                      border:1px solid ${isError ? "#f5c2c7" : "#badbcc"};
+                      border-radius:8px; padding:20px 25px; z-index:2000;
+                      box-shadow:0 4px 12px rgba(0,0,0,0.3); text-align:center; min-width:280px;
+                    `;
         popup.innerHTML = `
-                <div>${msg}</div>
-                <button style="margin-top:12px; background:#fff; border:1px solid #ccc;
-                  border-radius:4px; padding:5px 15px; cursor:pointer;">OK</button>`;
+                      <div>${msg}</div>
+                      <button style="margin-top:12px; background:#fff; border:1px solid #ccc;
+                        border-radius:4px; padding:5px 15px; cursor:pointer;">OK</button>`;
         popup.querySelector("button").onclick = () => popup.remove();
         document.body.appendChild(popup);
       }
@@ -2254,11 +2377,11 @@
         const maxText = maxB ? maxB : "Niet van toepassing";
         el.style.display = "block";
         el.innerHTML = `
-                <strong>Maximaal aantal beurten:</strong> ${maxText}<br>
-                <strong>Punten:</strong>
-                Winst &lt; max: ${p.winLess}, Gelijk &lt; max: ${p.drawLess}, Verlies &lt; max: ${p.loseLess} |
-                Winst = max: ${p.winMax}, Gelijk = max: ${p.drawMax}, Verlies = max: ${p.loseMax}
-              `;
+                      <strong>Maximaal aantal beurten:</strong> ${maxText}<br>
+                      <strong>Punten:</strong>
+                      Winst &lt; max: ${p.winLess}, Gelijk &lt; max: ${p.drawLess}, Verlies &lt; max: ${p.loseLess} |
+                      Winst = max: ${p.winMax}, Gelijk = max: ${p.drawMax}, Verlies = max: ${p.loseMax}
+                    `;
       }
 
       // ====== Algemeen overzicht voortgang ======
@@ -2285,30 +2408,29 @@
           )
             j++;
           const endRank = j;
-          const avgRank = (startRank + (endRank - 1)) / 2;
+          const avgRank = (startRank + endRank) / 2;
           for (let k = i; k < j; k++) sortedArray[k][targetField] = avgRank;
           i = j;
         }
       }
 
       // ====== Globale eindstand berekenen ======
+
       /* ----------------------------------------------------------
-   1E RONDE RESULTATEN – globale ranglijst (correcte ranking)
----------------------------------------------------------- */
-      /* ----------------------------------------------------------
-   1E RONDE RESULTATEN – globale ranglijst (correcte ranking)
----------------------------------------------------------- */
+         1E RONDE RESULTATEN – globale ranglijst (met poule-factor)
+      ---------------------------------------------------------- */
       function buildGlobalRankingFromStats(allMatches, r1Poules) {
-        const pouleSizeMap = {};
+        // Map met volledige poule-docs (voor evt. toekomstig gebruik)
+        const pouleMap = {};
         (r1Poules || []).forEach((p) => {
-          const size = (p.spelers || []).length || 0;
-          pouleSizeMap[p.id] = size;
+          pouleMap[p.id] = p;
         });
 
         // 1. verzamelen statistieken per speler
         const statsPerSpeler = {};
         allMatches.forEach((m) => {
           if (!m.spelerX || !m.spelerY) return;
+
           [m.spelerX, m.spelerY].forEach((sp) => {
             if (!statsPerSpeler[sp.id]) {
               statsPerSpeler[sp.id] = {
@@ -2323,12 +2445,15 @@
               };
             }
           });
+
           if (!m.afgerond) return;
+
           const sx = statsPerSpeler[m.spelerX.id];
           sx.puntenTotaal += Number(m.puntenX) || 0;
           sx.carambolesTotaal += Number(m.gemaakteX) || 0;
           sx.beurtenTotaal += Number(m.beurten) || 0;
           sx.wedstrijdenGespeeld++;
+
           const sy = statsPerSpeler[m.spelerY.id];
           sy.puntenTotaal += Number(m.puntenY) || 0;
           sy.carambolesTotaal += Number(m.gemaakteY) || 0;
@@ -2336,86 +2461,96 @@
           sy.wedstrijdenGespeeld++;
         });
 
-        // 2. verwerk factor 0,75 en extra velden
+        // 2. moy, %car en puntenAdj (puntenAdj = al-herberekende punten)
         const allStats = Object.values(statsPerSpeler).map((s) => {
           const moy =
             s.beurtenTotaal > 0 ? s.carambolesTotaal / s.beurtenTotaal : 0;
           const totTeMaken = s.teMaken * (s.wedstrijdenGespeeld || 0);
           const percCar =
             totTeMaken > 0 ? (s.carambolesTotaal / totTeMaken) * 100 : 0;
-          const size = pouleSizeMap[s.poule] || 4;
-          const factor = size === 5 ? 0.75 : 1.0;
-          const puntenAdj = (s.puntenTotaal || 0) * factor;
+
+          // Let op: puntenTotaal is al inclusief factor, via herberekening van de wedstrijden
+          const puntenAdj = s.puntenTotaal || 0;
+
           return { ...s, moy, percCar, puntenAdj };
         });
 
-        // 3. rangschikken op punten (hoog→laag)
-        allStats.sort((a, b) => {
-          if (b.puntenAdj !== a.puntenAdj) return b.puntenAdj - a.puntenAdj;
-          if (a.wedstrijdenGespeeld !== b.wedstrijdenGespeeld)
-            return a.wedstrijdenGespeeld - b.wedstrijdenGespeeld;
-          if (b.percCar !== a.percCar) return b.percCar - a.percCar;
-          if (b.moy !== a.moy) return b.moy - a.moy;
-          return a.naam.localeCompare(b.naam);
-        });
+        // 3. ranking voor punten (op basis van aangepaste punten)
+        const byPoints = [...allStats].sort(
+          (a, b) => b.puntenAdj - a.puntenAdj
+        );
+        // ✅ gebruik helper: gelijke punten → gemiddelde rang
+        assignRankPoints(byPoints, "puntenAdj", "rankPoints_punten");
 
-        // 4. Rangpunten toekennen op basis van puntenAdj (1-based)
-        let i = 0;
-        while (i < allStats.length) {
-          const startRank = i + 1;
-          let j = i + 1;
-          while (
-            j < allStats.length &&
-            allStats[j].puntenAdj === allStats[i].puntenAdj
-          )
-            j++;
-          const endRank = j;
-          const avgRank = (startRank + (endRank - 1)) / 2;
-          for (let k = i; k < j; k++) allStats[k].rankPoints_punten = avgRank;
-          i = j;
-        }
+        // 4. ranking voor % caramboles
+        const byPercCar = [...allStats].sort((a, b) => b.percCar - a.percCar);
+        // ✅ idem voor %car
+        assignRankPoints(byPercCar, "percCar", "rankPoints_percCar");
 
-        // 5. Rangpunten toekennen op basis van percCar (1-based)
-        // We sorteren opnieuw, maar passen de rangpunten toe op de oorspronkelijke volgorde
-        const percCarOrder = [...allStats].sort((a, b) => {
-          if (b.percCar !== a.percCar) return b.percCar - a.percCar;
-          return a.naam.localeCompare(b.naam);
-        });
-
-        let p = 0;
-        while (p < percCarOrder.length) {
-          const startPos = p + 1;
-          let q = p + 1;
-          while (
-            q < percCarOrder.length &&
-            percCarOrder[q].percCar === percCarOrder[p].percCar
-          )
-            q++;
-          const endPos = q;
-          const avgPos = (startPos + (endPos - 1)) / 2;
-          for (let k = p; k < q; k++) {
-            const player = percCarOrder[k];
-            const orig = allStats.find((s) => s.spelerId === player.spelerId);
-            if (orig) orig.rankPoints_percCar = avgPos;
-          }
-          p = q;
-        }
-
-        // 6. totaalrang en definitieve sortering
-        // 6. totaalrang en definitieve sortering
+        // 5. totale ranking (som van de twee rangen)
         allStats.forEach((s) => {
-          s.rankPoints_punten += 0.5;
-          s.rankPoints_percCar += 0.5;
           s.rankTotaal = s.rankPoints_punten + s.rankPoints_percCar;
         });
-        allStats.sort((a, b) => {
-          if (a.rankTotaal !== b.rankTotaal) return a.rankTotaal - b.rankTotaal;
-          if (a.rankPoints_punten !== b.rankPoints_punten)
-            return a.rankPoints_punten - b.rankPoints_punten;
-          return a.naam.localeCompare(b.naam);
-        });
 
-        return allStats;
+        return allStats.sort((a, b) => {
+          if (a.rankTotaal !== b.rankTotaal) {
+            return a.rankTotaal - b.rankTotaal;
+          }
+          // bij gelijke rankTotaal: eerst hoogste aangepaste punten
+          if (b.puntenAdj !== a.puntenAdj) {
+            return b.puntenAdj - a.puntenAdj;
+          }
+          // daarna hoogste %car
+          return b.percCar - a.percCar;
+        });
+      }
+      // Alle gespeelde wedstrijden in een poule opnieuw doorrekenen met de huidige factor
+      async function recalcR1PouleMatches(pouleId) {
+        if (!activeTournamentId) return;
+
+        const pouleDoc = r1PoulesCache.find((p) => p.id === pouleId);
+        if (!pouleDoc) return;
+
+        // Pak alle wedstrijden van deze poule
+        const matchesInPoule = r1Matches.filter((m) => m.poule === pouleId);
+
+        for (const m of matchesInPoule) {
+          // alleen afgeronde wedstrijden opnieuw berekenen
+          if (!m.afgerond) continue;
+
+          const gX = Number(m.gemaakteX) || 0;
+          const gY = Number(m.gemaakteY) || 0;
+          const b = Number(m.beurten) || 0;
+
+          const { pX, pY, uitslag } = calcR1Points(
+            gX,
+            gY,
+            b,
+            toernooiSettings.maxBeurten || 0,
+            m.spelerX.teMaken,
+            m.spelerY.teMaken,
+            toernooiSettings.punten,
+            pouleDoc
+          );
+
+          // Opslaan in Firestore
+          await saveMatchResultFields(m.id, {
+            gemaakteX: gX,
+            gemaakteY: gY,
+            beurten: b,
+            puntenX: pX,
+            puntenY: pY,
+            uitslag,
+          });
+
+          // Lokale cache ook bijwerken
+          m.puntenX = pX;
+          m.puntenY = pY;
+          m.uitslag = uitslag;
+        }
+
+        // UI opnieuw opbouwen met de nieuwe punten
+        renderR1Matches();
       }
 
       // ====== Wedstrijden ophalen ======
@@ -2453,8 +2588,8 @@
       }
 
       /* ----------------------------------------------------------
-   1E RONDE RESULTATEN – helper: thuis/uit sorteren
----------------------------------------------------------- */
+         1E RONDE RESULTATEN – helper: thuis/uit sorteren
+      ---------------------------------------------------------- */
       function sortHomeAway(arr) {
         const groups = new Map();
         arr.forEach((m) => {
@@ -2481,8 +2616,8 @@
 
       // ====== Wedstrijden tonen ======
       /* ----------------------------------------------------------
-   1E RONDE RESULTATEN – render wedstrijden + nieuwe stand
----------------------------------------------------------- */
+         1E RONDE RESULTATEN – render wedstrijden + nieuwe stand
+      ---------------------------------------------------------- */
       function renderR1Matches() {
         r1matchesWrapper.innerHTML = "";
         if (!r1Matches.length) {
@@ -2516,33 +2651,91 @@
             const headerId = `phead_${pouleNaam}`;
             const bodyId = `pbody_${pouleNaam}`;
 
+            // factor-info uit pouleDoc (indien aanwezig)
+            const basePlayers = pouleDoc?.factorBasePlayers || 4;
+            const factorEnabled = !!pouleDoc?.factorEnabled;
+            const rawFactorValue =
+              typeof pouleDoc?.factorValue === "number"
+                ? pouleDoc.factorValue
+                : null;
+
+            let factorValue;
+            if (factorEnabled && rawFactorValue != null) {
+              factorValue = rawFactorValue;
+            } else if (is5) {
+              // oude 0,75-logica blijft default voor 5-spelers poules
+              factorValue = 0.75;
+            } else {
+              factorValue = 1.0;
+            }
+
+            const factorText =
+              factorValue !== 1
+                ? `(punten ×${factorValue.toFixed(2).replace(".", ",")})`
+                : "";
+
+            const factorNote = pouleDoc?.factorNote || "";
+            const factorBadge =
+              factorEnabled && factorValue !== 1
+                ? `<span
+                      class="poule-factor-indicator"
+                      title="${
+                        factorNote
+                          ? "Toelichting: " + factorNote.replace(/"/g, "&quot;")
+                          : "Afwijkende factor voor puntentelling in deze poule"
+                      }"
+                      style="margin-left:4px;font-size:0.75em;background:#fff3cd;color:#856404;border-radius:999px;padding:2px 6px;border:1px solid #ffe69c;"
+                   >!</span>`
+                : "";
+            const wasOpen = pouleOpenState[pouleNaam] === true;
+
             let html = `
-      <div class="poule-block" data-poule="${pouleNaam}" style="border:1px solid #ccc;border-radius:8px;background:#fff;margin-bottom:16px">
-        <div id="${headerId}" class="poule-header" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;background:#f3f5f7;padding:8px 10px;border-radius:8px 8px 0 0;font-weight:600">
-          <span>${pouleNaam}</span>
-          ${
-            is5
-              ? '<span style="font-size:0.85em;color:#0c6dfd">(punten ×0,75)</span>'
-              : ""
-          }
-          <span style="font-weight:500;color:#34495e">Totaal gespeeld: ${played} / ${total} wedstrijden (${perc}%)</span>
-        </div>
-        <div id="${bodyId}" class="poule-body" style="padding:10px 10px 12px">
-          <table style="width:100%;border-collapse:collapse;font-size:0.92em">
-            <thead style="background:#eef2f6">
-              <tr>
-                <th style="text-align:left;padding:6px 4px">Speler A</th>
-                <th style="text-align:right;padding:6px 4px">Te&nbsp;maken A</th>
-                <th style="text-align:left;padding:6px 4px">Speler B</th>
-                <th style="text-align:right;padding:6px 4px">Te&nbsp;maken B</th>
-                <th style="text-align:right;padding:6px 4px">Gemaakte A</th>
-                <th style="text-align:right;padding:6px 4px">Gemaakte B</th>
-                <th style="text-align:right;padding:6px 4px">Beurten</th>
-                <th style="text-align:center;padding:6px 4px">Uitslag</th>
-                <th style="text-align:center;padding:6px 4px">Acties</th>
-              </tr>
-            </thead>
-            <tbody>`;
+              <div class="poule-block" data-poule="${pouleNaam}">
+                <div
+                  id="${headerId}"
+                  class="poule-header"
+                  style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#f8f9fa;border-radius:8px;border:1px solid #dee2e6;"
+                >
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <strong>${pouleNaam}</strong>
+                    ${
+                      factorText
+                        ? `<span style="font-size:0.85em;color:#b02a37;">${factorText}</span>`
+                        : ""
+                    }
+                    ${factorBadge}
+                    <button
+                      type="button"
+                      class="poule-factor-btn"
+                      data-poule="${pouleNaam}"
+                      title="Factor voor puntentelling instellen"
+                      style="margin-left:4px;background:#ffc107;color:#212529;border:none;border-radius:50%;width:22px;height:22px;font-size:0.9em;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"
+                    >!</button>
+                  </div>
+                  <div style="font-size:0.85em;color:#555;">
+                    Totaal gespeeld: ${played} / ${total} wedstrijden
+                  </div>
+                </div>
+                <div id="${bodyId}" class="poule-body"
+                   style="display:${wasOpen ? "block" : "none"};
+                   padding:10px;border:1px solid #dee2e6;border-top:none;
+                    border-radius:0 0 8px 8px;background:white;">
+
+                <table style="width:100%;border-collapse:collapse;font-size:0.92em">
+                  <thead style="background:#eef2f6">
+                    <tr>
+                      <th style="text-align:left;padding:6px 4px">Speler A</th>
+                      <th style="text-align:right;padding:6px 4px">Te&nbsp;maken A</th>
+                      <th style="text-align:left;padding:6px 4px">Speler B</th>
+                      <th style="text-align:right;padding:6px 4px">Te&nbsp;maken B</th>
+                      <th style="text-align:right;padding:6px 4px">Gemaakte A</th>
+                      <th style="text-align:right;padding:6px 4px">Gemaakte B</th>
+                      <th style="text-align:right;padding:6px 4px">Beurten</th>
+                      <th style="text-align:center;padding:6px 4px">Uitslag</th>
+                      <th style="text-align:center;padding:6px 4px">Acties</th>
+                    </tr>
+                  </thead>
+                  <tbody>`;
 
             matches.forEach((m) => {
               const gX = m.gemaakteX ?? "";
@@ -2552,29 +2745,29 @@
                 m.puntenX != null && m.puntenY != null
                   ? `${m.puntenX} - ${m.puntenY}`
                   : "";
-              const rowBg = m.afgerond ? "background:#f0fff4" : "";
+              const rowBg = m.afgerond ? "background:#B3FF87" : "";
 
               html += `
-        <tr data-matchid="${
-          m.id
-        }" style="border-bottom:1px solid #eee;${rowBg}">
-          <td style="padding:6px 4px">${m.spelerX?.naam ?? ""}</td>
-          <td style="padding:6px 4px;text-align:right">${
-            m.spelerX?.teMaken ?? ""
-          }</td>
-          <td style="padding:6px 4px">${m.spelerY?.naam ?? ""}</td>
-          <td style="padding:6px 4px;text-align:right">${
-            m.spelerY?.teMaken ?? ""
-          }</td>
-          <td style="padding:6px 4px;text-align:right"><input type="number" value="${gX}" class="r1-input" data-field="gemaakteX" style="width:70px;text-align:right"></td>
-          <td style="padding:6px 4px;text-align:right"><input type="number" value="${gY}" class="r1-input" data-field="gemaakteY" style="width:70px;text-align:right"></td>
-          <td style="padding:6px 4px;text-align:right"><input type="number" value="${b}" class="r1-input" data-field="beurten"   style="width:70px;text-align:right"></td>
-          <td style="padding:6px 4px;text-align:center;font-weight:600">${uitslag}</td>
-          <td style="padding:6px 4px;text-align:center">
-            <button class="actie-btn save" data-action="save" title="Opslaan">💾</button>
-            <button class="actie-btn reset" data-action="reset" title="Uitslag verwijderen">🗑️</button>
-          </td>
-        </tr>`;
+              <tr data-matchid="${
+                m.id
+              }" style="border-bottom:1px solid #eee;${rowBg}">
+                <td style="padding:6px 4px">${m.spelerX?.naam ?? ""}</td>
+                <td style="padding:6px 4px;text-align:right">${
+                  m.spelerX?.teMaken ?? ""
+                }</td>
+                <td style="padding:6px 4px">${m.spelerY?.naam ?? ""}</td>
+                <td style="padding:6px 4px;text-align:right">${
+                  m.spelerY?.teMaken ?? ""
+                }</td>
+                <td style="padding:6px 4px;text-align:right"><input type="number" value="${gX}" class="r1-input" data-field="gemaakteX" style="width:70px;text-align:right"></td>
+                <td style="padding:6px 4px;text-align:right"><input type="number" value="${gY}" class="r1-input" data-field="gemaakteY" style="width:70px;text-align:right"></td>
+                <td style="padding:6px 4px;text-align:right"><input type="number" value="${b}" class="r1-input" data-field="beurten"   style="width:70px;text-align:right"></td>
+                <td style="padding:6px 4px;text-align:center;font-weight:600">${uitslag}</td>
+                <td style="padding:6px 4px;text-align:center">
+                  <button class="actie-btn save" data-action="save" title="Opslaan">💾</button>
+                  <button class="actie-btn reset" data-action="reset" title="Uitslag verwijderen">🗑️</button>
+                </td>
+              </tr>`;
             });
 
             html += `</tbody></table>`;
@@ -2589,6 +2782,17 @@
             html += `</div></div>`;
             r1matchesWrapper.insertAdjacentHTML("beforeend", html);
 
+            // factor-knop koppelen (niet het inklappen laten triggeren)
+            const factorBtn = document.querySelector(
+              `.poule-factor-btn[data-poule="${pouleNaam}"]`
+            );
+            if (factorBtn) {
+              factorBtn.addEventListener("click", (e) => {
+                e.stopPropagation(); // header-click niet uitvoeren
+                configureR1PouleFactor(pouleNaam);
+              });
+            }
+
             // in/uitklappen
             const headerEl = document.getElementById(headerId);
             const bodyEl = document.getElementById(bodyId);
@@ -2596,6 +2800,7 @@
               const hidden = bodyEl.style.display === "none";
               bodyEl.style.display = hidden ? "block" : "none";
               headerEl.style.borderRadius = hidden ? "8px 8px 0 0" : "8px";
+              pouleOpenState[pouleNaam] = hidden; // onthouden
             });
           });
 
@@ -2605,44 +2810,130 @@
           r1PoulesCache
         );
         let gHtml = `
-    <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-top:10px">
-      <thead style="background:#f8f9fa">
-        <tr>
-          <th style="text-align:left;padding:4px;border-bottom:1px solid #ddd">#</th>
-          <th style="text-align:left;padding:4px;border-bottom:1px solid #ddd">Speler</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Ptn</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Rang&nbsp;Ptn</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">%Car</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Rang&nbsp;%Car</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Totaal&nbsp;Rang</th>
-        </tr>
-      </thead>
-      <tbody>`;
+          <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-top:10px">
+            <thead style="background:#f8f9fa">
+              <tr>
+                <th style="text-align:left;padding:4px;border-bottom:1px solid #ddd">#</th>
+                <th style="text-align:left;padding:4px;border-bottom:1px solid #ddd">Speler</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Ptn</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Rang&nbsp;Ptn</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">%Car</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Rang&nbsp;%Car</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Totaal&nbsp;Rang</th>
+              </tr>
+            </thead>
+            <tbody>`;
         globalStats.forEach((row, idx) => {
           const percCarText = row.percCar.toFixed(1).replace(".", ",") + "%";
           const isTop8 = idx < 8;
-          const bgColor = isTop8 ? "background:#d1e7dd;" : "";
+          const bgColor = "";
           gHtml += `
-      <tr style="border-bottom:1px solid #eee;${bgColor}">
-        <td style="padding:4px">${idx + 1}</td>
-        <td style="padding:4px">${row.naam}</td>
-        <td style="padding:4px;text-align:right">${Number(
-          row.puntenTotaal
-        )}</td>
-        <td style="padding:4px;text-align:right">${row.rankPoints_punten.toFixed(
-          1
-        )}</td>
-        <td style="padding:4px;text-align:right">${percCarText}</td>
-        <td style="padding:4px;text-align:right">${row.rankPoints_percCar.toFixed(
-          1
-        )}</td>
-        <td style="padding:4px;text-align:right;font-weight:600">${row.rankTotaal.toFixed(
-          1
-        )}</td>
-      </tr>`;
+            <tr style="border-bottom:1px solid #eee;${bgColor}">
+              <td style="padding:4px">${idx + 1}</td>
+              <td style="padding:4px">${row.naam}</td>
+              <td style="padding:4px;text-align:right">${Number(
+                row.puntenAdj ?? row.puntenTotaal
+              )}</td>
+              <td style="padding:4px;text-align:right;color:#f00">${row.rankPoints_punten.toFixed(
+                1
+              )}</td>
+              <td style="padding:4px;text-align:right">${percCarText}</td>
+              <td style="padding:4px;text-align:right;color:#f00">${row.rankPoints_percCar.toFixed(
+                1
+              )}</td>
+              <td style="padding:4px;text-align:right;font-weight:600;color:#f00">${row.rankTotaal.toFixed(
+                1
+              )}</td>
+            </tr>`;
         });
         gHtml += `</tbody></table>`;
         r1GlobalStandTable.innerHTML = gHtml;
+      }
+
+      // ----------------------------------------------------------
+      // 1E RONDE RESULTATEN – factor per poule instellen
+      // ----------------------------------------------------------
+      async function configureR1PouleFactor(pouleId) {
+        if (!activeTournamentId) {
+          alert("Er is geen actief toernooi geladen.");
+          return;
+        }
+
+        const pouleDoc = r1PoulesCache.find((p) => p.id === pouleId);
+        if (!pouleDoc) {
+          alert("Poule niet gevonden.");
+          return;
+        }
+
+        const huidigeActual = pouleDoc.factorActualPlayers || "";
+        const huidigeNote = pouleDoc.factorNote || "";
+        const basePlayers = pouleDoc.factorBasePlayers || 4;
+
+        const input = prompt(
+          `Werkelijk aantal spelers voor puntentelling in ${pouleId} (leeg = factor uitzetten):`,
+          huidigeActual ? String(huidigeActual) : ""
+        );
+        if (input === null) return; // gebruiker annuleert
+
+        const trimmed = input.trim();
+
+        const pouleRef = doc(
+          db,
+          "toernooien",
+          activeTournamentId,
+          "poules_r1",
+          pouleId
+        );
+
+        // Leeg = factor uitzetten, terug naar "normale" logica
+        if (trimmed === "") {
+          await updateDoc(pouleRef, {
+            factorEnabled: false,
+          });
+          pouleDoc.factorEnabled = false;
+          // UI en globale stand opnieuw laden
+          await loadR1MatchesFromFirestore();
+          return;
+        }
+
+        const actual = Number(trimmed);
+        if (!Number.isFinite(actual) || actual < 2 || actual > 8) {
+          alert("Voer een geldig aantal spelers in (minimaal 2, maximaal 8).");
+          return;
+        }
+
+        const note = prompt(
+          "Korte toelichting (wordt als mouse-over getoond, bijv. welke speler is uitgevallen):",
+          huidigeNote
+        );
+
+        // Factor berekenen op basis van 'normaal' 4 spelers vs werkelijk aantal
+        const refPlayers = basePlayers || 4; // standaard 4
+        const matchesRef = (refPlayers - 1) * 2;
+        const matchesActual = (actual - 1) * 2;
+        const factor = matchesActual > 0 ? matchesRef / matchesActual : 1.0;
+
+        const factorEnabled = Math.abs(factor - 1) > 0.0001;
+
+        await updateDoc(pouleRef, {
+          factorEnabled,
+          factorBasePlayers: refPlayers,
+          factorActualPlayers: actual,
+          factorValue: factor,
+          factorNote: note || "",
+        });
+
+        // lokale cache bijwerken zodat UI niet "achterloopt"
+        pouleDoc.factorEnabled = factorEnabled;
+        pouleDoc.factorBasePlayers = refPlayers;
+        pouleDoc.factorActualPlayers = actual;
+        pouleDoc.factorValue = factor;
+        pouleDoc.factorNote = note || "";
+
+        await recalcR1PouleMatches(pouleId);
+
+        // alles opnieuw tekenen met nieuwe factor
+        await loadR1MatchesFromFirestore();
       }
 
       // ====== Automatisch laden bij tab ======
@@ -2802,15 +3093,14 @@
         await loadR1MatchesFromFirestore();
       }
 
-      /* ----------------------------------------------------------
-   1E RONDE RESULTATEN – poule-stand (nieuwe kolommen)
----------------------------------------------------------- */
       function renderPouleStandHTML(pouleNaam, matches, pouleDoc) {
+        // spelers + te maken caramboles
         const spelers = (pouleDoc?.spelers || []).map((s) => ({
           id: s.id,
           naam: s.naam,
-          teMaken: s.carambolesR1 ?? s.caramboles ?? 0,
+          teMaken: s.carambolesR2 ?? s.carambolesR1 ?? s.caramboles ?? 0,
         }));
+
         const stats = new Map();
         spelers.forEach((s) =>
           stats.set(s.id, {
@@ -2824,6 +3114,7 @@
           })
         );
 
+        // ruwe stats opbouwen
         matches.forEach((m) => {
           if (!m.spelerX || !m.spelerY) return;
           if (m.gemaakteX != null) {
@@ -2842,15 +3133,26 @@
           }
         });
 
+        // factor bepalen op basis van poulegrootte
+        const pouleSize = (pouleDoc?.spelers || []).length || 0;
+        let factor = 1;
+        if (pouleSize === 5) {
+          factor = 0.75; // jouw huidige factor-regel
+        }
+        // (als je later met andere factoren wilt werken, komt die logica hier)
+
+        // moy, %car en aangepaste punten
         const rows = Array.from(stats.values()).map((s) => {
           const moy = s.beurten > 0 ? s.car / s.beurten : 0;
           const totTeMaken = s.teMaken * (s.gespeeld || 0);
           const percCar = totTeMaken > 0 ? (s.car / totTeMaken) * 100 : 0;
-          return { ...s, moy, percCar };
+          const puntenAdj = (s.punten || 0) * factor;
+          return { ...s, moy, percCar, puntenAdj };
         });
-        // sortering: punten ↓, gespeeld ↑, %car ↓, moy ↓, naam ↑
+
+        // sortering: aangepaste punten ↓, gespeeld ↑, %car ↓, moy ↓, naam ↑
         rows.sort((a, b) => {
-          if (b.punten !== a.punten) return b.punten - a.punten;
+          if (b.puntenAdj !== a.puntenAdj) return b.puntenAdj - a.puntenAdj;
           if (a.gespeeld !== b.gespeeld) return a.gespeeld - b.gespeeld;
           if (b.percCar !== a.percCar) return b.percCar - a.percCar;
           if (b.moy !== a.moy) return b.moy - a.moy;
@@ -2858,43 +3160,51 @@
         });
 
         let html = `
-    <div style="font-weight:600;margin-bottom:6px">Stand ${pouleNaam}</div>
-    <table style="width:100%;border-collapse:collapse;font-size:0.9em">
-      <thead style="background:#f8f9fa">
-        <tr>
-          <th style="text-align:left;padding:4px;border-bottom:1px solid #ddd">Speler</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Te maken</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Gespeeld</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Punten</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Gemaakt</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Beurten</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Moy</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">%Car</th>
-        </tr>
-      </thead>
-      <tbody>`;
+          <div style="font-weight:600;margin-bottom:6px">Stand ${pouleNaam}</div>
+          <table style="width:100%;border-collapse:collapse;font-size:0.9em">
+            <thead style="background:#f8f9fa">
+              <tr>
+                <th style="text-align:left;padding:4px;border-bottom:1px solid #ddd">Speler</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Te maken</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Gespeeld</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Punten</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Gemaakt</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Beurten</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Moy</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">%Car</th>
+              </tr>
+            </thead>
+            <tbody>`;
+
         rows.forEach((r) => {
           const perc = r.percCar.toFixed(1).replace(".", ",") + "%";
           const moy = r.moy.toFixed(3).replace(".", ",");
+          const puntenText = (
+            r.puntenAdj % 1 === 0 ? r.puntenAdj : r.puntenAdj.toFixed(1)
+          )
+            .toString()
+            .replace(".", ",");
+
           html += `
-      <tr style="border-bottom:1px solid #eee">
-        <td style="padding:4px">${r.naam}</td>
-        <td style="padding:4px;text-align:right">${r.teMaken}</td>
-        <td style="padding:4px;text-align:right">${r.gespeeld}</td>
-        <td style="padding:4px;text-align:right">${r.punten}</td>
-        <td style="padding:4px;text-align:right">${r.car}</td>
-        <td style="padding:4px;text-align:right">${r.beurten}</td>
-        <td style="padding:4px;text-align:right">${moy}</td>
-        <td style="padding:4px;text-align:right">${perc}</td>
-      </tr>`;
+            <tr style="border-bottom:1px solid #eee">
+              <td style="padding:4px">${r.naam}</td>
+              <td style="padding:4px;text-align:right">${r.teMaken}</td>
+              <td style="padding:4px;text-align:right">${r.gespeeld}</td>
+              <td style="padding:4px;text-align:right">${puntenText}</td>
+              <td style="padding:4px;text-align:right">${r.car}</td>
+              <td style="padding:4px;text-align:right">${r.beurten}</td>
+              <td style="padding:4px;text-align:right">${moy}</td>
+              <td style="padding:4px;text-align:right">${perc}</td>
+            </tr>`;
         });
+
         html += `</tbody></table>`;
         return html;
       }
 
       /* ----------------------------------------------------------
-   1E RONDE RESULTATEN – event-listeners voor actie-knoppen
----------------------------------------------------------- */
+         1E RONDE RESULTATEN – event-listeners voor actie-knoppen
+      ---------------------------------------------------------- */
       r1matchesWrapper.addEventListener("click", async (e) => {
         const btn = e.target.closest(".actie-btn");
         if (!btn) return;
@@ -2931,7 +3241,7 @@
             m.spelerX.teMaken,
             m.spelerY.teMaken,
             toernooiSettings.punten,
-            pouleDoc?.spelers?.length || 4
+            pouleDoc
           );
 
           await saveMatchResultFields(id, {
@@ -2949,9 +3259,10 @@
       });
 
       /* ----------------------------------------------------------
-   1E RONDE RESULTATEN – ontbrekende helpers
----------------------------------------------------------- */
+         1E RONDE RESULTATEN – ontbrekende helpers
+      ---------------------------------------------------------- */
       function validateR1Inputs(gX, gY, b, maxB, tX, tY) {
+        maxB = Number(maxB) || 0;
         if ([gX, gY, b].some((v) => Number.isNaN(v)))
           return "❌ Vul overal een geldig getal in.";
         if (gX < 0 || gY < 0)
@@ -2971,8 +3282,36 @@
         return null;
       }
 
-      function calcR1Points(gX, gY, b, maxB, tX, tY, pCfg = {}, pouleSize = 4) {
-        const factor = pouleSize === 5 ? 0.75 : 1;
+      function calcR1FactorForPoule(pouleDoc) {
+        if (!pouleDoc) return 1;
+
+        // Als jij later factorEnabled/factorValue in de poule-doc opslaat:
+        if (
+          pouleDoc.factorEnabled &&
+          typeof pouleDoc.factorValue === "number"
+        ) {
+          return pouleDoc.factorValue;
+        }
+
+        // Default: 5-spelers-poule → 0,75, anders 1,0
+        const size = (pouleDoc.spelers || []).length || 4;
+        if (size === 5) return 0.75;
+        return 1;
+      }
+
+      function calcR1Points(
+        gX,
+        gY,
+        b,
+        maxB,
+        tX,
+        tY,
+        pCfg = {},
+        pouleDoc = null
+      ) {
+        maxB = Number(maxB) || 0;
+
+        const factor = calcR1FactorForPoule(pouleDoc);
         const punten = {
           winLess: (pCfg.winLess ?? 2) * factor,
           drawLess: (pCfg.drawLess ?? 1) * factor,
@@ -3060,16 +3399,16 @@
       /* ===== EINDE FUNCTIES TAB 1E RONDE RESULTATEN ===== */
 
       /* =========================================================
-   2E RONDE POULES – GLOBALE VARIABELEN
-========================================================= */
+         2E RONDE POULES – GLOBALE VARIABELEN
+      ========================================================= */
       let r2CurrentPoules = []; // [{naam, maxSpelers:4, spelers:[]}, ...]
       let r2SelectedPlayer = null; // spelerobject
       let r2AllPlayers = []; // globale ranglijst 1e ronde
       let r2AvailablePlayers = []; // nog niet ingedeeld
 
       /* =========================================================
-   2E RONDE POULES – UI HELPERS
-========================================================= */
+         2E RONDE POULES – UI HELPERS
+      ========================================================= */
       function showR2PoulesFeedback(msg, type = "info") {
         const fb = document.getElementById("r2poulesFeedback");
         const color =
@@ -3094,68 +3433,138 @@
       }
 
       /* =========================================================
-   2E RONDE POULES – RANGLIJST LADEN
-========================================================= */
+         2E RONDE POULES – RANGLIJST LADEN
+      ========================================================= */
+      /* =========================================================
+         2E RONDE POULES – RANGLIJST LADEN
+      ========================================================= */
       async function loadR2GlobalRanking() {
         if (!activeTournamentId) return;
-        // Hergebruik bestaande global-ranking functie
+
+        // 1. Bouw globale ranglijst op basis van 1e ronde-wedstrijden
         const globalStats = buildGlobalRankingFromStats(
           r1Matches,
           r1PoulesCache
         );
-        r2AllPlayers = globalStats.map((p, idx) => ({
-          id: p.spelerId,
-          naam: p.naam,
-          punten: p.puntenTotaal,
-          percCar: p.percCar,
-          rankPunten: p.rankPoints_punten,
-          rankPercCar: p.rankPoints_percCar,
-          rankTotaal: p.rankTotaal,
-        }));
-        // Sorteren op rankTotaal (oplopend = beste bovenaan)
-        r2AllPlayers.sort((a, b) => a.rankTotaal - b.rankTotaal);
+
+        // 2. Sorteer op totaalrang (laagste = beste)
+        const sortedStats = [...globalStats].sort(
+          (a, b) => a.rankTotaal - b.rankTotaal
+        );
+
+        // 3. Combineer met spelersgegevens (caramboles 1e & 2e ronde)
+        r2AllPlayers = sortedStats.map((p, idx) => {
+          // bijbehorend speler-document uit de spelers-collection (voor carambolesR2)
+          const spelerDoc = Array.isArray(currentPlayers)
+            ? currentPlayers.find((sp) => sp.id === p.spelerId) || {}
+            : {};
+
+          // te maken caramboles in de 1e ronde
+          const caramboles1e = p.teMaken ?? spelerDoc.caramboles ?? 0;
+
+          // eventueel eerder ingevulde caramboles voor de 2e ronde
+          const caramboles2e =
+            spelerDoc.carambolesR2 != null ? spelerDoc.carambolesR2 : undefined;
+
+          return {
+            id: p.spelerId,
+            naam: p.naam,
+            punten: p.puntenTotaal,
+            percCar: p.percCar,
+            rankPunten: p.rankPoints_punten,
+            rankPercCar: p.rankPoints_percCar,
+            rankTotaal: p.rankTotaal,
+            // vaste rangnummer uit de 1e ronde (blijft altijd gekoppeld aan deze speler)
+            startRank: idx + 1,
+            // caramboles voor de UI
+            caramboles: caramboles1e,
+            carambolesR2: caramboles2e,
+          };
+        });
+
+        // 4. lijst met beschikbare spelers initialiseren
         r2AvailablePlayers = [...r2AllPlayers];
+
+        // 5. tabel links renderen
         renderR2AvailablePlayers();
       }
 
-      /* =========================================================
-   2E RONDE POULES – LINKERLIJST TONEN
-========================================================= */
+      /* ----------------------------------------------------------
+         2E RONDE POULES – RANGLIJST ALS TABEL (vervangt vorige renderR2AvailablePlayers)
+      ---------------------------------------------------------- */
       function renderR2AvailablePlayers() {
-        const box = document.getElementById("r2AvailablePlayers");
-        box.innerHTML = "";
-        if (r2AvailablePlayers.length === 0) {
-          box.innerHTML = `<p style="color:#777">Geen vrije spelers meer.</p>`;
+        const tbody = document.getElementById("r2RankTableBody");
+        tbody.innerHTML = "";
+
+        if (!r2AvailablePlayers.length) {
+          tbody.innerHTML =
+            '<tr><td colspan="4" style="color:#777;padding:6px">Geen vrije spelers meer.</td></tr>';
           return;
         }
-        r2AvailablePlayers.forEach((p) => {
-          const div = document.createElement("div");
-          div.className = "player-item";
-          div.innerHTML = `<strong>${p.naam}</strong> (P:${
-            p.punten
-          } | %:${p.percCar.toFixed(1)})`;
-          div.dataset.id = p.id;
-          div.style.cssText =
-            "padding:6px 8px;border:1px solid #ccc;border-radius:5px;margin-bottom:4px;background:white;cursor:pointer;";
-          div.addEventListener("click", () => selectR2Player(p.id, div));
-          box.appendChild(div);
+
+        // Altijd sorteren op vaste startRank uit de 1e ronde
+        const sorted = [...r2AvailablePlayers].sort(
+          (a, b) => (a.startRank || 9999) - (b.startRank || 9999)
+        );
+
+        sorted.forEach((p) => {
+          const tr = document.createElement("tr");
+          tr.dataset.id = p.id;
+          tr.style.cursor = "pointer";
+
+          tr.innerHTML = `
+            <td style="padding:6px 4px">${p.startRank ?? ""}</td>
+            <td style="padding:6px 4px">${p.naam}</td>
+            <td style="padding:6px 4px;text-align:right">${
+              p.caramboles ?? 0
+            }</td>
+            <td style="padding:6px 4px;text-align:right">
+              <input
+                type="number"
+                class="carambolesR2-input small"
+                value="${p.carambolesR2 ?? p.caramboles ?? 0}"
+                min="0"
+                max="999"
+                style="width:60px;text-align:right"
+              >
+            </td>`;
+
+          // Klik op de rij = speler selecteren (behalve in het inputveld zelf)
+          tr.addEventListener("click", (e) => {
+            if (e.target.tagName !== "INPUT") {
+              selectR2Player(p.id, tr);
+            }
+          });
+
+          tbody.appendChild(tr);
         });
       }
 
-      function selectR2Player(id, element) {
+      /* ----------------------------------------------------------
+         2E RONDE POULES – SPELER SELECTEREN
+      ---------------------------------------------------------- */
+      function selectR2Player(id, rowEl) {
+        // alle rijen eerst "resetten"
         document
-          .querySelectorAll("#r2AvailablePlayers .player-item")
+          .querySelectorAll("#r2RankTableBody tr")
           .forEach((el) => (el.style.background = "white"));
+
         const player = r2AvailablePlayers.find((p) => p.id === id);
         if (!player) return;
+
         r2SelectedPlayer = player;
-        element.style.background = "#cce5ff";
+
+        // highlight de geselecteerde rij
+        if (rowEl) {
+          rowEl.style.background = "#cce5ff";
+        }
+
         showR2PoulesFeedback(`🎯 Geselecteerd: ${player.naam}`, "info");
       }
 
       /* =========================================================
-   2E RONDE POULES – POULES AANMAKEN
-========================================================= */
+         2E RONDE POULES – POULES AANMAKEN
+      ========================================================= */
       async function createR2Poules() {
         if (!activeTournamentId) {
           showR2PoulesFeedback("⚠️ Geen toernooi actief.", "error");
@@ -3190,45 +3599,106 @@
       }
 
       /* =========================================================
-   2E RONDE POULES – POULES RENDEREN
-========================================================= */
+         2E RONDE POULES – POULES RENDEREN
+      ========================================================= */
       function renderR2Poules() {
         const container = document.getElementById("r2PoulesContainer");
         container.innerHTML = "";
+
         r2CurrentPoules.forEach((poule) => {
           const isFull = poule.spelers.length >= poule.maxSpelers;
+
           const card = document.createElement("div");
           card.className = "poule-card";
           card.style.cssText = `border:3px solid ${
             isFull ? "#198754" : "#ccc"
           };border-radius:8px;padding:8px;background:#fff;min-height:120px;cursor:pointer;`;
+
+          // HTML voor de poulekaart inclusief delete-knoppen met data-player-id
           card.innerHTML = `
-      <h5>${
-        poule.naam
-      } <span style="font-weight:normal;font-size:0.9em;color:#555;">(${
-            poule.spelers.length
-          }/${poule.maxSpelers})</span></h5>
-      <ul style="margin-top:5px;padding-left:15px">
-        ${poule.spelers
-          .map(
-            (sp) => `
-          <li style="display:flex;justify-content:space-between;margin-bottom:2px">
-            <span>${sp.naam} (${sp.percCar.toFixed(1)}%)</span>
-            <button style="background:#dc3545;color:white;border:none;border-radius:4px;cursor:pointer;padding:2px 5px;font-size:0.8rem" title="Verwijder speler uit poule">🗑️</button>
-          </li>`
-          )
-          .join("")}
-      </ul>`;
+            <h5>
+              ${poule.naam}
+              <span style="font-weight:normal;font-size:0.9em;color:#555;">
+                (${poule.spelers.length}/${poule.maxSpelers})
+              </span>
+            </h5>
+            <ul style="margin-top:5px;padding-left:15px">
+              ${poule.spelers
+                .map(
+                  (sp) => `
+                <li style="display:flex;justify-content:space-between;margin-bottom:2px">
+                  <span>${sp.naam} (${sp.carambolesR2})</span>
+                  <button
+                    type="button"
+                    data-player-id="${sp.id}"
+                    style="background:#dc3545;color:white;border:none;border-radius:4px;cursor:pointer;padding:2px 5px;font-size:0.8rem"
+                    title="Verwijder speler uit poule"
+                  >
+                    🗑️
+                  </button>
+                </li>`
+                )
+                .join("")}
+            </ul>
+          `;
+
+          // Verwijder-knoppen binnen deze kaart aankoppelen
+          const delButtons = card.querySelectorAll("button[data-player-id]");
+          delButtons.forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+              e.stopPropagation(); // voorkom dat de kaart-click ook triggert
+              const spelerId = btn.dataset.playerId;
+              removeR2PlayerFromPoule(poule.naam, spelerId);
+            });
+          });
+
+          // Klik op de kaart zelf = geselecteerde speler toevoegen aan deze poule
           card.addEventListener("click", () =>
             addSelectedR2PlayerToPoule(poule.naam)
           );
+
           container.appendChild(card);
         });
       }
 
       /* =========================================================
-   2E RONDE POULES – SPELER TOEVOEGEN AAN POULE
-========================================================= */
+         2E RONDE POULES – SPELER VERWIJDEREN UIT POULE
+      ========================================================= */
+      function removeR2PlayerFromPoule(pouleNaam, spelerId) {
+        const poule = r2CurrentPoules.find((p) => p.naam === pouleNaam);
+        if (!poule) return;
+
+        const idx = poule.spelers.findIndex((sp) => sp.id === spelerId);
+        if (idx === -1) return;
+
+        // speler die we terugzetten
+        const [removedPlayer] = poule.spelers.splice(idx, 1);
+
+        // alleen deze speler terug naar r2AvailablePlayers
+        const alreadyFree = r2AvailablePlayers.find(
+          (p) => p.id === removedPlayer.id
+        );
+        if (!alreadyFree) {
+          r2AvailablePlayers.push(removedPlayer);
+        }
+
+        // als deze speler toevallig geselecteerd was, selectie verwijderen
+        if (r2SelectedPlayer && r2SelectedPlayer.id === removedPlayer.id) {
+          r2SelectedPlayer = null;
+        }
+
+        // UI opnieuw tekenen
+        renderR2Poules();
+        renderR2AvailablePlayers();
+        showR2PoulesFeedback(
+          "♻️ Speler is uit de poule gehaald en staat weer bij de beschikbare spelers.",
+          "success"
+        );
+      }
+
+      /* =========================================================
+         2E RONDE POULES – SPELER TOEVOEGEN AAN POULE
+      ========================================================= */
       function addSelectedR2PlayerToPoule(pouleNaam) {
         if (!r2SelectedPlayer) {
           showR2PoulesFeedback("⚠️ Selecteer eerst een speler links.", "error");
@@ -3258,8 +3728,42 @@
       }
 
       /* =========================================================
-   2E RONDE POULES – OPSLAAN IN FIRESTORE
-========================================================= */
+         2E RONDE POULES – OPSLAAN IN FIRESTORE
+      ========================================================= */
+
+      async function saveCarambolesR2(spelerId, nieuweWaarde) {
+        if (!activeTournamentId) return;
+
+        const spelerRef = doc(
+          db,
+          "toernooien",
+          activeTournamentId,
+          "spelers",
+          spelerId
+        );
+
+        // 1. Schrijf naar Firestore
+        await updateDoc(spelerRef, { carambolesR2: nieuweWaarde });
+
+        // 2. Update lokale caches in dit tabblad
+        const p = r2AllPlayers.find((x) => x.id === spelerId);
+        if (p) p.carambolesR2 = nieuweWaarde;
+
+        const q = r2AvailablePlayers.find((x) => x.id === spelerId);
+        if (q) q.carambolesR2 = nieuweWaarde;
+
+        // 3. Heel belangrijk: ook de globale spelerslijst bijwerken
+        if (
+          typeof currentPlayers !== "undefined" &&
+          Array.isArray(currentPlayers)
+        ) {
+          const cp = currentPlayers.find((x) => x.id === spelerId);
+          if (cp) {
+            cp.carambolesR2 = nieuweWaarde;
+          }
+        }
+      }
+
       async function saveR2PoulesToFirestore() {
         if (!activeTournamentId) {
           showR2PoulesFeedback("⚠️ Geen toernooi actief.", "error");
@@ -3288,8 +3792,8 @@
       }
 
       /* =========================================================
-   2E RONDE POULES – ALLES WISSEN
-========================================================= */
+         2E RONDE POULES – ALLES WISSEN
+      ========================================================= */
       async function clearR2Poules() {
         if (!confirm("Weet je zeker dat je alle 2e ronde poules wilt wissen?"))
           return;
@@ -3310,9 +3814,52 @@
         showR2PoulesFeedback("🗑️ Alle 2e ronde poules gewist.", "success");
       }
 
+      async function resetAllCarambolesR2() {
+        if (!activeTournamentId) return;
+
+        const ok = confirm(
+          "Weet je zeker dat je alle 2e ronde caramboles wilt resetten naar de waarden uit de 1e ronde?"
+        );
+        if (!ok) return;
+
+        // Voor iedere speler: 2e ronde gelijk maken aan caramboles (1e ronde)
+        for (const speler of r2AllPlayers) {
+          const nieuweWaarde = speler.caramboles ?? 0;
+          await saveCarambolesR2(speler.id, nieuweWaarde);
+        }
+
+        // Tabel opnieuw tekenen met de nieuwe waarden
+        renderR2AvailablePlayers();
+
+        showR2PoulesFeedback(
+          "🔁 Alle 2e ronde caramboles zijn gereset naar de 1e ronde.",
+          "success"
+        );
+      }
+
+      async function saveAllCarambolesR2FromTable() {
+        if (!activeTournamentId) return;
+
+        const ok = confirm(
+          "Wil je alle huidige waarden voor 2e ronde caramboles opslaan?"
+        );
+        if (!ok) return;
+
+        // Loop over alle spelers in de ranglijst
+        for (const speler of r2AllPlayers) {
+          const waarde = speler.carambolesR2 ?? speler.caramboles ?? 0;
+          await saveCarambolesR2(speler.id, waarde);
+        }
+
+        showR2PoulesFeedback(
+          "💾 Alle 2e ronde caramboles zijn opgeslagen.",
+          "success"
+        );
+      }
+
       /* =========================================================
-   2E RONDE POULES – EVENT LISTENERS
-========================================================= */
+         2E RONDE POULES – EVENT LISTENERS
+      ========================================================= */
       document
         .getElementById("createR2PoulesBtn")
         .addEventListener("click", createR2Poules);
@@ -3322,10 +3869,45 @@
       document
         .getElementById("clearR2PoulesBtn")
         .addEventListener("click", clearR2Poules);
+      document
+        .getElementById("saveCarambolesR2Btn")
+        .addEventListener("click", saveAllCarambolesR2FromTable);
+
+      document
+        .getElementById("resetCarambolesR2Btn")
+        .addEventListener("click", resetAllCarambolesR2);
+
+      // Opslaan van carambolesR2 bij wijziging in de tabel
+      document
+        .getElementById("r2RankTableBody")
+        .addEventListener("change", async (e) => {
+          if (!e.target.classList.contains("carambolesR2-input")) return;
+
+          const row = e.target.closest("tr");
+          if (!row) return;
+
+          const spelerId = row.dataset.id;
+          const nieuweWaarde = Number(e.target.value);
+          await saveCarambolesR2(spelerId, nieuweWaarde);
+          showR2PoulesFeedback("✅ Aangepast", "success");
+        });
+
+      // Direct opslaan bij Enter-toets in de input
+      document
+        .getElementById("r2RankTableBody")
+        .addEventListener("keydown", async (e) => {
+          if (
+            e.key === "Enter" &&
+            e.target.classList.contains("carambolesR2-input")
+          ) {
+            e.preventDefault(); // voorkom submit/blur gedrag buiten onze controle
+            e.target.blur(); // triggert het change-event hierboven
+          }
+        });
 
       /* =========================================================
-   2E RONDE POULES – START BIJ TAB-OPENING
-========================================================= */
+         2E RONDE POULES – START BIJ TAB-OPENING
+      ========================================================= */
       async function loadR2PoulesForActiveTournament() {
         if (!activeTournamentId) return;
         await loadR2GlobalRanking();
@@ -3351,8 +3933,8 @@
       }
 
       /* =========================================================
-   2E RONDE POULES – AUTO-LADEN BIJ TAB-KLIK
-========================================================= */
+         2E RONDE POULES – AUTO-LADEN BIJ TAB-KLIK
+      ========================================================= */
       document
         .querySelector('button[data-tab="r2poules"]')
         .addEventListener("click", () => {
@@ -3360,31 +3942,31 @@
         });
 
       /* =========================================================
-   2E RONDE RESULTATEN – GLOBALE VARIABELEN
-========================================================= */
+         2E RONDE RESULTATEN – GLOBALE VARIABELEN
+      ========================================================= */
       let r2Matches = [];
       let r2ToernooiSettings = {};
       let r2PoulesCache = [];
 
       /* =========================================================
-   2E RONDE RESULTATEN – UI HELPERS
-========================================================= */
+         2E RONDE RESULTATEN – UI HELPERS
+      ========================================================= */
       function showR2PopupMessage(msg, isError = true) {
         const existing = document.getElementById("r2PopupMsg");
         if (existing) existing.remove();
         const popup = document.createElement("div");
         popup.id = "r2PopupMsg";
         popup.style.cssText = `
-    position:fixed;top:20%;left:50%;transform:translateX(-50%);
-    background:${isError ? "#f8d7da" : "#d1e7dd"};
-    color:${isError ? "#842029" : "#0f5132"};
-    border:1px solid ${isError ? "#f5c2c7" : "#badbcc"};
-    border-radius:8px;padding:20px 25px;z-index:2000;
-    box-shadow:0 4px 12px rgba(0,0,0,0.3);text-align:center;min-width:280px`;
+          position:fixed;top:20%;left:50%;transform:translateX(-50%);
+          background:${isError ? "#f8d7da" : "#d1e7dd"};
+          color:${isError ? "#842029" : "#0f5132"};
+          border:1px solid ${isError ? "#f5c2c7" : "#badbcc"};
+          border-radius:8px;padding:20px 25px;z-index:2000;
+          box-shadow:0 4px 12px rgba(0,0,0,0.3);text-align:center;min-width:280px`;
         popup.innerHTML = `
-    <div>${msg}</div>
-    <button style="margin-top:12px;background:#fff;border:1px solid #ccc;
-      border-radius:4px;padding:5px 15px;cursor:pointer;">OK</button>`;
+          <div>${msg}</div>
+          <button style="margin-top:12px;background:#fff;border:1px solid #ccc;
+            border-radius:4px;padding:5px 15px;cursor:pointer;">OK</button>`;
         popup.querySelector("button").onclick = () => popup.remove();
         document.body.appendChild(popup);
       }
@@ -3400,10 +3982,10 @@
         const maxText = maxB ? maxB : "Niet van toepassing";
         el.style.display = "block";
         el.innerHTML = `
-    <strong>Maximaal aantal beurten:</strong> ${maxText}<br>
-    <strong>Punten:</strong>
-    Winst &lt; max: ${p.winLess}, Gelijk &lt; max: ${p.drawLess}, Verlies &lt; max: ${p.loseLess} |
-    Winst = max: ${p.winMax}, Gelijk = max: ${p.drawMax}, Verlies = max: ${p.loseMax}`;
+          <strong>Maximaal aantal beurten:</strong> ${maxText}<br>
+          <strong>Punten:</strong>
+          Winst &lt; max: ${p.winLess}, Gelijk &lt; max: ${p.drawLess}, Verlies &lt; max: ${p.loseLess} |
+          Winst = max: ${p.winMax}, Gelijk = max: ${p.drawMax}, Verlies = max: ${p.loseMax}`;
       }
 
       function updateR2OverallProgress() {
@@ -3416,8 +3998,8 @@
       }
 
       /* =========================================================
-   2E RONDE RESULTATEN – WEDSTRIJDEN LADEN
-========================================================= */
+         2E RONDE RESULTATEN – WEDSTRIJDEN LADEN
+      ========================================================= */
       async function loadR2MatchesFromFirestore() {
         if (!activeTournamentId) {
           document.getElementById("noTournamentR2ResNotice").style.display =
@@ -3453,9 +4035,60 @@
         renderR2Matches();
       }
 
+      // ======================================================================
+      // 2E RONDE RESULTATEN – ALLE WEDSTRIJDEN VAN EEN POULE OPNIEUW BEREKENEN
+      // ======================================================================
+      async function recalcR2PouleMatches(pouleId) {
+        if (!activeTournamentId) return;
+
+        const pouleDoc = r2PoulesCache.find((p) => p.id === pouleId);
+        if (!pouleDoc) return;
+
+        // Alle wedstrijden van deze poule
+        const matchesInPoule = r2Matches.filter((m) => m.poule === pouleId);
+
+        for (const m of matchesInPoule) {
+          if (!m.afgerond) continue; // alleen afgeronde wedstrijden herberekenen
+
+          const gX = Number(m.gemaakteX) || 0;
+          const gY = Number(m.gemaakteY) || 0;
+          const b = Number(m.beurten) || 0;
+
+          // Punten opnieuw bepalen op basis van DE NIEUWE factor
+          const { pX, pY, uitslag } = calcR1Points(
+            gX,
+            gY,
+            b,
+            toernooiSettings.maxBeurten || 0,
+            m.spelerX.teMaken,
+            m.spelerY.teMaken,
+            toernooiSettings.punten,
+            pouleDoc
+          );
+
+          // Opslaan in Firestore
+          await saveR2MatchResultFields(m.id, {
+            gemaakteX: gX,
+            gemaakteY: gY,
+            beurten: b,
+            puntenX: pX,
+            puntenY: pY,
+            uitslag,
+          });
+
+          // Update lokale cache
+          m.puntenX = pX;
+          m.puntenY = pY;
+          m.uitslag = uitslag;
+        }
+
+        // UI opnieuw opbouwen
+        await loadR2MatchesFromFirestore();
+      }
+
       /* =========================================================
-   2E RONDE RESULTATEN – WEDSTRIJDEN TONEN
-========================================================= */
+         2E RONDE RESULTATEN – WEDSTRIJDEN TONEN
+      ========================================================= */
       function renderR2Matches() {
         const wrapper = document.getElementById("r2matchesWrapper");
         wrapper.innerHTML = "";
@@ -3490,33 +4123,92 @@
             const headerId = `r2phead_${pouleNaam}`;
             const bodyId = `r2pbody_${pouleNaam}`;
 
+            // factor-info uit pouleDoc (indien aanwezig)
+            const basePlayers = pouleDoc?.factorBasePlayers || 4;
+            const factorEnabled = !!pouleDoc?.factorEnabled;
+            const rawFactorValue =
+              typeof pouleDoc?.factorValue === "number"
+                ? pouleDoc.factorValue
+                : null;
+
+            let factorValue;
+            if (factorEnabled && rawFactorValue != null) {
+              factorValue = rawFactorValue;
+            } else if (is5) {
+              // default 5-spelers poule → 0,75
+              factorValue = 0.75;
+            } else {
+              factorValue = 1.0;
+            }
+
+            const factorText =
+              factorValue !== 1
+                ? `(punten ×${factorValue.toFixed(2).replace(".", ",")})`
+                : "";
+
+            const factorNote = pouleDoc?.factorNote || "";
+            const factorBadge =
+              factorEnabled && factorValue !== 1
+                ? `<span
+                    class="r2-poule-factor-indicator"
+                    title="${
+                      factorNote
+                        ? "Toelichting: " + factorNote.replace(/"/g, "&quot;")
+                        : "Afwijkende factor voor puntentelling in deze poule"
+                    }"
+                    style="margin-left:4px;font-size:0.75em;background:#fff3cd;color:#856404;border-radius:999px;padding:2px 6px;border:1px solid #ffe69c;"
+                  >!</span>`
+                : "";
+
+            const wasOpen = pouleOpenStateR2[pouleNaam] === true;
+
             let html = `
-      <div class="poule-block" data-poule="${pouleNaam}" style="border:1px solid #ccc;border-radius:8px;background:#fff;margin-bottom:16px">
-        <div id="${headerId}" class="poule-header" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;background:#f3f5f7;padding:8px 10px;border-radius:8px 8px 0 0;font-weight:600">
-          <span>${pouleNaam}</span>
-          ${
-            is5
-              ? '<span style="font-size:0.85em;color:#0c6dfd">(punten ×0,75)</span>'
-              : ""
-          }
-          <span style="font-weight:500;color:#34495e">Totaal gespeeld: ${played} / ${total} wedstrijden (${perc}%)</span>
-        </div>
-        <div id="${bodyId}" class="poule-body" style="padding:10px 10px 12px">
-          <table style="width:100%;border-collapse:collapse;font-size:0.92em">
-            <thead style="background:#eef2f6">
-              <tr>
-                <th style="text-align:left;padding:6px 4px">Speler A</th>
-                <th style="text-align:right;padding:6px 4px">Te&nbsp;maken A</th>
-                <th style="text-align:left;padding:6px 4px">Speler B</th>
-                <th style="text-align:right;padding:6px 4px">Te&nbsp;maken B</th>
-                <th style="text-align:right;padding:6px 4px">Gemaakte A</th>
-                <th style="text-align:right;padding:6px 4px">Gemaakte B</th>
-                <th style="text-align:right;padding:6px 4px">Beurten</th>
-                <th style="text-align:center;padding:6px 4px">Uitslag</th>
-                <th style="text-align:center;padding:6px 4px">Acties</th>
-              </tr>
-            </thead>
-            <tbody>`;
+              <div class="poule-block" data-poule="${pouleNaam}" style="border:1px solid #ccc;border-radius:8px;background:#fff;margin-bottom:16px">
+                <div
+                  id="${headerId}"
+                  class="poule-header"
+                  style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:#e9f5ff;padding:8px 10px;border-radius:8px 8px 0 0;font-weight:600"
+                >
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <strong>${pouleNaam}</strong>
+                    ${
+                      factorText
+                        ? `<span style="font-size:0.85em;color:#0c6dfd;">${factorText}</span>`
+                        : ""
+                    }
+                    ${factorBadge}
+                    <button
+                      type="button"
+                      class="r2-poule-factor-btn"
+                      data-poule="${pouleNaam}"
+                      title="Factor voor puntentelling instellen (2e ronde)"
+                      style="margin-left:4px;background:#ffc107;color:#212529;border:none;border-radius:50%;width:22px;height:22px;font-size:0.9em;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;"
+                    >!</button>
+                  </div>
+                  <div style="font-size:0.85em;color:#34495e;">
+                    Totaal gespeeld: ${played} / ${total} wedstrijden (${perc}%)
+                  </div>
+                </div>
+                   <div id="${bodyId}" class="poule-body"
+                    style="display:${
+                      wasOpen ? "block" : "none"
+                    };padding:10px 10px 12px">
+
+                <table style="width:100%;border-collapse:collapse;font-size:0.92em">
+                  <thead style="background:#eef2f6">
+                    <tr>
+                      <th style="text-align:left;padding:6px 4px">Speler A</th>
+                      <th style="text-align:right;padding:6px 4px">Te&nbsp;maken A</th>
+                      <th style="text-align:left;padding:6px 4px">Speler B</th>
+                      <th style="text-align:right;padding:6px 4px">Te&nbsp;maken B</th>
+                      <th style="text-align:right;padding:6px 4px">Gemaakte A</th>
+                      <th style="text-align:right;padding:6px 4px">Gemaakte B</th>
+                      <th style="text-align:right;padding:6px 4px">Beurten</th>
+                      <th style="text-align:center;padding:6px 4px">Uitslag</th>
+                      <th style="text-align:center;padding:6px 4px">Acties</th>
+                    </tr>
+                  </thead>
+                  <tbody>`;
 
             matches.forEach((m) => {
               const gX = m.gemaakteX ?? "";
@@ -3526,29 +4218,29 @@
                 m.puntenX != null && m.puntenY != null
                   ? `${m.puntenX} - ${m.puntenY}`
                   : "";
-              const rowBg = m.afgerond ? "background:#f0fff4" : "";
+              const rowBg = m.afgerond ? "background:#B3FF87" : "";
 
               html += `
-        <tr data-matchid="${
-          m.id
-        }" style="border-bottom:1px solid #eee;${rowBg}">
-          <td style="padding:6px 4px">${m.spelerX?.naam ?? ""}</td>
-          <td style="padding:6px 4px;text-align:right">${
-            m.spelerX?.teMaken ?? ""
-          }</td>
-          <td style="padding:6px 4px">${m.spelerY?.naam ?? ""}</td>
-          <td style="padding:6px 4px;text-align:right">${
-            m.spelerY?.teMaken ?? ""
-          }</td>
-          <td style="padding:6px 4px;text-align:right"><input type="number" value="${gX}" class="r2-input" data-field="gemaakteX" style="width:70px;text-align:right"></td>
-          <td style="padding:6px 4px;text-align:right"><input type="number" value="${gY}" class="r2-input" data-field="gemaakteY" style="width:70px;text-align:right"></td>
-          <td style="padding:6px 4px;text-align:right"><input type="number" value="${b}" class="r2-input" data-field="beurten" style="width:70px;text-align:right"></td>
-          <td style="padding:6px 4px;text-align:center;font-weight:600">${uitslag}</td>
-          <td style="padding:6px 4px;text-align:center">
-            <button class="actie-btn save" data-action="save" title="Opslaan">💾</button>
-            <button class="actie-btn reset" data-action="reset" title="Uitslag verwijderen">🗑️</button>
-          </td>
-        </tr>`;
+              <tr data-matchid="${
+                m.id
+              }" style="border-bottom:1px solid #eee;${rowBg}">
+                <td style="padding:6px 4px">${m.spelerX?.naam ?? ""}</td>
+                <td style="padding:6px 4px;text-align:right">${
+                  m.spelerX?.teMaken ?? ""
+                }</td>
+                <td style="padding:6px 4px">${m.spelerY?.naam ?? ""}</td>
+                <td style="padding:6px 4px;text-align:right">${
+                  m.spelerY?.teMaken ?? ""
+                }</td>
+                <td style="padding:6px 4px;text-align:right"><input type="number" value="${gX}" class="r2-input" data-field="gemaakteX" style="width:70px;text-align:right"></td>
+                <td style="padding:6px 4px;text-align:right"><input type="number" value="${gY}" class="r2-input" data-field="gemaakteY" style="width:70px;text-align:right"></td>
+                <td style="padding:6px 4px;text-align:right"><input type="number" value="${b}" class="r2-input" data-field="beurten" style="width:70px;text-align:right"></td>
+                <td style="padding:6px 4px;text-align:center;font-weight:600">${uitslag}</td>
+                <td style="padding:6px 4px;text-align:center">
+                  <button class="actie-btn save" data-action="save" title="Opslaan">💾</button>
+                  <button class="actie-btn reset" data-action="reset" title="Uitslag verwijderen">🗑️</button>
+                </td>
+              </tr>`;
             });
 
             html += `</tbody></table>`;
@@ -3560,14 +4252,31 @@
             html += `</div></div>`;
             wrapper.insertAdjacentHTML("beforeend", html);
 
-            // in/uitklappen
+            // in/uitklappen – beginstatus: ingeklapt
             const headerEl = document.getElementById(headerId);
             const bodyEl = document.getElementById(bodyId);
+
+            // bij initial render alles dicht
+            bodyEl.style.display = "none";
+            headerEl.style.borderRadius = "8px";
+
             headerEl.addEventListener("click", () => {
               const hidden = bodyEl.style.display === "none";
               bodyEl.style.display = hidden ? "block" : "none";
               headerEl.style.borderRadius = hidden ? "8px 8px 0 0" : "8px";
+              pouleOpenStateR2[pouleNaam] = hidden; // onthouden
             });
+
+            // factor-knop koppelen (voorkom dat de header inklapt)
+            const factorBtn = document.querySelector(
+              `.r2-poule-factor-btn[data-poule="${pouleNaam}"]`
+            );
+            if (factorBtn) {
+              factorBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                configureR2PouleFactor(pouleNaam);
+              });
+            }
           });
 
         // globale stand
@@ -3576,49 +4285,137 @@
           r2PoulesCache
         );
         let gHtml = `
-    <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-top:10px">
-      <thead style="background:#f8f9fa">
-        <tr>
-          <th style="text-align:left;padding:4px;border-bottom:1px solid #ddd">#</th>
-          <th style="text-align:left;padding:4px;border-bottom:1px solid #ddd">Speler</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Ptn</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Rang&nbsp;Ptn</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">%Car</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Rang&nbsp;%Car</th>
-          <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Totaal&nbsp;Rang</th>
-        </tr>
-      </thead>
-      <tbody>`;
+          <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-top:10px">
+            <thead style="background:#f8f9fa">
+              <tr>
+                <th style="text-align:left;padding:4px;border-bottom:1px solid #ddd">#</th>
+                <th style="text-align:left;padding:4px;border-bottom:1px solid #ddd">Speler</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Ptn</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Rang&nbsp;Ptn</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">%Car</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Rang&nbsp;%Car</th>
+                <th style="text-align:right;padding:4px;border-bottom:1px solid #ddd">Totaal&nbsp;Rang</th>
+              </tr>
+            </thead>
+            <tbody>`;
         globalStats.forEach((row, idx) => {
           const percCarText = row.percCar.toFixed(1).replace(".", ",") + "%";
           const isTop8 = idx < 8;
           const bgColor = isTop8 ? "background:#d1e7dd;" : "";
           gHtml += `
-      <tr style="border-bottom:1px solid #eee;${bgColor}">
-        <td style="padding:4px">${idx + 1}</td>
-        <td style="padding:4px">${row.naam}</td>
-        <td style="padding:4px;text-align:right">${Number(
-          row.puntenTotaal
-        )}</td>
-        <td style="padding:4px;text-align:right">${row.rankPoints_punten.toFixed(
-          1
-        )}</td>
-        <td style="padding:4px;text-align:right">${percCarText}</td>
-        <td style="padding:4px;text-align:right">${row.rankPoints_percCar.toFixed(
-          1
-        )}</td>
-        <td style="padding:4px;text-align:right;font-weight:600">${row.rankTotaal.toFixed(
-          1
-        )}</td>
-      </tr>`;
+            <tr style="border-bottom:1px solid #eee;${bgColor}">
+              <td style="padding:4px">${idx + 1}</td>
+              <td style="padding:4px">${row.naam}</td>
+              <td style="padding:4px;text-align:right">${Number(
+                row.puntenTotaal
+              )}</td>
+              <td style="padding:4px;text-align:right">${row.rankPoints_punten.toFixed(
+                1
+              )}</td>
+              <td style="padding:4px;text-align:right">${percCarText}</td>
+              <td style="padding:4px;text-align:right">${row.rankPoints_percCar.toFixed(
+                1
+              )}</td>
+              <td style="padding:4px;text-align:right;font-weight:600">${row.rankTotaal.toFixed(
+                1
+              )}</td>
+            </tr>`;
         });
         gHtml += `</tbody></table>`;
         document.getElementById("r2GlobalStandTable").innerHTML = gHtml;
       }
 
+      // ----------------------------------------------------------
+      // 2E RONDE RESULTATEN – factor per poule instellen
+      // ----------------------------------------------------------
+      async function configureR2PouleFactor(pouleId) {
+        if (!activeTournamentId) {
+          alert("Er is geen actief toernooi geladen.");
+          return;
+        }
+
+        const pouleDoc = r2PoulesCache.find((p) => p.id === pouleId);
+        if (!pouleDoc) {
+          alert("Poule niet gevonden.");
+          return;
+        }
+
+        const huidigeActual = pouleDoc.factorActualPlayers || "";
+        const huidigeNote = pouleDoc.factorNote || "";
+        const basePlayers = pouleDoc.factorBasePlayers || 4;
+
+        const input = prompt(
+          `Werkelijk aantal spelers voor puntentelling in ${pouleId} (leeg = factor uitzetten):`,
+          huidigeActual ? String(huidigeActual) : ""
+        );
+        if (input === null) return; // gebruiker annuleert
+
+        const trimmed = input.trim();
+
+        const pouleRef = doc(
+          db,
+          "toernooien",
+          activeTournamentId,
+          "poules_r2",
+          pouleId
+        );
+
+        // Leeg = factor uitzetten, terug naar normale logica
+        if (trimmed === "") {
+          await updateDoc(pouleRef, {
+            factorEnabled: false,
+          });
+          pouleDoc.factorEnabled = false;
+          await loadR2MatchesFromFirestore();
+          return;
+        }
+
+        const actual = Number(trimmed);
+        if (!Number.isFinite(actual) || actual < 2 || actual > 8) {
+          alert("Voer een geldig aantal spelers in (minimaal 2, maximaal 8).");
+          return;
+        }
+
+        const note = prompt(
+          "Korte toelichting (wordt als mouse-over getoond, bijv. welke speler is uitgevallen):",
+          huidigeNote
+        );
+
+        // Factor berekenen op basis van 'normaal' aantal spelers vs werkelijk aantal
+        const refPlayers = basePlayers || 4; // standaard 4
+        const matchesRef = (refPlayers - 1) * 2;
+        const matchesActual = (actual - 1) * 2;
+        const factor = matchesActual > 0 ? matchesRef / matchesActual : 1.0;
+
+        const factorEnabled = Math.abs(factor - 1) > 0.0001;
+
+        await updateDoc(pouleRef, {
+          factorEnabled,
+          factorBasePlayers: refPlayers,
+          factorActualPlayers: actual,
+          factorValue: factor,
+          factorNote: note || "",
+        });
+
+        // lokale cache bijwerken
+        pouleDoc.factorEnabled = factorEnabled;
+        pouleDoc.factorBasePlayers = refPlayers;
+        pouleDoc.factorActualPlayers = actual;
+        pouleDoc.factorValue = factor;
+        pouleDoc.factorNote = note || "";
+
+        // ============================
+        // Uitslagen opnieuw berekenen
+        // ============================
+        await recalcR2PouleMatches(pouleId);
+
+        // alles opnieuw laden met nieuwe factor
+        await loadR2MatchesFromFirestore();
+      }
+
       /* =========================================================
-   2E RONDE RESULTATEN – EVENT-LISTENERS VOOR ACTIE-KNOPPEN
-========================================================= */
+         2E RONDE RESULTATEN – EVENT-LISTENERS VOOR ACTIE-KNOPPEN
+      ========================================================= */
       document
         .getElementById("r2matchesWrapper")
         .addEventListener("click", async (e) => {
@@ -3657,7 +4454,7 @@
               m.spelerX.teMaken,
               m.spelerY.teMaken,
               r2ToernooiSettings.punten,
-              pouleDoc?.spelers?.length || 4
+              pouleDoc
             );
 
             await saveR2MatchResultFields(id, {
@@ -3675,8 +4472,8 @@
         });
 
       /* =========================================================
-   2E RONDE RESULTATEN – HELPERS (hergebruik 1e ronde)
-========================================================= */
+         2E RONDE RESULTATEN – HELPERS (hergebruik 1e ronde)
+      ========================================================= */
       async function saveR2MatchResultFields(matchId, update) {
         const ref = doc(
           db,
@@ -3715,8 +4512,8 @@
       }
 
       /* =========================================================
-   2E RONDE RESULTATEN – WEDSTRIJDEN AANMAKEN
-========================================================= */
+         2E RONDE RESULTATEN – WEDSTRIJDEN AANMAKEN
+      ========================================================= */
       async function createR2MatchSchedule() {
         if (!activeTournamentId) {
           showR2PopupMessage("⚠️ Geen toernooi geselecteerd.", true);
@@ -3799,8 +4596,8 @@
       }
 
       /* =========================================================
-   2E RONDE RESULTATEN – WEDSTRIJDEN WISSEN
-========================================================= */
+         2E RONDE RESULTATEN – WEDSTRIJDEN WISSEN
+      ========================================================= */
       async function deleteR2Matches() {
         if (!activeTournamentId) {
           showR2PopupMessage("⚠️ Geen toernooi geselecteerd.", true);
@@ -3839,8 +4636,8 @@
       }
 
       /* =========================================================
-   2E RONDE RESULTATEN – POULES OPVRAGEN
-========================================================= */
+         2E RONDE RESULTATEN – POULES OPVRAGEN
+      ========================================================= */
       async function getR2Poules() {
         const poulesRef = collection(
           db,
@@ -3853,17 +4650,20 @@
       }
 
       /* =========================================================
-   2E RONDE RESULTATEN – AUTO-LADEN BIJ TAB-KLIK
-========================================================= */
+         2E RONDE RESULTATEN – AUTO-LADEN BIJ TAB-KLIK
+      ========================================================= */
       document
         .querySelector('button[data-tab="r2resultaten"]')
         .addEventListener("click", () => {
+          Object.keys(pouleOpenStateR2).forEach(
+            (k) => (pouleOpenStateR2[k] = false)
+          );
           loadR2MatchesFromFirestore();
         });
 
       /* =========================================================
-   2E RONDE RESULTATEN – KNOPPEN EVENT LISTENERS
-========================================================= */
+         2E RONDE RESULTATEN – KNOPPEN EVENT LISTENERS
+      ========================================================= */
       document
         .getElementById("createR2MatchesBtn")
         .addEventListener("click", createR2MatchSchedule);
@@ -3872,8 +4672,8 @@
         .addEventListener("click", deleteR2Matches);
 
       /* =========================================================
-                                           EVENT LISTENERS VOOR TOERNOOI KNOPPEN
-                                           ========================================================= */
+                                                 EVENT LISTENERS VOOR TOERNOOI KNOPPEN
+                                                 ========================================================= */
       document
         .getElementById("tournamentForm")
         .addEventListener("submit", (e) => {
@@ -3897,9 +4697,9 @@
         .addEventListener("click", deleteR1Matches);
 
       /* =========================================================
-                                           INIT
-                                           ========================================================= */
-      showConnectionBanner();
+                                                 INIT
+                                                 ========================================================= */
+      document.addEventListener("DOMContentLoaded", showConnectionBanner);
       guardSpelersTabAvailability();
     </script>
   </body>
