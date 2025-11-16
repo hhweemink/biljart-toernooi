@@ -293,12 +293,19 @@
 
       <div class="card">
         <div class="selector-row">
-          <label for="tournamentSelect">Toernooi:</label>
-          <select id="tournamentSelect">
-            <option value="">Kies een toernooi…</option>
+          <label for="yearSelect">Jaar:</label>
+          <select id="yearSelect" style="width: 80px; min-width: 80px">
+            <option value="">Kies…</option>
           </select>
+
+          <label for="tournamentSelect">Toernooi:</label>
+          <select id="tournamentSelect" disabled>
+            <option value="">Kies eerst een jaar…</option>
+          </select>
+
           <span id="tournamentMeta" class="selector-meta"></span>
         </div>
+
         <div id="tournamentSelectNotice" class="small-muted">
           Alleen toernooien die door de organisatie als “gepubliceerd” zijn
           ingesteld, zijn hier zichtbaar.
@@ -441,6 +448,7 @@
 
       let activeTournamentId = null;
       let activeTournamentDoc = null;
+      let publishedTournaments = []; // <-- nieuw
 
       let r1Poules = [];
       let r1Matches = [];
@@ -1123,22 +1131,32 @@
       }
 
       // ====== TOERNOOI LADEN ======
+      // ====== TOERNOOIEN LADEN (per jaar) ======
       async function loadPublishedTournaments() {
-        const selectEl = $("tournamentSelect");
+        const yearSelect = $("yearSelect");
+        const tournamentSelect = $("tournamentSelect");
         const metaEl = $("tournamentMeta");
         const errorEl = $("tournamentError");
+
         errorEl.style.display = "none";
         errorEl.textContent = "";
 
-        selectEl.innerHTML = '<option value="">Kies een toernooi…</option>';
+        // reset dropdowns
+        yearSelect.innerHTML = '<option value="">Kies…</option>';
+        tournamentSelect.innerHTML =
+          '<option value="">Kies eerst een jaar…</option>';
+        tournamentSelect.disabled = true;
 
         try {
           const snap = await getDocs(collection(db, "toernooien"));
           const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
+          // Alleen gepubliceerde toernooien
           const published = all.filter(
             (t) => t.publiceerPubliek === true || t.publiceer === true
           );
+
+          publishedTournaments = published; // globaal bewaren
 
           if (!published.length) {
             metaEl.textContent =
@@ -1146,23 +1164,48 @@
             return;
           }
 
-          published
-            .sort((a, b) => {
-              const na = (a.naam || a.id || "").toLowerCase();
-              const nb = (b.naam || b.id || "").toLowerCase();
-              return na.localeCompare(nb);
-            })
-            .forEach((t) => {
-              const opt = document.createElement("option");
-              opt.value = t.id;
-              const naam = t.naam || t.id;
-              const jaar = t.jaar ? String(t.jaar) : "";
-              opt.textContent = jaar ? `${naam} ${jaar}` : naam;
-              selectEl.appendChild(opt);
-            });
+          // Unieke jaren verzameln (waar een jaar is ingevuld)
+          const years = Array.from(
+            new Set(
+              published
+                .map((t) => t.jaar)
+                .filter((y) => y !== undefined && y !== null)
+            )
+          );
 
-          metaEl.textContent =
-            "Kies een toernooi om de actuele stand te bekijken.";
+          if (!years.length) {
+            // Fallback: er zijn wel toernooien, maar geen jaren in de data
+            metaEl.textContent =
+              "Er zijn gepubliceerde toernooien, maar er is geen jaartal vastgelegd.";
+            tournamentSelect.innerHTML =
+              '<option value="">Kies een toernooi…</option>';
+            published
+              .sort((a, b) => {
+                const na = (a.naam || a.id || "").toLowerCase();
+                const nb = (b.naam || b.id || "").toLowerCase();
+                return na.localeCompare(nb);
+              })
+              .forEach((t) => {
+                const opt = document.createElement("option");
+                opt.value = t.id;
+                const naam = t.naam || t.id;
+                opt.textContent = naam;
+                tournamentSelect.appendChild(opt);
+              });
+            tournamentSelect.disabled = false;
+            return;
+          }
+
+          // Meest recente jaren bovenaan
+          years.sort((a, b) => b - a);
+          years.forEach((year) => {
+            const opt = document.createElement("option");
+            opt.value = String(year);
+            opt.textContent = String(year);
+            yearSelect.appendChild(opt);
+          });
+
+          metaEl.textContent = "Kies eerst een jaar en daarna een toernooi.";
         } catch (err) {
           console.error(err);
           errorEl.style.display = "block";
@@ -1278,6 +1321,60 @@
         initTabs();
         loadPublishedTournaments();
 
+        // Stap 1: jaar kiezen
+        $("yearSelect").addEventListener("change", (e) => {
+          const year = e.target.value;
+          const tournamentSelect = $("tournamentSelect");
+          const metaEl = $("tournamentMeta");
+
+          if (!year) {
+            // Jaar leeg: reset alles
+            tournamentSelect.innerHTML =
+              '<option value="">Kies eerst een jaar…</option>';
+            tournamentSelect.disabled = true;
+            metaEl.textContent = "Kies eerst een jaar en daarna een toernooi.";
+            loadTournament(null);
+            return;
+          }
+
+          // Filter gepubliceerde toernooien op gekozen jaar
+          const fromYear = publishedTournaments.filter(
+            (t) => String(t.jaar) === String(year)
+          );
+
+          tournamentSelect.innerHTML =
+            '<option value="">Kies een toernooi…</option>';
+
+          if (!fromYear.length) {
+            tournamentSelect.disabled = true;
+            metaEl.textContent =
+              "Voor dit jaar zijn (nog) geen gepubliceerde toernooien gevonden.";
+            loadTournament(null);
+            return;
+          }
+
+          fromYear
+            .sort((a, b) => {
+              const na = (a.naam || a.id || "").toLowerCase();
+              const nb = (b.naam || b.id || "").toLowerCase();
+              return na.localeCompare(nb);
+            })
+            .forEach((t) => {
+              const opt = document.createElement("option");
+              opt.value = t.id;
+              const naam = t.naam || t.id;
+              opt.textContent = naam;
+              tournamentSelect.appendChild(opt);
+            });
+
+          tournamentSelect.disabled = false;
+          metaEl.textContent = "Kies een toernooi in " + year + ".";
+
+          // Eventuele eerder getoonde data leegmaken
+          loadTournament(null);
+        });
+
+        // Stap 2: toernooi binnen gekozen jaar kiezen
         $("tournamentSelect").addEventListener("change", (e) => {
           loadTournament(e.target.value);
         });
