@@ -1205,8 +1205,76 @@
                 loadPlayersFromFirestore(); // lijst verversen bij openen
               }
             }
+
+            // Speciale regel: als je naar "1e ronde poules" gaat -> knoppenstatus updaten
+            if (btn.dataset.tab === "r1poules") {
+              if (typeof updateR1PoulesButtons === "function") {
+                updateR1PoulesButtons();
+              }
+            }
           });
         });
+
+      async function hasAnyPoulesOrMatchesForActiveTournament() {
+        if (!activeTournamentId) return false;
+
+        const basePath = ["toernooien", activeTournamentId];
+
+        const checks = [
+          ["poules_r1"],
+          ["r1_wedstrijden"],
+          ["poules_r2"],
+          ["r2_wedstrijden"],
+        ];
+
+        for (const sub of checks) {
+          const colRef = collection(db, ...basePath, ...sub);
+          const snap = await getDocs(colRef);
+          if (!snap.empty) return true;
+        }
+
+        return false;
+      }
+
+      async function clearAllPoulesAndMatchesForActiveTournament() {
+        if (!activeTournamentId) return;
+
+        const basePath = ["toernooien", activeTournamentId];
+
+        const paths = [
+          ["poules_r1"],
+          ["r1_wedstrijden"],
+          ["poules_r2"],
+          ["r2_wedstrijden"],
+        ];
+
+        for (const sub of paths) {
+          const colRef = collection(db, ...basePath, ...sub);
+          const snap = await getDocs(colRef);
+          if (snap.empty) continue;
+
+          const batch = writeBatch(db);
+          snap.forEach((d) => batch.delete(d.ref));
+          await batch.commit();
+        }
+
+        // Lokale caches ook leegmaken
+        if (typeof currentPoules !== "undefined") currentPoules = [];
+        if (typeof r1Matches !== "undefined") r1Matches = [];
+        if (typeof r1PoulesCache !== "undefined") r1PoulesCache = [];
+        if (typeof r2CurrentPoules !== "undefined") r2CurrentPoules = [];
+        if (typeof r2AllPlayers !== "undefined") r2AllPlayers = [];
+        if (typeof r2AvailablePlayers !== "undefined") r2AvailablePlayers = [];
+
+        // UI opruimen waar mogelijk
+        if (typeof renderPoules === "function") renderPoules();
+        if (typeof renderAvailablePlayers === "function")
+          renderAvailablePlayers();
+        if (typeof renderR1Matches === "function") renderR1Matches();
+        if (typeof renderR2Poules === "function") renderR2Poules();
+        if (typeof renderR2AvailablePlayers === "function")
+          renderR2AvailablePlayers();
+      }
 
       /* =========================================================
                                                  FUNCTIES TAB TOERNOOI
@@ -1579,6 +1647,7 @@
       let currentPlayers = [];
       let currentSort = null;
       let editPlayerId = null;
+      let r1PoulesExist = false; // true zodra er poules_r1 zijn
 
       function updatePlayerCount() {
         playerCount.textContent = `Aantal deelnemers: ${currentPlayers.length}`;
@@ -1586,11 +1655,27 @@
 
       function openEditModal(player) {
         editPlayerId = player.id;
-        document.getElementById("editName").value = player.naam || "";
-        document.getElementById("editEmail").value = player.email || "";
-        document.getElementById("editPhone").value = player.telefoon || "";
-        document.getElementById("editCaramboles").value =
-          player.caramboles ?? "";
+
+        const nameInput = document.getElementById("editName");
+        const emailInput = document.getElementById("editEmail");
+        const phoneInput = document.getElementById("editPhone");
+        const carInput = document.getElementById("editCaramboles");
+
+        nameInput.value = player.naam || "";
+        emailInput.value = player.email || "";
+        phoneInput.value = player.telefoon || "";
+        carInput.value = player.caramboles ?? "";
+
+        // Zodra er poules zijn: alleen e-mail & telefoon bewerkbaar
+        const lockStructural = !!r1PoulesExist;
+
+        nameInput.disabled = lockStructural;
+        carInput.disabled = lockStructural;
+
+        // kleine visuele hint
+        nameInput.style.backgroundColor = lockStructural ? "#f0f0f0" : "";
+        carInput.style.backgroundColor = lockStructural ? "#f0f0f0" : "";
+
         editPlayerModal.style.display = "flex";
       }
 
@@ -1605,7 +1690,7 @@
         e.preventDefault();
         if (!editPlayerId || !activeTournamentId) return;
 
-        const updateData = {
+        const newData = {
           naam: document.getElementById("editName").value.trim(),
           email: document.getElementById("editEmail").value.trim(),
           telefoon: document.getElementById("editPhone").value.trim(),
@@ -1613,13 +1698,45 @@
             Number(document.getElementById("editCaramboles").value) || 0,
         };
 
+        // Bestaande speler opzoeken om te kunnen vergelijken
+        const oldPlayer =
+          currentPlayers.find((p) => p.id === editPlayerId) || {};
+        const oldName = oldPlayer.naam || "";
+        const oldCar = oldPlayer.caramboles ?? 0;
+
+        const newName = newData.naam;
+        const newCar = newData.caramboles;
+
+        // Check: zitten we midden in het toernooi?
+        // (= spelerslijst definitief én er zijn al poules/wedstrijden)
+        let midTournament = false;
+        if (playersFinalized) {
+          const hasStructure = await hasAnyPoulesOrMatchesForActiveTournament();
+          midTournament = hasStructure;
+        }
+
+        if (midTournament) {
+          const nameChanged = oldName !== newName;
+          const carChanged = oldCar !== newCar;
+
+          if (nameChanged || carChanged) {
+            showPlayerFeedback(
+              "❌ Tijdens het toernooi mogen alleen e-mailadres en telefoonnummer worden gewijzigd. " +
+                "Naam en te maken caramboles blijven ongewijzigd.",
+              "error"
+            );
+            return;
+          }
+        }
+
+        // Als we hier zijn: wijziging is toegestaan
         await setDoc(
           doc(db, "toernooien", activeTournamentId, "spelers", editPlayerId),
-          updateData,
+          newData,
           { merge: true }
         );
         showPlayerFeedback(
-          `✏️ Speler "${updateData.naam}" bijgewerkt.`,
+          `✏️ Speler "${newData.naam}" bijgewerkt.`,
           "success"
         );
         closeEditModal();
@@ -1634,55 +1751,69 @@
 
       function guardSpelersTabAvailability() {
         const disabled = !activeTournamentId;
-        const overlay = document.getElementById("playersLockOverlay");
+        const hasPoules = !!r1PoulesExist;
 
-        noTournamentNotice.style.display = disabled ? "block" : "none";
-        playersFinalizedNotice.style.display = playersFinalized
-          ? "flex"
-          : "none";
-
-        // Toon of verberg de grijze overlay met sloticoon
+        // overlay tonen als lijst definitief is
         if (playersFinalized) {
-          overlay.style.display = "flex";
+          playersFinalizedNotice.style.display = "flex";
         } else {
-          overlay.style.display = "none";
+          playersFinalizedNotice.style.display = "none";
         }
 
-        // Invoervelden & knoppen blokkeren waar nodig
-        [...playerForm.querySelectorAll("input,button")].forEach((el) => {
-          el.disabled =
-            disabled || (playersFinalized && el.id === "addPlayerBtn");
-          if (playersFinalized && el.id === "addPlayerBtn") {
-            el.style.backgroundColor = "#bbb";
-            el.style.cursor = "not-allowed";
-            el.style.opacity = "0.6";
-          } else {
-            el.style.backgroundColor = "";
-            el.style.cursor = "";
-            el.style.opacity = "";
-          }
-        });
+        // formulier voor nieuwe speler
+        if (playerForm) {
+          [...playerForm.querySelectorAll("input,button")].forEach((el) => {
+            if (el.id === "addPlayerBtn") {
+              // Speler toevoegen mag NIET als:
+              // - geen toernooi
+              // - lijst definitief
+              // - er al poules zijn
+              const blockAdd = disabled || playersFinalized || hasPoules;
+              el.disabled = blockAdd;
+              if (blockAdd) {
+                el.style.backgroundColor = "#ccc";
+                el.style.cursor = "not-allowed";
+                el.style.opacity = "0.7";
+              } else {
+                el.style.backgroundColor = "";
+                el.style.cursor = "pointer";
+                el.style.opacity = "1";
+              }
+            } else {
+              // overige velden alleen blokkeren als er nog geen toernooi is
+              el.disabled = disabled;
+              if (disabled) {
+                el.style.backgroundColor = "#f0f0f0";
+                el.style.cursor = "not-allowed";
+                el.style.opacity = "0.7";
+              } else {
+                el.style.backgroundColor = "";
+                el.style.cursor = "";
+                el.style.opacity = "";
+              }
+            }
+          });
+        }
 
-        sortByNameBtn.disabled = disabled;
-        sortByCarambolesBtn.disabled = disabled;
-        finalizeBtn.disabled = disabled || playersFinalized;
-        editBtn.disabled = disabled || !playersFinalized;
+        // sorteerknoppen
+        if (sortByNameBtn) sortByNameBtn.disabled = disabled;
+        if (sortByCarambolesBtn) sortByCarambolesBtn.disabled = disabled;
 
-        finalizeBtn.style.backgroundColor = finalizeBtn.disabled
-          ? "#999"
-          : "#198754";
-        editBtn.style.backgroundColor = editBtn.disabled ? "#999" : "#0dcaf0";
+        // finalize / edit
+        if (finalizeBtn) finalizeBtn.disabled = disabled || playersFinalized;
+        if (editBtn) editBtn.disabled = disabled || !playersFinalized;
 
-        // Verwijderknoppen blokkeren bij finalized
+        // verwijder-knoppen in de tabel
         Array.from(
           playerTableBody.querySelectorAll(".delete-player-btn")
         ).forEach((btn) => {
-          btn.disabled = disabled || playersFinalized;
-          btn.style.backgroundColor =
-            disabled || playersFinalized ? "#bbb" : "#dc3545";
-          btn.style.cursor =
-            disabled || playersFinalized ? "not-allowed" : "pointer";
-          btn.style.opacity = disabled || playersFinalized ? "0.6" : "1";
+          // Verwijderen mag niet als:
+          // - geen toernooi
+          // - lijst definitief
+          // - er al poules zijn
+          btn.disabled = disabled || playersFinalized || hasPoules;
+          btn.style.opacity = btn.disabled ? "0.4" : "1";
+          btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
         });
       }
 
@@ -1839,14 +1970,13 @@
         playersFinalized = true;
         showPlayerFeedback("🔒 Spelerslijst is definitief gemaakt.", "success");
         guardSpelersTabAvailability();
+        updateR1PoulesButtons();
       });
 
       editBtn.addEventListener("click", async () => {
         if (!activeTournamentId) return;
-        const confirmEdit = confirm(
-          "Wil je de spelerslijst weer bewerkbaar maken?"
-        );
-        if (!confirmEdit) return;
+
+        // GEEN poules/wedstrijden meer wissen hier
 
         await setDoc(
           doc(db, "toernooien", activeTournamentId),
@@ -1856,6 +1986,10 @@
         playersFinalized = false;
         showPlayerFeedback("✏️ Spelerslijst is weer bewerkbaar.", "success");
         guardSpelersTabAvailability();
+
+        if (typeof updateR1PoulesButtons === "function") {
+          updateR1PoulesButtons();
+        }
       });
 
       playerForm.addEventListener("submit", addPlayer);
@@ -1912,8 +2046,14 @@
                                               margin-top:10px;">${msg}</div>`;
       }
 
-      function updateSaveButtonState() {
-        if (!savePoulesBtn) return;
+      function updateR1PoulesButtons() {
+        if (!createPoulesBtn || !savePoulesBtn || !clearPoulesBtn) return;
+
+        const hasTournament = !!activeTournamentId;
+        const hasPoules = currentPoules.length > 0;
+        const playersDef = !!playersFinalized;
+
+        // hoeveel spelers al ingedeeld?
         const totalPlayers = allPlayers.length;
         const assignedPlayers = currentPoules.reduce(
           (sum, p) => sum + p.spelers.length,
@@ -1922,16 +2062,39 @@
         const allAssigned =
           totalPlayers > 0 && assignedPlayers === totalPlayers;
 
-        if (allAssigned) {
-          savePoulesBtn.disabled = false;
-          savePoulesBtn.style.opacity = "1";
-          savePoulesBtn.title =
-            "Alle spelers zijn ingedeeld — je kunt nu opslaan.";
-        } else {
-          savePoulesBtn.disabled = true;
-          savePoulesBtn.style.opacity = "0.2";
-          savePoulesBtn.title =
-            "Opslaan is alleen mogelijk als alle spelers zijn ingedeeld.";
+        // onthoud dit ook voor de spelers-tab
+        r1PoulesExist = hasPoules;
+
+        // ➕ Poules aanmaken
+        // - alleen als er een toernooi is
+        // - spelerslijst definitief is
+        // - er nog géén poules bestaan
+        createPoulesBtn.disabled = !hasTournament || !playersDef || hasPoules;
+
+        // 💾 Indeling opslaan
+        // - alleen als:
+        //   • toernooi actief
+        //   • spelerslijst definitief
+        //   • er poules zijn
+        //   • alle spelers zijn ingedeeld
+        const canSave = hasTournament && playersDef && hasPoules && allAssigned;
+        savePoulesBtn.disabled = !canSave;
+
+        // 🗑️ Alles wissen
+        // - alleen als:
+        //   • toernooi actief
+        //   • spelerslijst definitief
+        //   • er poules zijn
+        clearPoulesBtn.disabled = !hasTournament || !playersDef || !hasPoules;
+
+        [createPoulesBtn, savePoulesBtn, clearPoulesBtn].forEach((btn) => {
+          btn.style.opacity = btn.disabled ? "0.4" : "1";
+          btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
+        });
+
+        // Spelers-tab ook updaten als de poules-situatie verandert
+        if (typeof guardSpelersTabAvailability === "function") {
+          guardSpelersTabAvailability();
         }
       }
 
@@ -2138,7 +2301,7 @@
         renderPoules();
         renderAvailablePlayers();
 
-        updateSaveButtonState();
+        updateR1PoulesButtons();
       }
 
       // ----- speler toevoegen aan poule -----
@@ -2179,7 +2342,7 @@
         // UI opnieuw tekenen
         renderPoules();
         renderAvailablePlayers();
-        updateSaveButtonState();
+        updateR1PoulesButtons();
 
         showPoulesFeedback("✅ Speler toegevoegd aan poule.", "success");
       }
@@ -2208,7 +2371,7 @@
         // UI opnieuw tekenen
         renderPoules();
         renderAvailablePlayers();
-        updateSaveButtonState();
+        updateR1PoulesButtons();
 
         showPoulesFeedback(
           `🗑️ ${removedPlayer.naam} is weer beschikbaar.`,
@@ -2287,7 +2450,7 @@
           }
         }
 
-        updateSaveButtonState();
+        updateR1PoulesButtons();
 
         showPoulesFeedback("🗑️ Alle poules gewist.", "success");
       }
@@ -2319,6 +2482,9 @@
         renderAvailablePlayers();
 
         selectedPlayer = null;
+
+        // Knop 'Poules aanmaken' blokkeren zodra er poules bestaan
+        updateR1PoulesButtons();
       }
 
       // ----- event listeners -----
@@ -3133,20 +3299,15 @@
           }
         });
 
-        // factor bepalen op basis van poulegrootte
-        const pouleSize = (pouleDoc?.spelers || []).length || 0;
-        let factor = 1;
-        if (pouleSize === 5) {
-          factor = 0.75; // jouw huidige factor-regel
-        }
-        // (als je later met andere factoren wilt werken, komt die logica hier)
+        // ⚠️ Geen factor meer toepassen in de stand: punten zijn al inclusief factor
+        const factor = 1;
 
         // moy, %car en aangepaste punten
         const rows = Array.from(stats.values()).map((s) => {
           const moy = s.beurten > 0 ? s.car / s.beurten : 0;
           const totTeMaken = s.teMaken * (s.gespeeld || 0);
           const percCar = totTeMaken > 0 ? (s.car / totTeMaken) * 100 : 0;
-          const puntenAdj = (s.punten || 0) * factor;
+          const puntenAdj = s.punten || 0;
           return { ...s, moy, percCar, puntenAdj };
         });
 
