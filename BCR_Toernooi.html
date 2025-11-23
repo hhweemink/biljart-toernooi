@@ -364,6 +364,49 @@
   </head>
 
   <body>
+    <!-- ===== LOGIN OVERLAY ===== -->
+    <div
+      id="loginOverlay"
+      style="
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 5000;
+      "
+    >
+      <div
+        style="
+          background: #fff;
+          padding: 20px 22px;
+          border-radius: 10px;
+          width: 320px;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        "
+      >
+        <h3 style="margin-top: 0">Inloggen beheer</h3>
+        <form
+          id="loginForm"
+          style="display: flex; flex-direction: column; gap: 10px"
+        >
+          <div>
+            <label>Gebruikersnaam</label>
+            <input id="loginUsername" type="text" required />
+          </div>
+          <div>
+            <label>Wachtwoord</label>
+            <input id="loginPassword" type="password" required />
+          </div>
+          <button type="submit" class="btn btn-save" style="max-width: none">
+            Inloggen
+          </button>
+          <div id="loginMsg" style="font-weight: 600; color: #842029"></div>
+        </form>
+      </div>
+    </div>
+
     <div id="bcr-toernooi-app">
       <header>Biljarttoernooi Beheer</header>
 
@@ -379,6 +422,9 @@
         <button data-tab="r2poules">2e Ronde poules</button>
         <button data-tab="r2resultaten">2e Ronde resultaten</button>
         <button data-tab="finale">Finale</button>
+        <button data-tab="admin" id="adminTabBtn" style="display: none">
+          Admin
+        </button>
       </div>
 
       <!-- ===== START TAB: TOERNOOI ===== -->
@@ -1073,7 +1119,75 @@
 
       <div id="finale" class="tab-content"><p>Finale-tab (komt later)</p></div>
       <!-- ===== END TAB: ANDERE PLACEHOLDERS ===== -->
+
+      <!-- ===== START TAB: ADMIN ===== -->
+      <div id="admin" class="tab-content">
+        <h3>Gebruikersbeheer</h3>
+
+        <form id="userForm" class="form-grid" style="margin-bottom: 10px">
+          <div>
+            <label>Gebruikersnaam (login) *</label>
+            <input type="text" id="uUsername" required />
+          </div>
+          <div>
+            <label>Weergavenaam *</label>
+            <input type="text" id="uDisplay" required />
+          </div>
+          <div>
+            <label>Wachtwoord *</label>
+            <input type="password" id="uPassword" required />
+          </div>
+          <div>
+            <label>Rol</label>
+            <select id="uRole">
+              <option value="user">Gebruiker</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
+          <div style="grid-column: 1/-1; text-align: right">
+            <button class="btn btn-save" type="submit">
+              ➕ Gebruiker opslaan
+            </button>
+          </div>
+        </form>
+
+        <div id="usersTableWrap"></div>
+
+        <hr style="margin: 18px 0" />
+
+        <h3>Toernooien koppelen aan gebruiker</h3>
+        <div class="form-grid">
+          <div>
+            <label>Kies gebruiker</label>
+            <select id="linkUserSelect"></select>
+          </div>
+          <div>
+            <label>Kies toernooien</label>
+            <div
+              id="linkTournamentsList"
+              style="
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                padding: 8px;
+                max-height: 220px;
+                overflow: auto;
+              "
+            >
+              <em>laden...</em>
+            </div>
+          </div>
+        </div>
+        <div class="button-row">
+          <button type="button" id="saveLinksBtn" class="btn btn-save">
+            💾 Koppelingen opslaan
+          </button>
+        </div>
+
+        <div id="adminFeedback"></div>
+      </div>
     </div>
+    <!-- ===== END TAB: ADMIN ===== -->
 
     <script type="module">
       /* Firebase imports */
@@ -1107,6 +1221,53 @@
       const db = getFirestore(app);
 
       /* =========================================================
+   LOGIN FLOW
+========================================================= */
+      const loginOverlay = document.getElementById("loginOverlay");
+      const loginForm = document.getElementById("loginForm");
+      const loginMsg = document.getElementById("loginMsg");
+
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        loginMsg.textContent = "";
+
+        const username = document.getElementById("loginUsername").value.trim();
+        const password = document.getElementById("loginPassword").value;
+
+        try {
+          // user zoeken op username
+          const usersSnap = await getDocs(collection(db, "users"));
+          const match = usersSnap.docs
+            .map((d) => ({ id: d.id, ...d.data() }))
+            .find(
+              (u) => (u.username || "").toLowerCase() === username.toLowerCase()
+            );
+
+          if (!match) {
+            loginMsg.textContent = "Onbekende gebruiker.";
+            return;
+          }
+
+          if (password !== match.password) {
+            loginMsg.textContent = "Wachtwoord onjuist.";
+            return;
+          }
+
+          currentUser = match;
+          isAdmin = match.role === "admin";
+          loginOverlay.style.display = "none";
+
+          applyPermissions();
+          await loadTournamentList(); // meteen lijst verversen met filtering
+        } catch (err) {
+          console.error(err);
+          loginMsg.textContent = "Inloggen mislukt.";
+        }
+      });
+
+      // overlay blijft staan tot login gelukt is
+
+      /* =========================================================
                                                  GLOBALE STATE VOOR ACTIEF TOERNOOI
                                                  ========================================================= */
       let activeTournamentId = null; // bv. "OpenKampioenschap_2025"
@@ -1116,6 +1277,12 @@
 
       // ✅ TOEVOEGEN: Status of er al poules zijn aangemaakt in ronde 1
       let r1PoulesExist = false;
+
+      /* =========================================================
+   SIMPELE LOGIN / AUTH STATE
+========================================================= */
+      let currentUser = null; // {id, username, role, tournaments, displayName}
+      let isAdmin = false;
 
       /* =========================================================
                                                  GEMEENSCHAPPELIJKE UI HELPERS
@@ -1180,6 +1347,63 @@
           banner.textContent = `Actief toernooi: ${name} (${year})`;
         } else {
           banner.textContent = "Geen toernooi geselecteerd";
+        }
+      }
+
+      function applyPermissions() {
+        // admin tab show/hide
+        const adminBtn = document.getElementById("adminTabBtn");
+        if (adminBtn) adminBtn.style.display = isAdmin ? "block" : "none";
+
+        // Toernooi-tab: users mogen NIET opslaan/verwijderen en velden read-only
+        const saveBtn = document.getElementById("saveBtn");
+        const deleteBtn = document.getElementById("deleteBtn");
+        const tournamentForm = document.getElementById("tournamentForm");
+
+        if (!isAdmin) {
+          // 1) knoppen verbergen i.p.v. alleen disablen
+          if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.style.display = "none";
+          }
+          if (deleteBtn) {
+            deleteBtn.disabled = true;
+            deleteBtn.style.display = "none";
+          }
+
+          if (tournamentForm) {
+            tournamentForm
+              .querySelectorAll("input, select, textarea")
+              .forEach((el) => {
+                if (el.id === "loadBtn") return;
+                el.disabled = true;
+                el.style.backgroundColor = "#f0f0f0";
+              });
+          }
+        } else {
+          if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.style.display = "";
+          }
+          if (deleteBtn) {
+            deleteBtn.disabled = false;
+            deleteBtn.style.display = "";
+          }
+
+          if (tournamentForm) {
+            tournamentForm
+              .querySelectorAll("input, select, textarea")
+              .forEach((el) => {
+                el.disabled = false;
+                el.style.backgroundColor = "";
+              });
+          }
+        }
+
+        // Admin tab data laden indien admin
+        if (isAdmin) {
+          loadUsersAdminTab();
+          loadTournamentsForLinking();
         }
       }
 
@@ -1451,6 +1675,13 @@
 
         snapshot.forEach((d) => {
           const t = d.data();
+
+          // filtering voor niet-admin
+          if (!isAdmin) {
+            const allowed = currentUser?.tournaments || [];
+            if (!allowed.includes(d.id)) return;
+          }
+
           select.innerHTML += `<option value="${d.id}">${t.naam} (${t.jaar})</option>`;
         });
 
@@ -1559,6 +1790,13 @@
           select.innerHTML = '<option value="">Kies een toernooi...</option>';
           snapshot.forEach((d) => {
             const t = d.data();
+
+            // filtering voor niet-admin
+            if (!isAdmin) {
+              const allowed = currentUser?.tournaments || [];
+              if (!allowed.includes(d.id)) return;
+            }
+
             select.innerHTML += `<option value="${d.id}">${t.naam} (${t.jaar})</option>`;
           });
         } catch (err) {
@@ -5164,6 +5402,295 @@
         const snap = await getDocs(poulesRef);
         return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       }
+
+      /* =========================================================
+   ADMIN TAB: USERS CRUD
+========================================================= */
+      const userForm = document.getElementById("userForm");
+      const usersTableWrap = document.getElementById("usersTableWrap");
+      const adminFeedback = document.getElementById("adminFeedback");
+      const linkUserSelect = document.getElementById("linkUserSelect");
+      const linkTournamentsList = document.getElementById(
+        "linkTournamentsList"
+      );
+      const saveLinksBtn = document.getElementById("saveLinksBtn");
+
+      let adminUsersCache = [];
+      let adminTournamentsCache = [];
+
+      function showAdminFeedback(msg, type = "info") {
+        const color =
+          type === "error"
+            ? "#f8d7da"
+            : type === "success"
+            ? "#d1e7dd"
+            : "#e2e3e5";
+        const textColor =
+          type === "error"
+            ? "#842029"
+            : type === "success"
+            ? "#0f5132"
+            : "#41464b";
+        adminFeedback.innerHTML = `
+    <div class="message" style="background:${color};color:${textColor};">
+      ${msg}
+      <span class="close" onclick="this.parentElement.remove()">×</span>
+    </div>`;
+      }
+
+      async function loadUsersAdminTab() {
+        const snap = await getDocs(collection(db, "users"));
+        adminUsersCache = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        renderUsersTable();
+        buildLinkUserSelect();
+      }
+
+      function renderTournamentBadges(tournamentIds) {
+        if (!tournamentIds.length) return "0";
+
+        const labels = tournamentIds.map((tid) => {
+          const t = adminTournamentsCache.find((x) => x.id === tid);
+          if (!t) return tid; // fallback als cache nog leeg is
+          return `${t.naam} (${t.jaar})`;
+        });
+
+        const count = tournamentIds.length;
+        return `
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <div><strong>${count}</strong></div>
+          <div style="font-size:12px;color:#555;">
+            ${labels.join("<br>")}
+          </div>
+        </div>
+      `;
+      }
+
+      function renderUsersTable() {
+        if (!usersTableWrap) return;
+
+        if (!adminUsersCache.length) {
+          usersTableWrap.innerHTML = "<p>Nog geen gebruikers.</p>";
+          return;
+        }
+
+        let html = `
+    <table class="player-table">
+      <thead>
+        <tr>
+          <th>Gebruikersnaam</th>
+          <th>Naam</th>
+          <th>Rol</th>
+          <th>Toernooien</th>
+          <th style="text-align:center;">Acties</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+        adminUsersCache.forEach((u) => {
+          html += `
+      <tr data-uid="${u.id}">
+        <td>${u.username || ""}</td>
+        <td>${u.displayName || ""}</td>
+        <td>${u.role || "user"}</td>
+        <td>
+          ${renderTournamentBadges(u.tournaments || [])}
+        </td>
+
+        <td class="actions">
+          <button class="edit-user-btn" style="background:#0d6efd;color:#fff;border:none;border-radius:6px;padding:4px 8px;">✏️</button>
+          <button class="delete-user-btn" style="background:#dc3545;color:#fff;border:none;border-radius:6px;padding:4px 8px;">🗑️</button>
+        </td>
+      </tr>`;
+        });
+
+        html += `</tbody></table>`;
+        usersTableWrap.innerHTML = html;
+
+        usersTableWrap.querySelectorAll(".edit-user-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const tr = btn.closest("tr");
+            const u = adminUsersCache.find((x) => x.id === tr.dataset.uid);
+            if (!u) return;
+            document.getElementById("uUsername").value = u.username || "";
+            document.getElementById("uDisplay").value = u.displayName || "";
+            document.getElementById("uRole").value = u.role || "user";
+            document.getElementById("uPassword").value = ""; // leeg laten => alleen wijzigen als ingevuld
+            userForm.dataset.editing = u.id;
+            showAdminFeedback(`Bewerken: ${u.username}`, "info");
+          });
+        });
+
+        usersTableWrap.querySelectorAll(".delete-user-btn").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const tr = btn.closest("tr");
+            const uid = tr.dataset.uid;
+            const u = adminUsersCache.find((x) => x.id === uid);
+            if (!u) return;
+
+            // ✅ Check: laatste admin mag niet verwijderd worden
+            if (u.role === "admin") {
+              const adminsLeft = adminUsersCache.filter(
+                (x) => x.role === "admin" && x.id !== uid
+              );
+              if (adminsLeft.length === 0) {
+                showAdminFeedback(
+                  "Je kunt de laatste admin niet verwijderen.",
+                  "error"
+                );
+                return;
+              }
+            }
+
+            if (!confirm(`Verwijder gebruiker "${u.username}"?`)) return;
+
+            await deleteDoc(doc(db, "users", uid));
+            showAdminFeedback("Gebruiker verwijderd.", "success");
+            await loadUsersAdminTab();
+          });
+        });
+      }
+
+      userForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("uUsername").value.trim();
+        const displayName = document.getElementById("uDisplay").value.trim();
+        const password = document.getElementById("uPassword").value;
+        const role = document.getElementById("uRole").value;
+
+        if (!username || !displayName) {
+          showAdminFeedback("Gebruikersnaam en naam zijn verplicht.", "error");
+          return;
+        }
+
+        const editingId = userForm.dataset.editing || null;
+
+        // ✅ check: laatste admin mag niet gedegradeerd worden
+        if (editingId) {
+          const existing = adminUsersCache.find((x) => x.id === editingId);
+          if (existing?.role === "admin" && role !== "admin") {
+            const otherAdmins = adminUsersCache.filter(
+              (x) => x.role === "admin" && x.id !== editingId
+            );
+            if (otherAdmins.length === 0) {
+              showAdminFeedback(
+                "Je kunt de laatste admin niet omzetten naar gebruiker.",
+                "error"
+              );
+              return;
+            }
+          }
+        }
+
+        // wachtwoord alleen verplicht bij nieuwe user
+        if (!editingId && !password) {
+          showAdminFeedback(
+            "Wachtwoord is verplicht bij nieuwe gebruiker.",
+            "error"
+          );
+          return;
+        }
+
+        // username uniek houden
+        const lower = username.toLowerCase();
+        const conflict = adminUsersCache.find(
+          (u) => u.username?.toLowerCase() === lower && u.id !== editingId
+        );
+        if (conflict) {
+          showAdminFeedback("Gebruikersnaam bestaat al.", "error");
+          return;
+        }
+
+        const data = { username, displayName, role };
+
+        if (password) {
+          data.password = password;
+        }
+
+        if (editingId) {
+          await setDoc(doc(db, "users", editingId), data, { merge: true });
+          showAdminFeedback("Gebruiker bijgewerkt.", "success");
+          userForm.dataset.editing = "";
+        } else {
+          data.tournaments = [];
+          await addDoc(collection(db, "users"), data);
+          showAdminFeedback("Gebruiker toegevoegd.", "success");
+        }
+
+        userForm.reset();
+        await loadUsersAdminTab();
+      });
+
+      /* =========================================================
+   ADMIN TAB: TOERNOOI KOPPELINGEN
+========================================================= */
+      async function loadTournamentsForLinking() {
+        const snap = await getDocs(collection(db, "toernooien"));
+        adminTournamentsCache = snap.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        }));
+        renderTournamentsChecklist();
+
+        // ✅ extra: nu cache gevuld is, usertabel opnieuw tekenen met namen
+        renderUsersTable();
+      }
+
+      function buildLinkUserSelect() {
+        if (!linkUserSelect) return;
+        linkUserSelect.innerHTML = `<option value="">Kies gebruiker...</option>`;
+        adminUsersCache.forEach((u) => {
+          linkUserSelect.innerHTML += `<option value="${u.id}">${u.username} (${u.displayName})</option>`;
+        });
+
+        linkUserSelect.onchange = () => renderTournamentsChecklist();
+      }
+
+      function renderTournamentsChecklist() {
+        if (!linkTournamentsList) return;
+        const uid = linkUserSelect.value;
+        const user = adminUsersCache.find((u) => u.id === uid);
+
+        linkTournamentsList.innerHTML = "";
+
+        adminTournamentsCache
+          .sort(
+            (a, b) =>
+              (a.jaar || 0) - (b.jaar || 0) ||
+              (a.naam || "").localeCompare(b.naam || "")
+          )
+          .forEach((t) => {
+            const checked = user?.tournaments?.includes(t.id) ? "checked" : "";
+            const row = document.createElement("label");
+            row.style.display = "block";
+            row.style.marginBottom = "4px";
+            row.innerHTML = `
+        <input type="checkbox" data-tid="${t.id}" ${checked} />
+        ${t.naam} (${t.jaar})
+      `;
+            linkTournamentsList.appendChild(row);
+          });
+      }
+
+      saveLinksBtn?.addEventListener("click", async () => {
+        const uid = linkUserSelect.value;
+        if (!uid) {
+          showAdminFeedback("Kies eerst een gebruiker.", "error");
+          return;
+        }
+        const selected = [
+          ...linkTournamentsList.querySelectorAll("input[type=checkbox]"),
+        ]
+          .filter((cb) => cb.checked)
+          .map((cb) => cb.dataset.tid);
+
+        await setDoc(
+          doc(db, "users", uid),
+          { tournaments: selected },
+          { merge: true }
+        );
+        showAdminFeedback("Koppelingen opgeslagen.", "success");
+        await loadUsersAdminTab();
+      });
 
       /* =========================================================
    1E RONDE RESULTATEN – AUTO-LADEN BIJ TAB-KLIK
