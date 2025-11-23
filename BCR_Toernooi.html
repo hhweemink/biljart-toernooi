@@ -547,26 +547,6 @@
           deelnemers te beheren.
         </div>
 
-        <div
-          id="playersFinalizedNotice"
-          style="
-            display: none;
-            background: #e2e3e5;
-            color: #41464b;
-            border: 1px solid #d3d6d8;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          "
-        >
-          🔒 De spelerslijst is definitief. Toevoegen en verwijderen zijn
-          uitgeschakeld, maar wijzigen blijft mogelijk.
-        </div>
-
         <form id="playerForm" class="form-grid">
           <div>
             <label>Naam speler</label>
@@ -617,7 +597,26 @@
         >
           Aantal deelnemers: 0
         </div>
-
+        <div
+          id="playersFinalizedNotice"
+          style="
+            display: none;
+            background: #ca3535;
+            color: #ffffff;
+            border: 1px solid #ca3535;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            margin-top: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          "
+        >
+          🔒 De spelerslijst is definitief. Alleen het wijzigen van het
+          e-mailadres en het telefoonnummer is mogelijk.
+        </div>
         <div
           id="playersTableContainer"
           style="position: relative; margin-top: 10px"
@@ -647,7 +646,7 @@
               position: absolute;
               top: 0;
               left: 0;
-              width: 100%;
+              width: 80%;
               height: 100%;
               background: rgba(240, 240, 240, 0.75);
               backdrop-filter: blur(2px);
@@ -1115,6 +1114,9 @@
       const pouleOpenStateR2 = {}; // 2e ronde: poule-naam → boolean
       let playersFinalized = false; // of de spelerslijst op slot staat
 
+      // ✅ TOEVOEGEN: Status of er al poules zijn aangemaakt in ronde 1
+      let r1PoulesExist = false;
+
       /* =========================================================
                                                  GEMEENSCHAPPELIJKE UI HELPERS
                                                  ========================================================= */
@@ -1200,9 +1202,13 @@
 
             // Speciale regel: als je naar "spelers" gaat -> check of er een toernooi actief is
             if (btn.dataset.tab === "spelers") {
-              guardSpelersTabAvailability();
               if (activeTournamentId) {
-                loadPlayersFromFirestore(); // lijst verversen bij openen
+                // eerst de echte status uit Firestore halen
+                loadPlayersFromFirestore().then(() => {
+                  guardSpelersTabAvailability(); // daarna knoppen goed zetten
+                });
+              } else {
+                guardSpelersTabAvailability();
               }
             }
 
@@ -1543,6 +1549,9 @@
               await loadPlayersForActiveTournament();
               await loadPoulesForActiveTournament();
               await loadR1ResultsTabForActiveTournament();
+
+              // ✅ forceer eindstatus knoppen
+              guardSpelersTabAvailability();
             });
           }
 
@@ -1647,7 +1656,7 @@
       let currentPlayers = [];
       let currentSort = null;
       let editPlayerId = null;
-      let r1PoulesExist = false; // true zodra er poules_r1 zijn
+      // let r1PoulesExist = false; // true zodra er poules_r1 zijn
 
       function updatePlayerCount() {
         playerCount.textContent = `Aantal deelnemers: ${currentPlayers.length}`;
@@ -1751,23 +1760,25 @@
 
       function guardSpelersTabAvailability() {
         const disabled = !activeTournamentId;
-        const hasPoules = !!r1PoulesExist;
+        const hasPoules = !!r1PoulesExist; // NIEUW: controle op poules
 
-        // overlay tonen als lijst definitief is
+        // Overlay & Notice voor definitieve lijst
         if (playersFinalized) {
           playersFinalizedNotice.style.display = "flex";
+          playersLockOverlay.style.display = "flex";
         } else {
           playersFinalizedNotice.style.display = "none";
+          playersLockOverlay.style.display = "none";
         }
+
+        // Toernooi nodig waarschuwing
+        noTournamentNotice.style.display = disabled ? "block" : "none";
 
         // formulier voor nieuwe speler
         if (playerForm) {
           [...playerForm.querySelectorAll("input,button")].forEach((el) => {
             if (el.id === "addPlayerBtn") {
-              // Speler toevoegen mag NIET als:
-              // - geen toernooi
-              // - lijst definitief
-              // - er al poules zijn
+              // Speler toevoegen mag NIET als: geen toernooi OF lijst definitief OF er al poules zijn
               const blockAdd = disabled || playersFinalized || hasPoules;
               el.disabled = blockAdd;
               if (blockAdd) {
@@ -1799,21 +1810,40 @@
         if (sortByNameBtn) sortByNameBtn.disabled = disabled;
         if (sortByCarambolesBtn) sortByCarambolesBtn.disabled = disabled;
 
-        // finalize / edit
-        if (finalizeBtn) finalizeBtn.disabled = disabled || playersFinalized;
-        if (editBtn) editBtn.disabled = disabled || !playersFinalized;
+        // ✅ 1) De 'Lijst definitief maken' knop is actief wanneer:
+        // - Toernooi actief is (niet disabled)
+        // - Lijst NIET definitief is (!playersFinalized)
+        // - ER ZIJN GEEN poules (!hasPoules)
+        if (finalizeBtn) {
+          finalizeBtn.disabled = disabled || playersFinalized || hasPoules;
+          finalizeBtn.style.opacity = finalizeBtn.disabled ? "0.6" : "1";
+          finalizeBtn.style.cursor = finalizeBtn.disabled
+            ? "not-allowed"
+            : "pointer";
+        }
 
-        // verwijder-knoppen in de tabel
-        Array.from(
-          playerTableBody.querySelectorAll(".delete-player-btn")
-        ).forEach((btn) => {
-          // Verwijderen mag niet als:
-          // - geen toernooi
-          // - lijst definitief
-          // - er al poules zijn
-          btn.disabled = disabled || playersFinalized || hasPoules;
+        // ✅ 2) De 'Lijst bewerken' knop is actief wanneer:
+        // - Toernooi actief is (niet disabled)
+        // - Lijst WEL definitief is (playersFinalized)
+        // - ER ZIJN GEEN poules (!hasPoules)
+        if (editBtn) {
+          editBtn.disabled = disabled || !playersFinalized || hasPoules;
+          editBtn.style.opacity = editBtn.disabled ? "0.6" : "1";
+          editBtn.style.cursor = editBtn.disabled ? "not-allowed" : "pointer";
+        }
+
+        // Disable delete buttons in the table if finalized or has poules (NIEUW)
+        document.querySelectorAll(".delete-player-btn").forEach((btn) => {
+          btn.disabled = playersFinalized || hasPoules;
           btn.style.opacity = btn.disabled ? "0.4" : "1";
-          btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
+        });
+
+        // Visuele status voor de bewerk knop in de tabel (NIEUW)
+        document.querySelectorAll(".edit-player-btn").forEach((btn) => {
+          const isStructuralLock = hasPoules; // Edit van naam/caramboles is geblokkeerd zodra poules bestaan
+          btn.title = isStructuralLock
+            ? "Alleen e-mail/telefoon zijn wijzigbaar (Poules bestaan)"
+            : "Speler wijzigen";
         });
       }
 
@@ -1994,6 +2024,72 @@
 
       playerForm.addEventListener("submit", addPlayer);
 
+      // NIEUWE FUNCTIES VOOR DE KNOPPEN
+
+      async function finalizePlayersAction() {
+        if (!activeTournamentId) return;
+        if (playersFinalized) {
+          showPlayerFeedback("❌ Lijst is al definitief.", "error");
+          return;
+        }
+        // ✅ Controle: mag niet definitief worden als er al poules zijn
+        if (r1PoulesExist) {
+          showPlayerFeedback(
+            "❌ Kan niet definitief maken: er zijn al poules aangemaakt. Wis eerst de poules als je de lijst nog wilt wijzigen.",
+            "error"
+          );
+          return;
+        }
+
+        const confirmFinalize = confirm(
+          "Weet je zeker dat je de spelerslijst definitief wilt maken? Hierna zijn aanpassingen aan namen en caramboles niet meer mogelijk, tenzij je de lijst weer bewerkt (en er nog geen poules zijn)."
+        );
+        if (!confirmFinalize) return;
+
+        try {
+          const tRef = doc(db, "toernooien", activeTournamentId);
+          await updateDoc(tRef, { playersFinalized: true });
+          playersFinalized = true;
+          showPlayerFeedback("✅ Spelerslijst definitief gemaakt.", "success");
+          guardSpelersTabAvailability(); // Update knoppen direct
+          renderPlayersTable();
+        } catch (err) {
+          console.error("Fout bij definitief maken:", err);
+          showPlayerFeedback("⚠️ Kon lijst niet definitief maken.", "error");
+        }
+      }
+
+      async function editPlayersAction() {
+        if (!activeTournamentId) return;
+        if (!playersFinalized) {
+          showPlayerFeedback("❌ Lijst is al bewerkbaar.", "error");
+          return;
+        }
+        // ✅ Controle: mag niet bewerkbaar worden als er al poules zijn
+        if (r1PoulesExist) {
+          showPlayerFeedback(
+            "❌ Kan lijst niet bewerken: er zijn al 1e ronde poules aangemaakt. Wis eerst de poules."
+          );
+          return;
+        }
+        const confirmEdit = confirm(
+          "Weet je zeker dat je de spelerslijst weer wilt bewerken? De definitieve status wordt ongedaan gemaakt, en je kunt namen/caramboles weer wijzigen."
+        );
+        if (!confirmEdit) return;
+
+        try {
+          const tRef = doc(db, "toernooien", activeTournamentId);
+          await updateDoc(tRef, { playersFinalized: false });
+          playersFinalized = false;
+          showPlayerFeedback("✏️ Spelerslijst is weer bewerkbaar.", "success");
+          guardSpelersTabAvailability(); // Update knoppen direct
+          renderPlayersTable();
+        } catch (err) {
+          console.error("Fout bij bewerken:", err);
+          showPlayerFeedback("⚠️ Kon lijst niet bewerkbaar maken.", "error");
+        }
+      }
+
       async function loadPlayersForActiveTournament() {
         if (!activeTournamentId) return;
         await loadPlayersFromFirestore();
@@ -2053,6 +2149,9 @@
         const hasPoules = currentPoules.length > 0;
         const playersDef = !!playersFinalized;
 
+        // ✅ NIEUW: wedstrijdschema bestaat zodra er r1Matches zijn
+        const hasSchedule = Array.isArray(r1Matches) && r1Matches.length > 0;
+
         // hoeveel spelers al ingedeeld?
         const totalPlayers = allPlayers.length;
         const assignedPlayers = currentPoules.reduce(
@@ -2069,7 +2168,9 @@
         // - alleen als er een toernooi is
         // - spelerslijst definitief is
         // - er nog géén poules bestaan
-        createPoulesBtn.disabled = !hasTournament || !playersDef || hasPoules;
+        // - ✅ EN er nog géén wedstrijdschema is
+        createPoulesBtn.disabled =
+          !hasTournament || !playersDef || hasPoules || hasSchedule;
 
         // 💾 Indeling opslaan
         // - alleen als:
@@ -2077,7 +2178,13 @@
         //   • spelerslijst definitief
         //   • er poules zijn
         //   • alle spelers zijn ingedeeld
-        const canSave = hasTournament && playersDef && hasPoules && allAssigned;
+        //   • ✅ EN er nog géén wedstrijdschema is
+        const canSave =
+          hasTournament &&
+          playersDef &&
+          hasPoules &&
+          allAssigned &&
+          !hasSchedule;
         savePoulesBtn.disabled = !canSave;
 
         // 🗑️ Alles wissen
@@ -2085,12 +2192,23 @@
         //   • toernooi actief
         //   • spelerslijst definitief
         //   • er poules zijn
-        clearPoulesBtn.disabled = !hasTournament || !playersDef || !hasPoules;
+        //   • ✅ EN er nog géén wedstrijdschema is
+        clearPoulesBtn.disabled =
+          !hasTournament || !playersDef || !hasPoules || hasSchedule;
 
         [createPoulesBtn, savePoulesBtn, clearPoulesBtn].forEach((btn) => {
           btn.style.opacity = btn.disabled ? "0.4" : "1";
           btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
         });
+
+        // ✅ NIEUW: verwijder-knoppen in poule-kaarten blokkeren als schema bestaat
+        document
+          .querySelectorAll("#poulesContainer button[data-player-id]")
+          .forEach((btn) => {
+            btn.disabled = hasSchedule;
+            btn.style.opacity = btn.disabled ? "0.4" : "1";
+            btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
+          });
 
         // Spelers-tab ook updaten als de poules-situatie verandert
         if (typeof guardSpelersTabAvailability === "function") {
@@ -2458,33 +2576,74 @@
       // ----- bestaande indeling laden bij actief toernooi -----
 
       async function loadPoulesForActiveTournament() {
-        if (!activeTournamentId) return;
-
-        // 1. lees alle spelers (cache in allPlayers)
-        const playersSnap = await getDocs(
-          collection(db, "toernooien", activeTournamentId, "spelers")
-        );
-        allPlayers = playersSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-        // 2. lees poules
-        const poulesSnap = await getDocs(
-          collection(db, "toernooien", activeTournamentId, "poules_r1")
-        );
-        if (!poulesSnap.empty) {
-          currentPoules = poulesSnap.docs.map((d) => d.data());
-          showPoulesFeedback("📋 Poule-indeling geladen.", "success");
-        } else {
+        if (!activeTournamentId) {
           currentPoules = [];
+          r1PoulesExist = false; // Reset status bij geen toernooi
+          if (typeof renderPoules === "function") renderPoules(); // Zorg dat de UI leeg is
+          if (typeof renderAvailablePlayers === "function")
+            renderAvailablePlayers();
+          guardSpelersTabAvailability(); // Update knopstatus naar 'disabled'
+          return;
         }
 
-        // 3. sync beschikbare spelers op basis van wie al in currentPoules zit
-        renderPoules();
-        renderAvailablePlayers();
+        try {
+          // Zorg eerst dat allPlayers gevuld is (nodig voor data-consistentie)
+          // De functie loadPlayersForActiveTournament doet dit, maar hier een fallback/check:
+          if (allPlayers.length === 0) {
+            const playersSnap = await getDocs(
+              collection(db, "toernooien", activeTournamentId, "spelers")
+            );
+            allPlayers = playersSnap.docs.map((d) => ({
+              id: d.id,
+              ...d.data(),
+            }));
+          }
 
-        selectedPlayer = null;
+          const poulesSnap = await getDocs(
+            collection(db, "toernooien", activeTournamentId, "poules_r1")
+          );
 
-        // Knop 'Poules aanmaken' blokkeren zodra er poules bestaan
-        updateR1PoulesButtons();
+          // ✅ 1. Stel r1PoulesExist in op basis van het resultaat
+          r1PoulesExist = poulesSnap.docs.length > 0;
+
+          currentPoules = poulesSnap.docs.map((d) => ({
+            id: d.id,
+            ...d.data(),
+          }));
+
+          // Zorg ervoor dat de poule-spelers de meest recente spelerdata bevatten
+          currentPoules.forEach((poule) => {
+            // De 'spelers' array zou moeten bestaan als de poule goed is opgeslagen
+            if (!poule.spelers) poule.spelers = [];
+
+            poule.spelers = poule.spelers
+              .map((pouleSpeler) => {
+                const fullPlayer = allPlayers.find(
+                  (ap) => ap.id === pouleSpeler.id
+                );
+                // Als de speler nog bestaat, geef dan de volledige (up-to-date) speler terug
+                return fullPlayer || pouleSpeler;
+              })
+              .filter((p) => allPlayers.some((ap) => ap.id === p.id)); // Filter spelers die niet meer in allPlayers zitten
+          });
+
+          // 3. sync beschikbare spelers op basis van wie al in currentPoules zit
+          renderPoules();
+          renderAvailablePlayers();
+
+          selectedPlayer = null;
+
+          // Knop 'Poules aanmaken' blokkeren zodra er poules bestaan
+          updateR1PoulesButtons();
+
+          // ✅ 2. BELANGRIJK: Update knopstatus op het Spelers-tabblad
+          guardSpelersTabAvailability();
+        } catch (e) {
+          console.error("Fout bij laden poules:", e);
+          // Reset de status bij een fout
+          r1PoulesExist = false;
+          guardSpelersTabAvailability();
+        }
       }
 
       // ----- event listeners -----
@@ -2719,6 +2878,89 @@
         renderR1Matches();
       }
 
+      // =============================
+      // R1 RESULTATEN – knopstatussen
+      // =============================
+      // =============================
+      // R1 RESULTATEN – knopstatussen
+      // =============================
+      function updateR1ResultsButtons() {
+        const createBtn = document.getElementById("createMatchesBtn");
+        const deleteBtn = document.getElementById("deleteMatchesBtn");
+        if (!createBtn || !deleteBtn) return;
+
+        const hasTournament = !!activeTournamentId;
+
+        // Wedstrijdschema bestaat zodra er r1Matches zijn
+        const hasSchedule = Array.isArray(r1Matches) && r1Matches.length > 0;
+
+        // Poule-indeling moet al opgeslagen/bestaan
+        const hasPoules = !!r1PoulesExist;
+
+        // Er is al minstens 1 uitslag opgeslagen als er een afgeronde match is
+        const hasAnyResult =
+          hasSchedule && r1Matches.some((m) => m && m.afgerond === true);
+
+        // ✅ NIEUW / FIX: R2 poules bestaan?
+        const hasR2PoulesLocal =
+          Array.isArray(r2CurrentPoules) && r2CurrentPoules.length > 0;
+
+        // 1) Wedstrijdschema aanmaken:
+        // actief als: geen schema + wél poules + toernooi actief
+        createBtn.disabled = !hasTournament || hasSchedule || !hasPoules;
+
+        // 2) Wedstrijden wissen:
+        // actief als: schema bestaat + géén enkele uitslag
+        deleteBtn.disabled = !hasTournament || !hasSchedule || hasAnyResult;
+
+        // extra voorwaarde: als R2-poules bestaan → nooit wissen
+        if (hasR2PoulesLocal) {
+          deleteBtn.disabled = true;
+        }
+
+        [createBtn, deleteBtn].forEach((btn) => {
+          btn.style.opacity = btn.disabled ? "0.4" : "1";
+          btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
+        });
+      }
+
+      // =============================
+      // R2 RESULTATEN – knopstatussen
+      // =============================
+      function updateR2ResultsButtons() {
+        const createBtn = document.getElementById("createR2MatchesBtn");
+        const deleteBtn = document.getElementById("deleteR2MatchesBtn");
+        if (!createBtn || !deleteBtn) return;
+
+        const hasTournament = !!activeTournamentId;
+
+        // Wedstrijdschema 2e ronde bestaat zodra er r2Matches zijn
+        const hasR2Schedule = Array.isArray(r2Matches) && r2Matches.length > 0;
+
+        // R2-poules moeten opgeslagen/bestaan (Firestore) → r2PoulesCache is leidend
+        const hasR2PoulesSaved =
+          Array.isArray(r2PoulesCache) && r2PoulesCache.length > 0;
+
+        // Er is al minstens 1 uitslag opgeslagen als er een afgeronde match is
+        const hasAnyR2Result =
+          hasR2Schedule && r2Matches.some((m) => m && m.afgerond === true);
+
+        // 1) Wedstrijdschema aanmaken:
+        // actief als: geen schema + wél poules + toernooi actief
+        createBtn.disabled =
+          !hasTournament || hasR2Schedule || !hasR2PoulesSaved;
+
+        // 2) Wedstrijden wissen:
+        // actief als: schema bestaat + géén enkele uitslag
+        deleteBtn.disabled = !hasTournament || !hasR2Schedule || hasAnyR2Result;
+
+        // Visuele indicatie (zelfde stijl als elders)
+        [createBtn, deleteBtn].forEach((btn) => {
+          btn.style.opacity = btn.disabled ? "0.4" : "1";
+          btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
+        });
+      }
+
       // ====== Wedstrijden ophalen ======
       async function loadR1MatchesFromFirestore() {
         if (!activeTournamentId) {
@@ -2751,6 +2993,9 @@
         r1PoulesCache = poulesSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
         renderR1Matches();
+
+        updateR1ResultsButtons();
+        updateR1PoulesButtons(); // zodat poules-tab ook meteen meeloopt
       }
 
       /* ----------------------------------------------------------
@@ -3221,6 +3466,9 @@
           false
         );
         await loadR1MatchesFromFirestore();
+
+        updateR1ResultsButtons();
+        updateR1PoulesButtons();
       }
 
       // ====== Wedstrijden wissen ======
@@ -3257,6 +3505,9 @@
         await batch.commit();
         showPopupMessage(`🗑️ ${count} wedstrijden verwijderd.`, false);
         await loadR1MatchesFromFirestore();
+
+        updateR1ResultsButtons();
+        updateR1PoulesButtons();
       }
 
       function renderPouleStandHTML(pouleNaam, matches, pouleDoc) {
@@ -3648,6 +3899,7 @@
 
         // 5. tabel links renderen
         renderR2AvailablePlayers();
+        updateR2PoulesButtons();
       }
 
       /* ----------------------------------------------------------
@@ -3699,6 +3951,7 @@
 
           tbody.appendChild(tr);
         });
+        updateR2PoulesButtons();
       }
 
       /* ----------------------------------------------------------
@@ -3757,6 +4010,7 @@
         renderR2Poules();
         renderR2AvailablePlayers();
         showR2PoulesFeedback(`✅ ${n} poules aangemaakt.`, "success");
+        updateR2PoulesButtons();
       }
 
       /* =========================================================
@@ -3820,6 +4074,7 @@
 
           container.appendChild(card);
         });
+        updateR2PoulesButtons();
       }
 
       /* =========================================================
@@ -3855,6 +4110,7 @@
           "♻️ Speler is uit de poule gehaald en staat weer bij de beschikbare spelers.",
           "success"
         );
+        updateR2PoulesButtons();
       }
 
       /* =========================================================
@@ -3886,6 +4142,7 @@
         renderR2Poules();
         renderR2AvailablePlayers();
         showR2PoulesFeedback("✅ Speler toegevoegd aan poule.", "success");
+        updateR2PoulesButtons();
       }
 
       /* =========================================================
@@ -3923,6 +4180,7 @@
             cp.carambolesR2 = nieuweWaarde;
           }
         }
+        updateR2PoulesButtons();
       }
 
       async function saveR2PoulesToFirestore() {
@@ -3950,6 +4208,7 @@
           });
         }
         showR2PoulesFeedback("💾 2e ronde poules opgeslagen.", "success");
+        updateR2PoulesButtons();
       }
 
       /* =========================================================
@@ -3973,6 +4232,7 @@
           for (const d of existing.docs) await deleteDoc(d.ref);
         }
         showR2PoulesFeedback("🗑️ Alle 2e ronde poules gewist.", "success");
+        updateR2PoulesButtons();
       }
 
       async function resetAllCarambolesR2() {
@@ -3996,6 +4256,7 @@
           "🔁 Alle 2e ronde caramboles zijn gereset naar de 1e ronde.",
           "success"
         );
+        updateR2PoulesButtons();
       }
 
       async function saveAllCarambolesR2FromTable() {
@@ -4016,6 +4277,7 @@
           "💾 Alle 2e ronde caramboles zijn opgeslagen.",
           "success"
         );
+        updateR2PoulesButtons();
       }
 
       /* =========================================================
@@ -4066,12 +4328,95 @@
           }
         });
 
+      // =============================================
+      // 2E RONDE POULES – knopstatussen
+      // =============================================
+      function updateR2PoulesButtons() {
+        const createBtn = document.getElementById("createR2PoulesBtn");
+        const saveBtn = document.getElementById("saveR2PoulesBtn");
+        const clearBtn = document.getElementById("clearR2PoulesBtn");
+        const resetCarBtn = document.getElementById("resetCarambolesR2Btn");
+        const saveCarBtn = document.getElementById("saveCarambolesR2Btn");
+
+        if (!createBtn || !saveBtn || !clearBtn || !resetCarBtn || !saveCarBtn)
+          return;
+
+        const hasTournament = !!activeTournamentId;
+
+        // Poule-inhoud bestaat zodra r2CurrentPoules gevuld is
+        const hasR2Poules =
+          Array.isArray(r2CurrentPoules) && r2CurrentPoules.length > 0;
+
+        // Wedstrijdschema 2e ronde bestaat zodra r2Matches bestaan
+        const hasR2Schedule = Array.isArray(r2Matches) && r2Matches.length > 0;
+
+        // Caramboles 2e ronde opgeslagen?
+        // (we leiden dit af uit r2AllPlayers: iedereen heeft carambolesR2)
+        const carambolesSaved =
+          Array.isArray(r2AllPlayers) &&
+          r2AllPlayers.length > 0 &&
+          r2AllPlayers.every((p) => p.carambolesR2 != null);
+
+        // Alle poules gevuld?
+        let allFilled = false;
+        if (hasR2Poules) {
+          allFilled = r2CurrentPoules.every(
+            (p) => Array.isArray(p.spelers) && p.spelers.length === p.maxSpelers
+          );
+        }
+
+        // === Knopstatussen volgen jouw regels ===
+
+        // 1) Poules aanmaken
+        // actief als: géén poules + caramboles opgeslagen + géén wedstrijdschema
+        createBtn.disabled =
+          !hasTournament || hasR2Poules || !carambolesSaved || hasR2Schedule;
+
+        // 2) Indeling opslaan
+        // actief als: poules bestaan + alle poules gevuld + géén schema
+        saveBtn.disabled =
+          !hasTournament || !hasR2Poules || !allFilled || hasR2Schedule;
+
+        // 3) Alles wissen
+        // actief als: poules bestaan + géén schema
+        clearBtn.disabled = !hasTournament || !hasR2Poules || hasR2Schedule;
+
+        // 4) Reset caramboles
+        // actief als: géén poules
+        resetCarBtn.disabled = !hasTournament || hasR2Poules;
+
+        // 5) Opslaan car. 2e ronde
+        // actief als: caramboles nog NIET zijn opgeslagen
+        saveCarBtn.disabled = !hasTournament || carambolesSaved;
+
+        // 6) Delete-knoppen achter spelers in poules deactiveren als schema bestaat
+        document
+          .querySelectorAll("#r2PoulesContainer button[data-player-id]")
+          .forEach((btn) => {
+            btn.disabled = hasR2Schedule;
+            btn.style.opacity = btn.disabled ? "0.4" : "1";
+            btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
+          });
+
+        // Visuele indicatie
+        [createBtn, saveBtn, clearBtn, resetCarBtn, saveCarBtn].forEach(
+          (btn) => {
+            btn.style.opacity = btn.disabled ? "0.4" : "1";
+            btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
+          }
+        );
+      }
+
       /* =========================================================
          2E RONDE POULES – START BIJ TAB-OPENING
       ========================================================= */
       async function loadR2PoulesForActiveTournament() {
         if (!activeTournamentId) return;
+
+        // 1) Altijd eerst ranglijst (her)bouwen
         await loadR2GlobalRanking();
+
+        // 2) Probeer poules uit Firestore te halen
         const poulesRef = collection(
           db,
           "toernooien",
@@ -4079,18 +4424,26 @@
           "poules_r2"
         );
         const snap = await getDocs(poulesRef);
+
         if (!snap.empty) {
+          // Firestore is leidend als er al opgeslagen poules zijn
           r2CurrentPoules = snap.docs.map((d) => d.data());
-          // verwijder reeds ingedeelde spelers uit available
-          const idsInPoules = new Set(
-            r2CurrentPoules.flatMap((p) => p.spelers.map((sp) => sp.id))
-          );
-          r2AvailablePlayers = r2AllPlayers.filter(
-            (p) => !idsInPoules.has(p.id)
-          );
-          renderR2Poules();
-          renderR2AvailablePlayers();
         }
+        // else: Firestore leeg → houd lokale r2CurrentPoules zoals ze zijn
+
+        // 3) Ongeacht bron: haal alle spelers die al in een poule zitten uit available
+        const idsInPoules = new Set(
+          (r2CurrentPoules || []).flatMap((p) =>
+            (p.spelers || []).map((sp) => sp.id)
+          )
+        );
+
+        r2AvailablePlayers = r2AllPlayers.filter((p) => !idsInPoules.has(p.id));
+
+        // 4) UI altijd opnieuw tekenen
+        renderR2Poules();
+        renderR2AvailablePlayers();
+        updateR2PoulesButtons();
       }
 
       /* =========================================================
@@ -4100,6 +4453,8 @@
         .querySelector('button[data-tab="r2poules"]')
         .addEventListener("click", () => {
           loadR2PoulesForActiveTournament();
+
+          updateR2PoulesButtons();
         });
 
       /* =========================================================
@@ -4192,8 +4547,8 @@
         );
         const poulesSnap = await getDocs(poulesRef);
         r2PoulesCache = poulesSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
         renderR2Matches();
+        updateR2ResultsButtons(); // ✅ knoppen altijd goed zetten na laden
       }
 
       // ======================================================================
@@ -4811,15 +5166,29 @@
       }
 
       /* =========================================================
+   1E RONDE RESULTATEN – AUTO-LADEN BIJ TAB-KLIK
+========================================================= */
+      document
+        .querySelector('button[data-tab="r1resultaten"]')
+        .addEventListener("click", () => {
+          Object.keys(pouleOpenState).forEach(
+            (k) => (pouleOpenState[k] = false)
+          );
+          loadR1MatchesFromFirestore(); // vult r1Matches
+          updateR1ResultsButtons(); // zet knoppen direct goed
+        });
+
+      /* =========================================================
          2E RONDE RESULTATEN – AUTO-LADEN BIJ TAB-KLIK
       ========================================================= */
       document
         .querySelector('button[data-tab="r2resultaten"]')
-        .addEventListener("click", () => {
+        .addEventListener("click", async () => {
           Object.keys(pouleOpenStateR2).forEach(
             (k) => (pouleOpenStateR2[k] = false)
           );
-          loadR2MatchesFromFirestore();
+          await loadR2MatchesFromFirestore(); // vult r2Matches + r2PoulesCache
+          updateR2ResultsButtons(); // zet knoppen direct goed
         });
 
       /* =========================================================
@@ -4849,6 +5218,11 @@
         .getElementById("deleteBtn")
         .addEventListener("click", deleteTournament);
 
+      // ✅ TOEVOEGEN: Event listeners voor de spelerslijst status knoppen
+      if (finalizeBtn)
+        finalizeBtn.addEventListener("click", finalizePlayersAction);
+      if (editBtn) editBtn.addEventListener("click", editPlayersAction);
+
       document
         .getElementById("createMatchesBtn")
         .addEventListener("click", createR1MatchSchedule);
@@ -4862,6 +5236,10 @@
                                                  ========================================================= */
       document.addEventListener("DOMContentLoaded", showConnectionBanner);
       guardSpelersTabAvailability();
+
+      if (typeof updateR2PoulesButtons === "function") {
+        updateR2PoulesButtons();
+      }
     </script>
   </body>
 </html>
