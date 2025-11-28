@@ -802,6 +802,14 @@
           <button type="button" id="createPoulesBtn" class="btn btn-save">
             ➕ Poules aanmaken
           </button>
+          <button
+            type="button"
+            id="baseLayoutBtn"
+            class="btn btn-save"
+            title="Kies een standaardindeling (willekeurig, op sterkte, gelijkmatig, enz.)"
+          >
+            🧩 Kies basisindeling
+          </button>
           <button type="button" id="savePoulesBtn" class="btn btn-lock">
             💾 Indeling opslaan
           </button>
@@ -959,6 +967,14 @@
           <button type="button" id="createR2PoulesBtn" class="btn btn-save">
             ➕ Poules aanmaken
           </button>
+          <button
+            type="button"
+            id="r2BaseLayoutBtn"
+            class="btn btn-save"
+            title="Kies de standaardindeling (gelijkmatig, slingerend, op basis van ranglijst)"
+          >
+            🧩 Kies basisindeling
+          </button>
           <button type="button" id="saveR2PoulesBtn" class="btn btn-lock">
             💾 Indeling opslaan
           </button>
@@ -1000,6 +1016,14 @@
                 <thead style="background: #f8f9fa">
                   <tr>
                     <th style="text-align: left; padding: 6px 4px">#</th>
+                    <th
+                      style="text-align: center; padding: 6px 4px; width: 32px"
+                      title="Afgemeld"
+                    >
+                      <span style="color: #b02a37; font-weight: 700"
+                        >&#10006;</span
+                      >
+                    </th>
                     <th style="text-align: left; padding: 6px 4px">Speler</th>
                     <th style="text-align: right; padding: 6px 4px">
                       1e&nbsp;ronde
@@ -1009,6 +1033,7 @@
                     </th>
                   </tr>
                 </thead>
+
                 <tbody id="r2RankTableBody"></tbody>
               </table>
               <!-- Nieuwe knop onder de tabel -->
@@ -1117,7 +1142,301 @@
 
       <!-- ===== START TAB: ANDERE PLACEHOLDERS ===== -->
 
-      <div id="finale" class="tab-content"><p>Finale-tab (komt later)</p></div>
+      <!-- Tab 6: Finale -->
+      <div id="finale" class="tab-content">
+        <h3>Finale</h3>
+
+        <div
+          id="finaleNoTournament"
+          style="
+            display: none;
+            padding: 10px 12px;
+            background: #fff3cd;
+            border: 1px solid #ffe69c;
+            border-radius: 6px;
+            color: #856404;
+            margin-bottom: 15px;
+          "
+        >
+          Geen toernooi geselecteerd. Kies eerst een toernooi op het tabblad
+          <strong>Toernooi</strong>.
+        </div>
+
+        <div id="finaleContent" style="display: none">
+          <!-- Kaart 1: finalisten + caramboles -->
+          <div
+            style="
+              border: 1px solid #dee2e6;
+              border-radius: 10px;
+              padding: 12px 14px;
+              margin-bottom: 18px;
+              background: #f8f9fa;
+            "
+          >
+            <h4 style="margin-top: 0; margin-bottom: 6px">
+              Finalisten en caramboles
+            </h4>
+            <p
+              style="
+                margin-top: 0;
+                margin-bottom: 10px;
+                font-size: 0.9em;
+                color: #555;
+              "
+            >
+              De acht hoogst geplaatste spelers uit de
+              <strong>totaalstand van de 2e ronde</strong> plaatsen zich
+              automatisch voor de finale. Hier kun je het aantal te maken
+              caramboles in de finale aanpassen en aangeven of een speler zich
+              heeft afgemeld.
+            </p>
+
+            <div style="overflow-x: auto">
+              <table
+                style="
+                  width: 100%;
+                  border-collapse: collapse;
+                  font-size: 0.9em;
+                  background: #fff;
+                "
+              >
+                <thead style="background: #f1f3f5">
+                  <tr>
+                    <th
+                      style="
+                        text-align: left;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                        width: 40px;
+                      "
+                    >
+                      R2
+                    </th>
+                    <th
+                      style="
+                        text-align: center;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                        width: 40px;
+                      "
+                      title="Afgemeld"
+                    >
+                      ❌
+                    </th>
+                    <th
+                      style="
+                        text-align: left;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                      "
+                    >
+                      Speler
+                    </th>
+                    <th
+                      style="
+                        text-align: right;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                        width: 80px;
+                      "
+                    >
+                      Car. 2e&nbsp;ronde
+                    </th>
+                    <th
+                      style="
+                        text-align: right;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                        width: 90px;
+                      "
+                    >
+                      Car. finale
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="finalePlayersBody"></tbody>
+              </table>
+            </div>
+
+            <div class="button-row" style="margin-top: 8px; gap: 8px">
+              <button
+                type="button"
+                id="finaleSaveCarambolesBtn"
+                class="btn btn-save"
+              >
+                💾 Opslaan car. finale
+              </button>
+            </div>
+
+            <div
+              id="finaleFeedback"
+              style="margin-top: 8px; font-size: 0.9em; min-height: 18px"
+            ></div>
+          </div>
+
+          <!-- Kaart 2: eindstand finale -->
+          <div
+            style="
+              border: 1px solid #dee2e6;
+              border-radius: 10px;
+              padding: 12px 14px;
+              background: #f8f9fa;
+            "
+          >
+            <h4 style="margin-top: 0; margin-bottom: 6px">Eindstand finale</h4>
+            <p
+              style="
+                margin-top: 0;
+                margin-bottom: 10px;
+                font-size: 0.9em;
+                color: #555;
+              "
+            >
+              De wedstrijden van de finale worden in een ander programma
+              bijgehouden. Vul hier de
+              <strong>definitieve eindstand</strong> in. De eindstand wordt
+              getoond op basis van de ingevulde <strong>positie</strong>.
+            </p>
+
+            <div style="overflow-x: auto">
+              <table
+                style="
+                  width: 100%;
+                  border-collapse: collapse;
+                  font-size: 0.9em;
+                  background: #fff;
+                "
+              >
+                <thead style="background: #f1f3f5">
+                  <tr>
+                    <th
+                      style="
+                        text-align: right;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                        width: 55px;
+                      "
+                    >
+                      Pos.
+                    </th>
+                    <th
+                      style="
+                        text-align: left;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                      "
+                    >
+                      Speler
+                    </th>
+                    <th
+                      style="
+                        text-align: right;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                        width: 80px;
+                      "
+                    >
+                      Car. finale
+                    </th>
+                    <th
+                      style="
+                        text-align: right;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                        width: 70px;
+                      "
+                    >
+                      Gesp.
+                    </th>
+                    <th
+                      style="
+                        text-align: right;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                        width: 70px;
+                      "
+                    >
+                      Pnt.
+                    </th>
+                    <th
+                      style="
+                        text-align: right;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                        width: 80px;
+                      "
+                    >
+                      Car.
+                    </th>
+                    <th
+                      style="
+                        text-align: right;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                        width: 80px;
+                      "
+                    >
+                      HS
+                    </th>
+                    <th
+                      style="
+                        text-align: right;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                        width: 80px;
+                      "
+                    >
+                      Beurten
+                    </th>
+                    <th
+                      style="
+                        text-align: right;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                        width: 80px;
+                      "
+                    >
+                      Moy.
+                    </th>
+                    <th
+                      style="
+                        text-align: right;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                        width: 80px;
+                      "
+                    >
+                      Moy&nbsp;%
+                    </th>
+                    <th
+                      style="
+                        text-align: right;
+                        padding: 6px 4px;
+                        border-bottom: 1px solid #dee2e6;
+                        width: 80px;
+                      "
+                    >
+                      Car&nbsp;%
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="finaleResultsBody"></tbody>
+              </table>
+            </div>
+
+            <div class="button-row" style="margin-top: 8px; gap: 8px">
+              <button
+                type="button"
+                id="finaleSaveResultsBtn"
+                class="btn btn-save"
+              >
+                💾 Eindstand opslaan
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ===== END TAB: ANDERE PLACEHOLDERS ===== -->
 
       <!-- ===== START TAB: ADMIN ===== -->
@@ -1442,6 +1761,13 @@
                 updateR1PoulesButtons();
               }
             }
+
+            // Speciale regel: als je naar "finale" gaat -> finale-tab laden
+            if (btn.dataset.tab === "finale") {
+              if (typeof loadFinaleTab === "function") {
+                loadFinaleTab();
+              }
+            }
           });
         });
 
@@ -1495,6 +1821,7 @@
         if (typeof r2CurrentPoules !== "undefined") r2CurrentPoules = [];
         if (typeof r2AllPlayers !== "undefined") r2AllPlayers = [];
         if (typeof r2AvailablePlayers !== "undefined") r2AvailablePlayers = [];
+        if (typeof r2PoulesDirty !== "undefined") r2PoulesDirty = false;
 
         // UI opruimen waar mogelijk
         if (typeof renderPoules === "function") renderPoules();
@@ -2340,6 +2667,7 @@
       const createPoulesBtn = document.getElementById("createPoulesBtn");
       const savePoulesBtn = document.getElementById("savePoulesBtn");
       const clearPoulesBtn = document.getElementById("clearPoulesBtn");
+      const baseLayoutBtn = document.getElementById("baseLayoutBtn"); // NIEUW
       const availablePlayersDiv = document.getElementById("availablePlayers");
       const poulesContainer = document.getElementById("poulesContainer");
       const poulesFeedback = document.getElementById("poulesFeedback");
@@ -2380,6 +2708,31 @@
                                               margin-top:10px;">${msg}</div>`;
       }
 
+      function showFinaleFeedback(msg, type = "info") {
+        const box = document.getElementById("finaleFeedback");
+        if (!box) return;
+        let color = "#e2e3e5";
+        let textColor = "#41464b";
+        if (type === "error") {
+          color = "#f8d7da";
+          textColor = "#842029";
+        } else if (type === "success") {
+          color = "#d1e7dd";
+          textColor = "#0f5132";
+        }
+        box.innerHTML = `
+    <div style="
+      background:${color};
+      color:${textColor};
+      border-radius:6px;
+      padding:6px 8px;
+      border:1px solid rgba(0,0,0,0.05);
+    ">
+      ${msg}
+    </div>
+  `;
+      }
+
       function updateR1PoulesButtons() {
         if (!createPoulesBtn || !savePoulesBtn || !clearPoulesBtn) return;
 
@@ -2387,7 +2740,7 @@
         const hasPoules = currentPoules.length > 0;
         const playersDef = !!playersFinalized;
 
-        // ✅ NIEUW: wedstrijdschema bestaat zodra er r1Matches zijn
+        // Wedstrijdschema bestaat zodra er r1Matches zijn
         const hasSchedule = Array.isArray(r1Matches) && r1Matches.length > 0;
 
         // hoeveel spelers al ingedeeld?
@@ -2402,21 +2755,20 @@
         // onthoud dit ook voor de spelers-tab
         r1PoulesExist = hasPoules;
 
-        // ➕ Poules aanmaken
-        // - alleen als er een toernooi is
-        // - spelerslijst definitief is
-        // - er nog géén poules bestaan
-        // - ✅ EN er nog géén wedstrijdschema is
+        // ➕ Poules aanmaken:
+        // - toernooi actief
+        // - spelerslijst definitief
+        // - nog géén poules
+        // - en nog géén wedstrijdschema
         createPoulesBtn.disabled =
           !hasTournament || !playersDef || hasPoules || hasSchedule;
 
-        // 💾 Indeling opslaan
-        // - alleen als:
-        //   • toernooi actief
-        //   • spelerslijst definitief
-        //   • er poules zijn
-        //   • alle spelers zijn ingedeeld
-        //   • ✅ EN er nog géén wedstrijdschema is
+        // 💾 Indeling opslaan:
+        // - toernooi actief
+        // - spelerslijst definitief
+        // - er zijn poules
+        // - alle spelers zijn ingedeeld
+        // - en nog géén wedstrijdschema
         const canSave =
           hasTournament &&
           playersDef &&
@@ -2425,12 +2777,11 @@
           !hasSchedule;
         savePoulesBtn.disabled = !canSave;
 
-        // 🗑️ Alles wissen
-        // - alleen als:
-        //   • toernooi actief
-        //   • spelerslijst definitief
-        //   • er poules zijn
-        //   • ✅ EN er nog géén wedstrijdschema is
+        // 🗑️ Alles wissen:
+        // - toernooi actief
+        // - spelerslijst definitief
+        // - er zijn poules
+        // - en nog géén wedstrijdschema
         clearPoulesBtn.disabled =
           !hasTournament || !playersDef || !hasPoules || hasSchedule;
 
@@ -2439,7 +2790,21 @@
           btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
         });
 
-        // ✅ NIEUW: verwijder-knoppen in poule-kaarten blokkeren als schema bestaat
+        // 🧩 NIEUW: knop 'Kies basisindeling'
+        // Actief als:
+        // - er een toernooi is
+        // - er poules zijn aangemaakt
+        // - er nog GEEN wedstrijdschema is
+        if (baseLayoutBtn) {
+          const canBaseLayout = hasTournament && hasPoules && !hasSchedule;
+          baseLayoutBtn.disabled = !canBaseLayout;
+          baseLayoutBtn.style.opacity = canBaseLayout ? "1" : "0.4";
+          baseLayoutBtn.style.cursor = canBaseLayout
+            ? "pointer"
+            : "not-allowed";
+        }
+
+        // verwijder-knoppen in poule-kaarten blokkeren als schema bestaat
         document
           .querySelectorAll("#poulesContainer button[data-player-id]")
           .forEach((btn) => {
@@ -2447,11 +2812,402 @@
             btn.style.opacity = btn.disabled ? "0.4" : "1";
             btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
           });
+      }
 
-        // Spelers-tab ook updaten als de poules-situatie verandert
-        if (typeof guardSpelersTabAvailability === "function") {
-          guardSpelersTabAvailability();
+      // ===== Basisindelingen – helpers =====
+
+      // hoe sterk is een speler? (caramboles 1e ronde, anders algemene caramboles, anders teMaken)
+      function getPlayerStrength(speler) {
+        if (!speler) return 0;
+        const raw =
+          speler.carambolesR1 ?? speler.caramboles ?? speler.teMaken ?? 0;
+        return Number(raw) || 0;
+      }
+
+      // sorteer spelers op sterkte (sterkste eerst)
+      function sortByStrength(players) {
+        return [...players].sort(
+          (a, b) => getPlayerStrength(b) - getPlayerStrength(a)
+        );
+      }
+
+      // bouw een volgorde van poule-indexen (0..n-1) waarin slots worden gevuld
+      // snake = false: A, B, C, D, A, B, C, D, ...
+      // snake = true : A, B, C, D, D, C, B, A, A, B, C, D, ...
+      function buildPouleIndexSequence(poules, snake = false) {
+        const totalSlots = poules.reduce(
+          (sum, p) => sum + (p.maxSpelers || 0),
+          0
+        );
+        const seq = [];
+        const n = poules.length;
+        if (!totalSlots || !n) return seq;
+
+        // Normale (roulerende) verdeling: A, B, C, D, A, B, C, D, ...
+        if (!snake) {
+          while (seq.length < totalSlots) {
+            for (let i = 0; i < n && seq.length < totalSlots; i++) {
+              seq.push(i);
+            }
+          }
+          return seq;
         }
+
+        // Snake-verdeling per "rij":
+        // rij 1: 0,1,2,...,n-1  => A,B,C,D
+        // rij 2: n-1,...,2,1,0  => D,C,B,A
+        // rij 3: weer 0..n-1    => A,B,C,D
+        // enz.
+        const forward = Array.from({ length: n }, (_, i) => i); // 0..n-1
+        const backward = Array.from({ length: n }, (_, i) => n - 1 - i); // n-1..0
+
+        let useForward = true;
+        while (seq.length < totalSlots) {
+          const row = useForward ? forward : backward;
+          for (const idx of row) {
+            if (seq.length >= totalSlots) break;
+            seq.push(idx);
+          }
+          useForward = !useForward; // volgende rij omdraaien
+        }
+
+        return seq;
+      }
+
+      // verdeel spelers in volgorde van 'sequence' over poules (zonder maxSpelers te overschrijden)
+      function assignBySequence(playersOrdered, poules, sequence) {
+        const assignments = {};
+        poules.forEach((p) => {
+          assignments[p.naam] = [];
+        });
+
+        let playerIdx = 0;
+        for (const slotIdx of sequence) {
+          if (playerIdx >= playersOrdered.length) break;
+          const poule = poules[slotIdx];
+          const list = assignments[poule.naam];
+          if (list.length >= poule.maxSpelers) continue;
+          list.push(playersOrdered[playerIdx]);
+          playerIdx++;
+        }
+        return assignments;
+      }
+
+      // op sterkte per blok: eerst Poule A helemaal vullen, dan B, enz.
+      function assignByBlocks(playersOrdered, poules) {
+        const assignments = {};
+        poules.forEach((p) => {
+          assignments[p.naam] = [];
+        });
+
+        let idx = 0;
+        poules.forEach((poule) => {
+          const list = assignments[poule.naam];
+          while (
+            list.length < poule.maxSpelers &&
+            idx < playersOrdered.length
+          ) {
+            list.push(playersOrdered[idx++]);
+          }
+        });
+
+        return assignments;
+      }
+
+      // sterke en zwakke helft bepalen volgens jouw definitie
+      function splitStrongWeak(players, poules) {
+        const sorted = sortByStrength(players);
+        const numPoules = poules.length;
+
+        // aantal poules voor sterke helft: helft, naar boven afgerond
+        const strongPouleCount = Math.ceil(numPoules / 2);
+        const strongPoules = poules.slice(0, strongPouleCount);
+        const weakPoules = poules.slice(strongPouleCount);
+
+        // aantal spelers in sterke helft = som maxSpelers van sterke poules
+        const strongSlots = strongPoules.reduce(
+          (sum, p) => sum + (p.maxSpelers || 0),
+          0
+        );
+        const strongPlayers = sorted.slice(0, strongSlots);
+        const weakPlayers = sorted.slice(strongSlots);
+
+        return { strongPlayers, weakPlayers, strongPoules, weakPoules };
+      }
+
+      function mergeAssignments(allPoules, strongAssignments, weakAssignments) {
+        const result = {};
+        allPoules.forEach((p) => {
+          result[p.naam] =
+            (strongAssignments && strongAssignments[p.naam]) ||
+            (weakAssignments && weakAssignments[p.naam]) ||
+            [];
+        });
+        return result;
+      }
+
+      // ===== Definitie van de verschillende basisindelingen =====
+
+      const baseLayouts = [
+        {
+          id: "random",
+          title: "Willekeurig",
+          description:
+            "Alle spelers worden in een willekeurige volgorde over de poules verdeeld.",
+          apply(players, poules) {
+            const shuffled = [...players];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            const seq = buildPouleIndexSequence(poules, false);
+            return assignBySequence(shuffled, poules, seq);
+          },
+        },
+        {
+          id: "byStrengthBlocks",
+          title: "Op sterkte (per poule)",
+          description:
+            "De sterkste 4 of 5 spelers in poule A, de volgende 4/5 in poule B, enzovoort.",
+          apply(players, poules) {
+            const sorted = sortByStrength(players);
+            return assignByBlocks(sorted, poules);
+          },
+        },
+        {
+          id: "even_rr",
+          title: "Gelijkmatig – doorlopend",
+          description:
+            "Spelers op volgorde van sterkte: eerst de sterkste in poule A, dan B, C, …; daarna opnieuw vanaf poule A (roulerend schema).",
+          apply(players, poules) {
+            const sorted = sortByStrength(players);
+            const seq = buildPouleIndexSequence(poules, false);
+            return assignBySequence(sorted, poules, seq);
+          },
+        },
+        {
+          id: "even_snake",
+          title: "Gelijkmatig – slingerend (snake)",
+          description:
+            "Zelfde als hierboven, maar dan slingerend: A–B–C–D, daarna D–C–B–A, enzovoort (in het Nederlands vaak een slingerend ‘snake’-schema).",
+          apply(players, poules) {
+            const sorted = sortByStrength(players);
+            const seq = buildPouleIndexSequence(poules, true);
+            return assignBySequence(sorted, poules, seq);
+          },
+        },
+        {
+          id: "half_rr",
+          title: "Sterkste/zwakste helft – doorlopend",
+          description:
+            "De sterkste helft van het deelnemersveld wordt gelijkmatig over de eerste helft van de poules verdeeld, de zwakste helft over de overige poules.",
+          apply(players, poules) {
+            const { strongPlayers, weakPlayers, strongPoules, weakPoules } =
+              splitStrongWeak(players, poules);
+            const seqStrong = buildPouleIndexSequence(strongPoules, false);
+            const seqWeak = buildPouleIndexSequence(weakPoules, false);
+            const strongAssign = assignBySequence(
+              strongPlayers,
+              strongPoules,
+              seqStrong
+            );
+            const weakAssign = assignBySequence(
+              weakPlayers,
+              weakPoules,
+              seqWeak
+            );
+            return mergeAssignments(poules, strongAssign, weakAssign);
+          },
+        },
+        {
+          id: "half_snake",
+          title: "Sterkste/zwakste helft – slingerend",
+          description:
+            "Zelfde als hierboven, maar binnen zowel sterke als zwakke helft in een slingerend (snake-)schema: A–B–C, dan C–B–A, enzovoort.",
+          apply(players, poules) {
+            const { strongPlayers, weakPlayers, strongPoules, weakPoules } =
+              splitStrongWeak(players, poules);
+            const seqStrong = buildPouleIndexSequence(strongPoules, true);
+            const seqWeak = buildPouleIndexSequence(weakPoules, true);
+            const strongAssign = assignBySequence(
+              strongPlayers,
+              strongPoules,
+              seqStrong
+            );
+            const weakAssign = assignBySequence(
+              weakPlayers,
+              weakPoules,
+              seqWeak
+            );
+            return mergeAssignments(poules, strongAssign, weakAssign);
+          },
+        },
+      ];
+
+      // ===== Popup + toepassen van de basisindeling =====
+
+      function openBaseLayoutDialog() {
+        if (!activeTournamentId) {
+          showPoulesFeedback("⚠️ Geen toernooi actief.", "error");
+          return;
+        }
+        if (!currentPoules.length) {
+          showPoulesFeedback(
+            "⚠️ Er zijn nog geen poules aangemaakt. Maak eerst poules aan.",
+            "error"
+          );
+          return;
+        }
+
+        const hasSchedule = Array.isArray(r1Matches) && r1Matches.length > 0;
+        if (hasSchedule) {
+          showPoulesFeedback(
+            "❌ Je kunt geen basisindeling kiezen als er al een wedstrijdschema is aangemaakt.",
+            "error"
+          );
+          return;
+        }
+
+        const alreadyAssigned = currentPoules.reduce(
+          (sum, p) => sum + p.spelers.length,
+          0
+        );
+        if (alreadyAssigned > 0) {
+          const ok = confirm(
+            "Er zijn al spelers in de poules ingedeeld. De gekozen basisindeling zal de huidige indeling overschrijven. Doorgaan?"
+          );
+          if (!ok) return;
+        }
+
+        const existing = document.getElementById("baseIndelingDialog");
+        if (existing) existing.remove();
+
+        const overlay = document.createElement("div");
+        overlay.id = "baseIndelingDialog";
+        overlay.style.cssText = `
+    position:fixed; inset:0; background:rgba(0,0,0,0.35);
+    display:flex; align-items:center; justify-content:center; z-index:2100;
+  `;
+
+        const box = document.createElement("div");
+        box.style.cssText = `
+    background:#fff; border-radius:10px; padding:18px 20px;
+    max-width:560px; width:90%;
+    box-shadow:0 6px 18px rgba(0,0,0,0.25);
+    font-size:0.95rem;
+  `;
+
+        let html = `
+    <h4 style="margin-top:0;margin-bottom:10px;">Kies basisindeling voor de poules</h4>
+    <p style="margin-top:0;margin-bottom:10px;">
+      Kies één van de voorgedefinieerde indelingen. De spelers worden automatisch over de poules verdeeld;
+      je kunt de indeling daarna nog handmatig aanpassen voordat je opslaat.
+    </p>
+    <form id="baseIndelingForm" style="max-height:320px;overflow:auto;margin-bottom:10px;">`;
+
+        baseLayouts.forEach((layout, idx) => {
+          html += `
+      <label style="display:block;margin-bottom:8px;cursor:pointer;">
+        <input type="radio" name="baseLayoutOption" value="${layout.id}"
+          style="margin-right:6px;" ${idx === 0 ? "checked" : ""} />
+        <strong>${layout.title}</strong><br>
+        <span style="font-size:0.85em;color:#555;">${layout.description}</span>
+      </label>`;
+        });
+
+        html += `
+    </form>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;">
+      <button type="button" id="cancelBaseLayoutBtn"
+        style="padding:6px 12px;border-radius:6px;border:1px solid #ccc;background:#f8f9fa;cursor:pointer;">
+        Annuleren
+      </button>
+      <button type="button" id="applyBaseLayoutBtn"
+        style="padding:6px 12px;border-radius:6px;border:1px solid #0d6efd;background:#0d6efd;color:#fff;cursor:pointer;">
+        Toepassen
+      </button>
+    </div>
+  `;
+
+        box.innerHTML = html;
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+
+        overlay
+          .querySelector("#cancelBaseLayoutBtn")
+          .addEventListener("click", () => overlay.remove());
+
+        overlay
+          .querySelector("#applyBaseLayoutBtn")
+          .addEventListener("click", () => {
+            const checked = overlay.querySelector(
+              'input[name="baseLayoutOption"]:checked'
+            );
+            if (!checked) {
+              alert("Kies eerst een basisindeling.");
+              return;
+            }
+            const id = checked.value;
+            applyBaseLayout(id);
+            overlay.remove();
+          });
+      }
+
+      function applyBaseLayout(layoutId) {
+        const layout = baseLayouts.find((l) => l.id === layoutId);
+        if (!layout) {
+          showPoulesFeedback("❌ Onbekende basisindeling.", "error");
+          return;
+        }
+
+        // gebruik alle spelers uit het toernooi als basis
+        const playersSource =
+          (allPlayers && allPlayers.length && allPlayers) ||
+          availablePlayers ||
+          [];
+        if (!playersSource.length) {
+          showPoulesFeedback(
+            "⚠️ Er zijn nog geen spelers geladen. Laad eerst de spelerslijst.",
+            "error"
+          );
+          return;
+        }
+
+        const hasSchedule = Array.isArray(r1Matches) && r1Matches.length > 0;
+        if (hasSchedule) {
+          showPoulesFeedback(
+            "❌ Er is al een wedstrijdschema. De basisindeling kan niet meer worden gewijzigd.",
+            "error"
+          );
+          return;
+        }
+
+        const assignments = layout.apply(playersSource, currentPoules);
+
+        // toegewezen spelers in currentPoules schrijven
+        const assignedIds = new Set();
+        currentPoules.forEach((p) => {
+          const list = assignments[p.naam] || [];
+          p.spelers = list.map((pl) => {
+            assignedIds.add(pl.id);
+            return pl;
+          });
+        });
+
+        // beschikbare spelers = spelers die niet zijn ingedeeld
+        availablePlayers = playersSource.filter(
+          (pl) => !assignedIds.has(pl.id)
+        );
+        selectedPlayer = null;
+
+        renderPoules();
+        renderAvailablePlayers();
+        updateR1PoulesButtons();
+
+        showPoulesFeedback(
+          `✅ Basisindeling "${layout.title}" toegepast. Je kunt de poules nog aanpassen en daarna de indeling opslaan.`,
+          "success"
+        );
       }
 
       // ----- hulpfunctie om te bepalen wie al in een poule zit -----
@@ -2890,6 +3646,11 @@
       savePoulesBtn.addEventListener("click", savePoulesToFirestore);
       clearPoulesBtn.addEventListener("click", clearPoules);
 
+      // NIEUW: basisindeling kiezen
+      if (baseLayoutBtn) {
+        baseLayoutBtn.addEventListener("click", openBaseLayoutDialog);
+      }
+
       /* ===== EINDE FUNCTIES TAB 1E RONDE POULES ===== */
 
       /* ===== FUNCTIES TAB 1E RONDE RESULTATEN ===== */
@@ -3067,6 +3828,467 @@
           return b.percCar - a.percCar;
         });
       }
+
+      /* ----------------------------------------------------------
+   FINALE – helpers om kandidaten op te bouwen
+---------------------------------------------------------- */
+
+      function buildFinaleCandidatesFromR2() {
+        // We verwachten dat r2Matches en r2PoulesCache gevuld zijn
+        const stats = buildGlobalRankingFromStats(
+          r2Matches || [],
+          r2PoulesCache || []
+        );
+        if (!stats || !stats.length) return [];
+
+        // Sorteer op totale rang (staat al gesorteerd, maar voor de zekerheid)
+        const ordered = [...stats].sort((a, b) => a.rankTotaal - b.rankTotaal);
+
+        // Neem de beste 8
+        const top8 = ordered.slice(0, 8);
+
+        const playersMap = {};
+        (currentPlayers || []).forEach((p) => {
+          playersMap[p.id] = p;
+        });
+
+        return top8.map((s, index) => {
+          const pDoc = playersMap[s.spelerId] || {};
+          const carR2 =
+            typeof pDoc.carambolesR2 === "number"
+              ? pDoc.carambolesR2
+              : typeof s.teMaken === "number"
+              ? s.teMaken
+              : typeof pDoc.caramboles === "number"
+              ? pDoc.caramboles
+              : 0;
+
+          const carFinale =
+            typeof pDoc.carambolesFinale === "number"
+              ? pDoc.carambolesFinale
+              : carR2;
+
+          return {
+            spelerId: s.spelerId,
+            naam: s.naam,
+            r2Rank: index + 1,
+            carR2,
+            carFinale,
+            withdrawFinale: !!pDoc.withdrawFinale,
+            // velden voor eindstand (kunnen leeg zijn)
+            finalPos:
+              typeof pDoc.finalPos === "number" && pDoc.finalPos > 0
+                ? pDoc.finalPos
+                : "",
+            finalGames:
+              typeof pDoc.finalGames === "number" ? pDoc.finalGames : "",
+            finalPts: typeof pDoc.finalPts === "number" ? pDoc.finalPts : "",
+            finalCaramboles:
+              typeof pDoc.finalCaramboles === "number"
+                ? pDoc.finalCaramboles
+                : "",
+            finalHS: typeof pDoc.finalHS === "number" ? pDoc.finalHS : "",
+            finalBeurten:
+              typeof pDoc.finalBeurten === "number" ? pDoc.finalBeurten : "",
+            finalMoy: typeof pDoc.finalMoy === "number" ? pDoc.finalMoy : "",
+            finalMoyPerc:
+              typeof pDoc.finalMoyPerc === "number" ? pDoc.finalMoyPerc : "",
+            finalCarPerc:
+              typeof pDoc.finalCarPerc === "number" ? pDoc.finalCarPerc : "",
+          };
+        });
+      }
+
+      /* ----------------------------------------------------------
+   FINALE – tab laden
+---------------------------------------------------------- */
+
+      async function loadFinaleTab() {
+        const noT = document.getElementById("finaleNoTournament");
+        const content = document.getElementById("finaleContent");
+
+        if (!activeTournamentId) {
+          if (noT) noT.style.display = "block";
+          if (content) content.style.display = "none";
+          return;
+        }
+        if (noT) noT.style.display = "none";
+        if (content) content.style.display = "block";
+
+        // Zorg dat we r2Matches / r2PoulesCache hebben
+        try {
+          await loadR2MatchesFromFirestore();
+        } catch (err) {
+          console.error("Fout bij laden 2e ronde voor finale:", err);
+          showFinaleFeedback(
+            "❌ Kan de totaalstand van de 2e ronde niet laden. Controleer het tabblad 2e ronde resultaten.",
+            "error"
+          );
+          return;
+        }
+
+        finaleCandidates = buildFinaleCandidatesFromR2() || [];
+
+        if (!finaleCandidates.length) {
+          showFinaleFeedback(
+            "Er is nog geen (volledige) totaalstand van de 2e ronde. De finale kan pas worden samengesteld als alle uitslagen van de 2e ronde bekend zijn.",
+            "info"
+          );
+        } else {
+          showFinaleFeedback(
+            "De 8 hoogst geplaatste spelers uit de 2e ronde zijn als finalisten geladen.",
+            "success"
+          );
+        }
+
+        renderFinaleSelection();
+        renderFinaleResultsInputs();
+      }
+
+      function renderFinaleSelection() {
+        const tbody = document.getElementById("finalePlayersBody");
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        if (!finaleCandidates.length) {
+          tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="padding:8px;color:#777;">
+          Nog geen finalisten beschikbaar.
+        </td>
+      </tr>
+    `;
+          return;
+        }
+
+        finaleCandidates.forEach((c) => {
+          const tr = document.createElement("tr");
+          tr.dataset.spelerId = c.spelerId;
+          tr.innerHTML = `
+      <td style="padding:4px;text-align:left;border-bottom:1px solid #eee;">
+        ${c.r2Rank}
+      </td>
+      <td style="padding:4px;text-align:center;border-bottom:1px solid #eee;">
+        <input
+          type="checkbox"
+          class="finale-withdraw-checkbox"
+          ${c.withdrawFinale ? "checked" : ""}
+        />
+      </td>
+      <td style="padding:4px;text-align:left;border-bottom:1px solid #eee;">
+        ${c.naam}
+      </td>
+      <td style="padding:4px;text-align:right;border-bottom:1px solid #eee;">
+        ${c.carR2 ?? ""}
+      </td>
+      <td style="padding:4px;text-align:right;border-bottom:1px solid #eee;">
+        <input
+          type="number"
+          class="finale-car-input"
+          min="0"
+          style="width:70px;text-align:right;"
+          value="${c.carFinale ?? ""}"
+        />
+      </td>
+    `;
+          tbody.appendChild(tr);
+        });
+
+        // Event-handlers voor checkbox + caramboles-input
+        tbody.querySelectorAll(".finale-withdraw-checkbox").forEach((cb) => {
+          cb.addEventListener("change", () => {
+            const tr = cb.closest("tr");
+            const id = tr?.dataset.spelerId;
+            const c = finaleCandidates.find((x) => x.spelerId === id);
+            if (!c) return;
+            c.withdrawFinale = cb.checked;
+          });
+        });
+
+        tbody.querySelectorAll(".finale-car-input").forEach((inp) => {
+          inp.addEventListener("input", () => {
+            const tr = inp.closest("tr");
+            const id = tr?.dataset.spelerId;
+            const c = finaleCandidates.find((x) => x.spelerId === id);
+            if (!c) return;
+            const v = Number(inp.value);
+            c.carFinale = isNaN(v) ? 0 : v;
+          });
+        });
+      }
+
+      function renderFinaleResultsInputs() {
+        const tbody = document.getElementById("finaleResultsBody");
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        if (!finaleCandidates.length) {
+          tbody.innerHTML = `
+      <tr>
+        <td colspan="11" style="padding:8px;color:#777;">
+          Nog geen finalisten beschikbaar.
+        </td>
+      </tr>
+    `;
+          return;
+        }
+
+        finaleCandidates.forEach((c) => {
+          const tr = document.createElement("tr");
+          tr.dataset.spelerId = c.spelerId;
+          tr.innerHTML = `
+      <td style="padding:4px;text-align:right;border-bottom:1px solid #eee;">
+        <input
+          type="number"
+          class="finale-pos-input"
+          min="1"
+          style="width:55px;text-align:right;"
+          value="${c.finalPos ?? ""}"
+        />
+      </td>
+      <td style="padding:4px;text-align:left;border-bottom:1px solid #eee;">
+        ${c.naam}
+      </td>
+      <td style="padding:4px;text-align:right;border-bottom:1px solid #eee;">
+        ${c.carFinale ?? ""}
+      </td>
+      <td style="padding:4px;text-align:right;border-bottom:1px solid #eee;">
+        <input
+          type="number"
+          class="finale-games-input"
+          min="0"
+          style="width:60px;text-align:right;"
+          value="${c.finalGames ?? ""}"
+        />
+      </td>
+      <td style="padding:4px;text-align:right;border-bottom:1px solid #eee;">
+        <input
+          type="number"
+          class="finale-pts-input"
+          min="0"
+          step="0.5"
+          style="width:60px;text-align:right;"
+          value="${c.finalPts ?? ""}"
+        />
+      </td>
+      <td style="padding:4px;text-align:right;border-bottom:1px solid #eee;">
+        <input
+          type="number"
+          class="finale-caramboles-input"
+          min="0"
+          style="width:70px;text-align:right;"
+          value="${c.finalCaramboles ?? ""}"
+        />
+      </td>
+      <td style="padding:4px;text-align:right;border-bottom:1px solid #eee;">
+        <input
+          type="number"
+          class="finale-hs-input"
+          min="0"
+          style="width:70px;text-align:right;"
+          value="${c.finalHS ?? ""}"
+        />
+      </td>
+      <td style="padding:4px;text-align:right;border-bottom:1px solid #eee;">
+        <input
+          type="number"
+          class="finale-beurten-input"
+          min="0"
+          style="width:70px;text-align:right;"
+          value="${c.finalBeurten ?? ""}"
+        />
+      </td>
+      <td style="padding:4px;text-align:right;border-bottom:1px solid #eee;">
+        <input
+          type="number"
+          class="finale-moy-input"
+          min="0"
+          step="0.001"
+          style="width:70px;text-align:right;"
+          value="${c.finalMoy ?? ""}"
+        />
+      </td>
+      <td style="padding:4px;text-align:right;border-bottom:1px solid #eee;">
+        <input
+          type="number"
+          class="finale-moyperc-input"
+          min="0"
+          step="0.1"
+          style="width:70px;text-align:right;"
+          value="${c.finalMoyPerc ?? ""}"
+        />
+      </td>
+      <td style="padding:4px;text-align:right;border-bottom:1px solid #eee;">
+        <input
+          type="number"
+          class="finale-carperc-input"
+          min="0"
+          step="0.1"
+          style="width:70px;text-align:right;"
+          value="${c.finalCarPerc ?? ""}"
+        />
+      </td>
+    `;
+          tbody.appendChild(tr);
+        });
+
+        const updateFromRow = (row, field, cls) => {
+          const inp = row.querySelector(cls);
+          if (!inp) return;
+          const id = row.dataset.spelerId;
+          const c = finaleCandidates.find((x) => x.spelerId === id);
+          if (!c) return;
+          const v = inp.value;
+          c[field] = v === "" ? "" : Number(v);
+        };
+
+        tbody.querySelectorAll("tr").forEach((tr) => {
+          tr.querySelectorAll("input").forEach((inp) => {
+            inp.addEventListener("input", () => {
+              if (inp.classList.contains("finale-pos-input")) {
+                updateFromRow(tr, "finalPos", ".finale-pos-input");
+              } else if (inp.classList.contains("finale-games-input")) {
+                updateFromRow(tr, "finalGames", ".finale-games-input");
+              } else if (inp.classList.contains("finale-pts-input")) {
+                updateFromRow(tr, "finalPts", ".finale-pts-input");
+              } else if (inp.classList.contains("finale-caramboles-input")) {
+                updateFromRow(
+                  tr,
+                  "finalCaramboles",
+                  ".finale-caramboles-input"
+                );
+              } else if (inp.classList.contains("finale-hs-input")) {
+                updateFromRow(tr, "finalHS", ".finale-hs-input");
+              } else if (inp.classList.contains("finale-beurten-input")) {
+                updateFromRow(tr, "finalBeurten", ".finale-beurten-input");
+              } else if (inp.classList.contains("finale-moy-input")) {
+                updateFromRow(tr, "finalMoy", ".finale-moy-input");
+              } else if (inp.classList.contains("finale-moyperc-input")) {
+                updateFromRow(tr, "finalMoyPerc", ".finale-moyperc-input");
+              } else if (inp.classList.contains("finale-carperc-input")) {
+                updateFromRow(tr, "finalCarPerc", ".finale-carperc-input");
+              }
+            });
+          });
+        });
+      }
+
+      async function saveFinaleCarambolesAndWithdraw() {
+        if (!activeTournamentId) {
+          showFinaleFeedback(
+            "❌ Geen toernooi geselecteerd. Kies eerst een toernooi.",
+            "error"
+          );
+          return;
+        }
+        if (!finaleCandidates.length) {
+          showFinaleFeedback(
+            "Geen finalisten om op te slaan. Controleer de totaalstand van de 2e ronde.",
+            "error"
+          );
+          return;
+        }
+
+        try {
+          const batch = writeBatch(db);
+          finaleCandidates.forEach((c) => {
+            const ref = doc(
+              db,
+              "toernooien",
+              activeTournamentId,
+              "spelers",
+              c.spelerId
+            );
+            const car =
+              typeof c.carFinale === "number" && !isNaN(c.carFinale)
+                ? c.carFinale
+                : 0;
+            batch.update(ref, {
+              carambolesFinale: car,
+              withdrawFinale: !!c.withdrawFinale,
+            });
+          });
+
+          await batch.commit();
+          showFinaleFeedback(
+            "✅ Caramboles finale en afmeldingen opgeslagen.",
+            "success"
+          );
+        } catch (err) {
+          console.error("Fout bij opslaan finale caramboles:", err);
+          showFinaleFeedback(
+            "❌ Fout bij opslaan van de caramboles voor de finale.",
+            "error"
+          );
+        }
+      }
+
+      async function saveFinaleResults() {
+        if (!activeTournamentId) {
+          showFinaleFeedback(
+            "❌ Geen toernooi geselecteerd. Kies eerst een toernooi.",
+            "error"
+          );
+          return;
+        }
+        if (!finaleCandidates.length) {
+          showFinaleFeedback(
+            "Geen finalisten om op te slaan. Controleer de totaalstand van de 2e ronde.",
+            "error"
+          );
+          return;
+        }
+
+        const toNumberOrNull = (v) => {
+          if (v === "" || v === null || typeof v === "undefined") return null;
+          const n = Number(v);
+          return isNaN(n) ? null : n;
+        };
+
+        try {
+          const batch = writeBatch(db);
+
+          finaleCandidates.forEach((c) => {
+            const ref = doc(
+              db,
+              "toernooien",
+              activeTournamentId,
+              "spelers",
+              c.spelerId
+            );
+            batch.update(ref, {
+              finalPos: toNumberOrNull(c.finalPos),
+              finalGames: toNumberOrNull(c.finalGames),
+              finalPts: toNumberOrNull(c.finalPts),
+              finalCaramboles: toNumberOrNull(c.finalCaramboles),
+              finalHS: toNumberOrNull(c.finalHS),
+              finalBeurten: toNumberOrNull(c.finalBeurten),
+              finalMoy: toNumberOrNull(c.finalMoy),
+              finalMoyPerc: toNumberOrNull(c.finalMoyPerc),
+              finalCarPerc: toNumberOrNull(c.finalCarPerc),
+            });
+          });
+
+          await batch.commit();
+
+          // Sorteer lokale weergave op positie, zodat de getoonde eindstand logisch is
+          finaleCandidates.sort((a, b) => {
+            const pa = toNumberOrNull(a.finalPos) ?? 999;
+            const pb = toNumberOrNull(b.finalPos) ?? 999;
+            return pa - pb;
+          });
+          renderFinaleResultsInputs();
+
+          showFinaleFeedback("✅ Eindstand finale opgeslagen.", "success");
+        } catch (err) {
+          console.error("Fout bij opslaan eindstand finale:", err);
+          showFinaleFeedback(
+            "❌ Fout bij opslaan van de eindstand van de finale.",
+            "error"
+          );
+        }
+      }
+
       // Alle gespeelde wedstrijden in een poule opnieuw doorrekenen met de huidige factor
       async function recalcR1PouleMatches(pouleId) {
         if (!activeTournamentId) return;
@@ -4056,6 +5278,16 @@
       let r2AllPlayers = []; // globale ranglijst 1e ronde
       let r2AvailablePlayers = []; // nog niet ingedeeld
 
+      // Vlag: zijn de caramboles 2e ronde "bewust" opgeslagen?
+      // - wordt TRUE na 'Opslaan car. 2e ronde' of na resetAllCarambolesR2()
+      // - wordt opnieuw bepaald bij het laden van een toernooi
+      let r2CarambolesBulkSaved = false;
+
+      // Vlag: is de poule-indeling gewijzigd sinds de laatste opslag?
+      // - wordt TRUE na elke wijziging (speler toevoegen/verwijderen, basisindeling, nieuwe poules)
+      // - wordt FALSE na succesvol opslaan, wissen of laden uit Firestore
+      let r2PoulesDirty = false;
+
       /* =========================================================
          2E RONDE POULES – UI HELPERS
       ========================================================= */
@@ -4129,15 +5361,18 @@
             // caramboles voor de UI
             caramboles: caramboles1e,
             carambolesR2: caramboles2e,
+            // nieuw: afgemeld voor 2e ronde? (standaard false als veld niet bestaat)
+            withdrawR2: !!spelerDoc.withdrawR2,
           };
         });
 
         // 4. lijst met beschikbare spelers initialiseren
         r2AvailablePlayers = [...r2AllPlayers];
 
-        // 5. tabel links renderen
-        renderR2AvailablePlayers();
-        updateR2PoulesButtons();
+        // 5. Vlag initialiseren:
+        //    Bij het laden van een toernooi gaan we er vanuit
+        //    dat de gebruiker eerst bewust op "Opslaan car. 2e ronde" klikt.
+        r2CarambolesBulkSaved = false;
       }
 
       /* ----------------------------------------------------------
@@ -4149,7 +5384,7 @@
 
         if (!r2AvailablePlayers.length) {
           tbody.innerHTML =
-            '<tr><td colspan="4" style="color:#777;padding:6px">Geen vrije spelers meer.</td></tr>';
+            '<tr><td colspan="5" style="color:#777;padding:6px">Geen vrije spelers meer.</td></tr>';
           return;
         }
 
@@ -4158,37 +5393,71 @@
           (a, b) => (a.startRank || 9999) - (b.startRank || 9999)
         );
 
-        sorted.forEach((p) => {
+        const active = sorted.filter((p) => !p.withdrawR2);
+        const withdrawn = sorted.filter((p) => p.withdrawR2);
+
+        function renderRow(p, isWithdrawn) {
           const tr = document.createElement("tr");
           tr.dataset.id = p.id;
-          tr.style.cursor = "pointer";
+          tr.style.cursor = isWithdrawn ? "default" : "pointer";
+
+          const dimColor = isWithdrawn ? "color:#999;" : "";
+          const nameExtra = isWithdrawn
+            ? ' <span style="font-size:0.8em;color:#b02a37;margin-left:4px">(afgemeld 2e ronde)</span>'
+            : "";
 
           tr.innerHTML = `
-            <td style="padding:6px 4px">${p.startRank ?? ""}</td>
-            <td style="padding:6px 4px">${p.naam}</td>
-            <td style="padding:6px 4px;text-align:right">${
-              p.caramboles ?? 0
-            }</td>
-            <td style="padding:6px 4px;text-align:right">
+            <td style="padding:6px 4px;${dimColor}">${p.startRank ?? ""}</td>
+            <td style="padding:6px 4px;text-align:center;">
+              <input
+                type="checkbox"
+                class="r2-withdraw-checkbox"
+                ${p.withdrawR2 ? "checked" : ""}
+                style="cursor:pointer"
+              >
+            </td>
+            <td style="padding:6px 4px;${dimColor}">${p.naam}${nameExtra}</td>
+            <td style="padding:6px 4px;text-align:right;${dimColor}">${
+            p.caramboles ?? 0
+          }</td>
+            <td style="padding:6px 4px;text-align:right;">
               <input
                 type="number"
                 class="carambolesR2-input small"
                 value="${p.carambolesR2 ?? p.caramboles ?? 0}"
                 min="0"
                 max="999"
-                style="width:60px;text-align:right"
+                style="width:60px;text-align:right;${
+                  isWithdrawn ? "background:#f8f9fa;color:#999;" : ""
+                }"
               >
-            </td>`;
+            </td>
+          `;
 
-          // Klik op de rij = speler selecteren (behalve in het inputveld zelf)
-          tr.addEventListener("click", (e) => {
-            if (e.target.tagName !== "INPUT") {
-              selectR2Player(p.id, tr);
-            }
-          });
+          // Alleen actieve spelers kunnen geselecteerd worden voor poules
+          if (!isWithdrawn) {
+            tr.addEventListener("click", (e) => {
+              if (e.target.tagName !== "INPUT") {
+                selectR2Player(p.id, tr);
+              }
+            });
+          }
 
           tbody.appendChild(tr);
-        });
+        }
+
+        // Eerst alle actieve spelers
+        active.forEach((p) => renderRow(p, false));
+
+        // Dan – indien aanwezig – de afmeldingen in een blok onder de lijn
+        if (withdrawn.length) {
+          const sep = document.createElement("tr");
+          sep.innerHTML =
+            '<td colspan="5" style="padding-top:8px;border-top:1px solid #ccc;font-size:0.8em;color:#555;">Afmeldingen 2e ronde</td>';
+          tbody.appendChild(sep);
+          withdrawn.forEach((p) => renderRow(p, true));
+        }
+
         updateR2PoulesButtons();
       }
 
@@ -4204,11 +5473,20 @@
         const player = r2AvailablePlayers.find((p) => p.id === id);
         if (!player) return;
 
+        // afgemelde speler mag niet geselecteerd worden
+        if (player.withdrawR2) {
+          showR2PoulesFeedback(
+            "⚠️ Deze speler is afgemeld voor de 2e ronde en kan niet meer in een poule worden ingedeeld.",
+            "error"
+          );
+          return;
+        }
+
         r2SelectedPlayer = player;
 
         // highlight de geselecteerde rij
         if (rowEl) {
-          rowEl.style.background = "#cce5ff";
+          rowEl.style.background = "#ffeeba";
         }
 
         showR2PoulesFeedback(`🎯 Geselecteerd: ${player.naam}`, "info");
@@ -4245,10 +5523,190 @@
           });
         }
         r2SelectedPlayer = null;
+        // nieuwe poules = indeling nog niet opgeslagen
+        r2PoulesDirty = true;
         renderR2Poules();
         renderR2AvailablePlayers();
         showR2PoulesFeedback(`✅ ${n} poules aangemaakt.`, "success");
         updateR2PoulesButtons();
+      }
+
+      /* =========================================================
+         2E RONDE POULES – BASISINDELING (GELIJKMATIG, SLINGEREND)
+      ========================================================= */
+
+      function applyR2SnakeBaseLayout() {
+        if (!activeTournamentId) {
+          showR2PoulesFeedback("⚠️ Geen toernooi actief.", "error");
+          return;
+        }
+
+        const hasR2Poules =
+          Array.isArray(r2CurrentPoules) && r2CurrentPoules.length > 0;
+        if (!hasR2Poules) {
+          showR2PoulesFeedback(
+            "⚠️ Maak eerst 2e ronde poules aan voordat je een basisindeling kiest.",
+            "error"
+          );
+          return;
+        }
+
+        if (!Array.isArray(r2AllPlayers) || r2AllPlayers.length === 0) {
+          showR2PoulesFeedback(
+            "⚠️ Geen spelerslijst gevonden. Zorg dat de ranglijst van de 1e ronde beschikbaar is.",
+            "error"
+          );
+          return;
+        }
+
+        // Sorteer spelers op startRank (1 = sterkste / hoogste plaats 1e ronde)
+        // Let op: spelers die zich hebben afgemeld voor de 2e ronde worden hier uitgesloten.
+        const orderedPlayers = [...r2AllPlayers]
+          .filter((p) => !p.withdrawR2)
+          .sort((a, b) => (a.startRank || 9999) - (b.startRank || 9999));
+
+        // "Skelet" van poules voor de helper-functies
+        const pouleSkeleton = r2CurrentPoules.map((p) => ({
+          naam: p.naam,
+          maxSpelers: p.maxSpelers || 4,
+        }));
+
+        // Slingerend poule-indexpatroon (snake)
+        const seq = buildPouleIndexSequence(pouleSkeleton, true);
+
+        // Laat bestaande helper het echte toewijzen doen
+        const assignments = assignBySequence(
+          orderedPlayers,
+          pouleSkeleton,
+          seq
+        );
+
+        // Schrijf assignments terug naar r2CurrentPoules
+        r2CurrentPoules = r2CurrentPoules.map((p) => ({
+          ...p,
+          spelers: (assignments[p.naam] || []).map((sp) => ({ ...sp })),
+        }));
+
+        // Bepaal welke spelers nog beschikbaar zijn
+        const idsInPoules = new Set(
+          r2CurrentPoules.flatMap((p) => (p.spelers || []).map((sp) => sp.id))
+        );
+        r2AvailablePlayers = r2AllPlayers.filter(
+          (sp) => !idsInPoules.has(sp.id)
+        );
+        // basisindeling = indeling gewijzigd t.o.v. vorige opslag
+        r2PoulesDirty = true;
+        renderR2Poules();
+        renderR2AvailablePlayers();
+        updateR2PoulesButtons();
+        showR2PoulesFeedback(
+          "✅ Basisindeling voor de 2e ronde is toegepast (gelijkmatig, slingerend op basis van ranglijst).",
+          "success"
+        );
+      }
+
+      function openR2BaseLayoutDialog() {
+        // Niet toestaan als er al een wedstrijdschema is
+        const hasR2Schedule = Array.isArray(r2Matches) && r2Matches.length > 0;
+        if (hasR2Schedule) {
+          showR2PoulesFeedback(
+            "❌ Je kunt de basisindeling niet meer wijzigen omdat er al een wedstrijdschema voor de 2e ronde is aangemaakt.",
+            "error"
+          );
+          return;
+        }
+
+        const hasR2Poules =
+          Array.isArray(r2CurrentPoules) && r2CurrentPoules.length > 0;
+        if (!hasR2Poules) {
+          showR2PoulesFeedback(
+            "⚠️ Maak eerst 2e ronde poules aan voordat je een basisindeling kiest.",
+            "error"
+          );
+          return;
+        }
+
+        // Zijn er al spelers ingedeeld?
+        const alreadyAssigned =
+          hasR2Poules &&
+          r2CurrentPoules.some(
+            (p) => Array.isArray(p.spelers) && p.spelers.length > 0
+          );
+
+        if (alreadyAssigned) {
+          const ok = confirm(
+            "Er zijn al spelers over de poules verdeeld.\n\n" +
+              "Als je de basisindeling toepast, wordt de huidige indeling overschreven.\n\n" +
+              "Wil je doorgaan?"
+          );
+          if (!ok) return;
+        }
+
+        // Verwijder bestaande dialog (als die er is)
+        const existing = document.getElementById("r2BaseIndelingDialog");
+        if (existing) existing.remove();
+
+        const overlay = document.createElement("div");
+        overlay.id = "r2BaseIndelingDialog";
+        overlay.style.cssText = `
+          position:fixed;inset:0;z-index:2000;
+          background:rgba(0,0,0,0.4);
+          display:flex;align-items:center;justify-content:center;
+        `;
+
+        overlay.innerHTML = `
+          <div style="
+            background:#fff;
+            border-radius:10px;
+            padding:18px 20px;
+            max-width:520px;
+            width:90%;
+            box-shadow:0 6px 20px rgba(0,0,0,0.25);
+            font-size:0.95rem;
+          ">
+            <h3 style="margin-top:0;margin-bottom:10px;">
+              Basisindeling 2e ronde poules
+            </h3>
+            <p style="margin:0 0 8px;">
+              Voor de 2e ronde gebruiken we altijd de indeling
+              <strong>“Gelijkmatig – slingerend”</strong>.
+            </p>
+            <p style="margin:0 0 8px;">
+              De spelers worden op volgorde van hun ranglijst (1e ronde)
+              verdeeld over de poules: eerst van A naar D, daarna weer terug
+              van D naar A, dan opnieuw A naar D, enzovoort.
+              Dit wordt ook wel <em>slingerend indelen</em> genoemd.
+            </p>
+            <p style="margin:0 0 14px;font-size:0.9rem;color:#555;">
+              Voorbeeld bij vier poules: A – B – C – D – D – C – B – A – A – B – C – D – ...
+            </p>
+            <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px;">
+              <button type="button"
+                class="r2-base-cancel"
+                style="padding:6px 12px;border-radius:6px;border:1px solid #ccc;background:#f8f9fa;cursor:pointer;">
+                Annuleren
+              </button>
+              <button type="button"
+                class="r2-base-apply"
+                style="padding:6px 14px;border-radius:6px;border:1px solid #198754;background:#198754;color:white;cursor:pointer;font-weight:600;">
+                Indeling toepassen
+              </button>
+            </div>
+          </div>
+        `;
+
+        overlay
+          .querySelector(".r2-base-cancel")
+          .addEventListener("click", () => overlay.remove());
+
+        overlay
+          .querySelector(".r2-base-apply")
+          .addEventListener("click", () => {
+            overlay.remove();
+            applyR2SnakeBaseLayout();
+          });
+
+        document.body.appendChild(overlay);
       }
 
       /* =========================================================
@@ -4342,6 +5800,12 @@
         }
 
         // UI opnieuw tekenen
+        // indeling gewijzigd (speler verwijderd)
+        r2PoulesDirty = true;
+
+        // UI opnieuw tekenen
+        renderR2Poules();
+
         renderR2Poules();
         renderR2AvailablePlayers();
         showR2PoulesFeedback(
@@ -4377,6 +5841,8 @@
           (p) => p.id !== r2SelectedPlayer.id
         );
         r2SelectedPlayer = null;
+        // indeling gewijzigd (speler toegevoegd)
+        r2PoulesDirty = true;
         renderR2Poules();
         renderR2AvailablePlayers();
         showR2PoulesFeedback("✅ Speler toegevoegd aan poule.", "success");
@@ -4421,6 +5887,35 @@
         updateR2PoulesButtons();
       }
 
+      // Nieuw: afmelden / weer aanmelden voor de 2e ronde
+      async function setR2WithdrawStatus(spelerId, withdrawn) {
+        if (!activeTournamentId) return;
+
+        const spelerRef = doc(
+          db,
+          "toernooien",
+          activeTournamentId,
+          "spelers",
+          spelerId
+        );
+
+        // 1. Schrijf naar Firestore
+        await updateDoc(spelerRef, { withdrawR2: withdrawn });
+
+        // 2. Lokale caches bijwerken
+        const p = r2AllPlayers.find((x) => x.id === spelerId);
+        if (p) p.withdrawR2 = withdrawn;
+
+        const q = r2AvailablePlayers.find((x) => x.id === spelerId);
+        if (q) q.withdrawR2 = withdrawn;
+
+        // 3. Ook de globale spelerslijst bijwerken (currentPlayers)
+        if (Array.isArray(currentPlayers)) {
+          const r = currentPlayers.find((x) => x.id === spelerId);
+          if (r) r.withdrawR2 = withdrawn;
+        }
+      }
+
       async function saveR2PoulesToFirestore() {
         if (!activeTournamentId) {
           showR2PoulesFeedback("⚠️ Geen toernooi actief.", "error");
@@ -4445,6 +5940,9 @@
             spelers: p.spelers,
           });
         }
+
+        // na succesvol opslaan: indeling is niet meer "dirty"
+        r2PoulesDirty = false;
         showR2PoulesFeedback("💾 2e ronde poules opgeslagen.", "success");
         updateR2PoulesButtons();
       }
@@ -4455,10 +5953,21 @@
       async function clearR2Poules() {
         if (!confirm("Weet je zeker dat je alle 2e ronde poules wilt wissen?"))
           return;
+
+        // Lokale pouledata leegmaken
         r2CurrentPoules = [];
         r2SelectedPlayer = null;
+        r2PoulesDirty = false; // niets meer om op te slaan
+
         renderR2Poules();
+
+        // Ranglijst en beschikbare spelers opnieuw opbouwen
         await loadR2GlobalRanking(); // herset beschikbare spelers
+        if (typeof renderR2AvailablePlayers === "function") {
+          renderR2AvailablePlayers();
+        }
+
+        // Eventuele poules in Firestore verwijderen
         if (activeTournamentId) {
           const poulesRef = collection(
             db,
@@ -4469,6 +5978,7 @@
           const existing = await getDocs(poulesRef);
           for (const d of existing.docs) await deleteDoc(d.ref);
         }
+
         showR2PoulesFeedback("🗑️ Alle 2e ronde poules gewist.", "success");
         updateR2PoulesButtons();
       }
@@ -4489,6 +5999,9 @@
 
         // Tabel opnieuw tekenen met de nieuwe waarden
         renderR2AvailablePlayers();
+
+        // Na een volledige reset zijn ze óók weer netjes opgeslagen
+        r2CarambolesBulkSaved = true;
 
         showR2PoulesFeedback(
           "🔁 Alle 2e ronde caramboles zijn gereset naar de 1e ronde.",
@@ -4511,6 +6024,9 @@
           await saveCarambolesR2(speler.id, waarde);
         }
 
+        // Markeer dat er nu bewust een volledige opslag is gedaan
+        r2CarambolesBulkSaved = true;
+
         showR2PoulesFeedback(
           "💾 Alle 2e ronde caramboles zijn opgeslagen.",
           "success"
@@ -4524,6 +6040,10 @@
       document
         .getElementById("createR2PoulesBtn")
         .addEventListener("click", createR2Poules);
+
+      document
+        .getElementById("r2BaseLayoutBtn")
+        .addEventListener("click", openR2BaseLayoutDialog);
       document
         .getElementById("saveR2PoulesBtn")
         .addEventListener("click", saveR2PoulesToFirestore);
@@ -4538,31 +6058,51 @@
         .getElementById("resetCarambolesR2Btn")
         .addEventListener("click", resetAllCarambolesR2);
 
-      // Opslaan van carambolesR2 bij wijziging in de tabel
       document
         .getElementById("r2RankTableBody")
         .addEventListener("change", async (e) => {
-          if (!e.target.classList.contains("carambolesR2-input")) return;
-
-          const row = e.target.closest("tr");
+          const target = e.target;
+          const row = target.closest("tr");
           if (!row) return;
 
           const spelerId = row.dataset.id;
-          const nieuweWaarde = Number(e.target.value);
-          await saveCarambolesR2(spelerId, nieuweWaarde);
-          showR2PoulesFeedback("✅ Aangepast", "success");
-        });
+          if (!spelerId) return;
 
-      // Direct opslaan bij Enter-toets in de input
-      document
-        .getElementById("r2RankTableBody")
-        .addEventListener("keydown", async (e) => {
-          if (
-            e.key === "Enter" &&
-            e.target.classList.contains("carambolesR2-input")
-          ) {
-            e.preventDefault(); // voorkom submit/blur gedrag buiten onze controle
-            e.target.blur(); // triggert het change-event hierboven
+          // 1) wijziging caramboles 2e ronde
+          if (target.classList.contains("carambolesR2-input")) {
+            const nieuweWaarde = Number(target.value);
+            await saveCarambolesR2(spelerId, nieuweWaarde);
+            showR2PoulesFeedback(
+              "✅ Aantal caramboles 2e ronde aangepast.",
+              "success"
+            );
+            return;
+          }
+
+          // 2) wijziging afmeld-status (checkbox)
+          if (target.classList.contains("r2-withdraw-checkbox")) {
+            const withdrawn = target.checked; // aangevinkt = afgemeld
+
+            try {
+              await setR2WithdrawStatus(spelerId, withdrawn);
+              // ranglijst opnieuw tekenen zodat speler boven/onder de lijn komt
+              renderR2AvailablePlayers();
+              updateR2PoulesButtons();
+              showR2PoulesFeedback(
+                withdrawn
+                  ? "❌ Speler is afgemeld voor de 2e ronde en wordt niet meer automatisch ingedeeld."
+                  : "✅ Speler is weer aangemeld voor de 2e ronde.",
+                "success"
+              );
+            } catch (err) {
+              console.error(err);
+              // rollback checkbox
+              target.checked = !target.checked;
+              showR2PoulesFeedback(
+                "⚠️ Opslaan van de afmelding is mislukt.",
+                "error"
+              );
+            }
           }
         });
 
@@ -4571,31 +6111,36 @@
       // =============================================
       function updateR2PoulesButtons() {
         const createBtn = document.getElementById("createR2PoulesBtn");
+        const baseLayoutBtn = document.getElementById("r2BaseLayoutBtn");
         const saveBtn = document.getElementById("saveR2PoulesBtn");
         const clearBtn = document.getElementById("clearR2PoulesBtn");
         const resetCarBtn = document.getElementById("resetCarambolesR2Btn");
         const saveCarBtn = document.getElementById("saveCarambolesR2Btn");
 
-        if (!createBtn || !saveBtn || !clearBtn || !resetCarBtn || !saveCarBtn)
+        if (
+          !createBtn ||
+          !baseLayoutBtn ||
+          !saveBtn ||
+          !clearBtn ||
+          !resetCarBtn ||
+          !saveCarBtn
+        ) {
           return;
+        }
 
         const hasTournament = !!activeTournamentId;
 
-        // Poule-inhoud bestaat zodra r2CurrentPoules gevuld is
+        // Poules bestaan zodra r2CurrentPoules gevuld is
         const hasR2Poules =
           Array.isArray(r2CurrentPoules) && r2CurrentPoules.length > 0;
 
         // Wedstrijdschema 2e ronde bestaat zodra r2Matches bestaan
         const hasR2Schedule = Array.isArray(r2Matches) && r2Matches.length > 0;
 
-        // Caramboles 2e ronde opgeslagen?
-        // (we leiden dit af uit r2AllPlayers: iedereen heeft carambolesR2)
-        const carambolesSaved =
-          Array.isArray(r2AllPlayers) &&
-          r2AllPlayers.length > 0 &&
-          r2AllPlayers.every((p) => p.carambolesR2 != null);
+        // Caramboles 2e ronde bewust vastgelegd? (alleen via de knop / reset)
+        const carambolesSaved = !!r2CarambolesBulkSaved;
 
-        // Alle poules gevuld?
+        // Alle poules volledig gevuld?
         let allFilled = false;
         if (hasR2Poules) {
           allFilled = r2CurrentPoules.every(
@@ -4603,17 +6148,27 @@
           );
         }
 
-        // === Knopstatussen volgen jouw regels ===
+        // === Knopstatussen ===
 
         // 1) Poules aanmaken
         // actief als: géén poules + caramboles opgeslagen + géén wedstrijdschema
         createBtn.disabled =
           !hasTournament || hasR2Poules || !carambolesSaved || hasR2Schedule;
 
+        // 1b) Basisindeling kiezen
+        // actief als: poules bestaan + géén wedstrijdschema
+        baseLayoutBtn.disabled =
+          !hasTournament || !hasR2Poules || hasR2Schedule;
+
         // 2) Indeling opslaan
         // actief als: poules bestaan + alle poules gevuld + géén schema
+        // én er zijn niet-opgeslagen wijzigingen (r2PoulesDirty)
         saveBtn.disabled =
-          !hasTournament || !hasR2Poules || !allFilled || hasR2Schedule;
+          !hasTournament ||
+          !hasR2Poules ||
+          !allFilled ||
+          hasR2Schedule ||
+          !r2PoulesDirty;
 
         // 3) Alles wissen
         // actief als: poules bestaan + géén schema
@@ -4624,8 +6179,9 @@
         resetCarBtn.disabled = !hasTournament || hasR2Poules;
 
         // 5) Opslaan car. 2e ronde
-        // actief als: caramboles nog NIET zijn opgeslagen
-        saveCarBtn.disabled = !hasTournament || carambolesSaved;
+        // actief als: caramboles nog NIET zijn opgeslagen en er géén schema is
+        saveCarBtn.disabled =
+          !hasTournament || carambolesSaved || hasR2Schedule;
 
         // 6) Delete-knoppen achter spelers in poules deactiveren als schema bestaat
         document
@@ -4636,13 +6192,18 @@
             btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
           });
 
-        // Visuele indicatie
-        [createBtn, saveBtn, clearBtn, resetCarBtn, saveCarBtn].forEach(
-          (btn) => {
-            btn.style.opacity = btn.disabled ? "0.4" : "1";
-            btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
-          }
-        );
+        // Visuele indicatie voor de hoofdknoppen
+        [
+          createBtn,
+          baseLayoutBtn,
+          saveBtn,
+          clearBtn,
+          resetCarBtn,
+          saveCarBtn,
+        ].forEach((btn) => {
+          btn.style.opacity = btn.disabled ? "0.4" : "1";
+          btn.style.cursor = btn.disabled ? "not-allowed" : "pointer";
+        });
       }
 
       /* =========================================================
@@ -4666,10 +6227,19 @@
         if (!snap.empty) {
           // Firestore is leidend als er al opgeslagen poules zijn
           r2CurrentPoules = snap.docs.map((d) => d.data());
+          // toestand uit Firestore = niet dirty
+          r2PoulesDirty = false;
+        } else {
+          // Firestore leeg → houd lokale r2CurrentPoules zoals ze zijn
+          // Als er lokaal ook niets is, dan is er niets om op te slaan
+          if (!Array.isArray(r2CurrentPoules) || r2CurrentPoules.length === 0) {
+            r2PoulesDirty = false;
+          }
+          // Als er lokaal wél poules zijn, laat r2PoulesDirty ongemoeid
         }
-        // else: Firestore leeg → houd lokale r2CurrentPoules zoals ze zijn
 
         // 3) Ongeacht bron: haal alle spelers die al in een poule zitten uit available
+
         const idsInPoules = new Set(
           (r2CurrentPoules || []).flatMap((p) =>
             (p.spelers || []).map((sp) => sp.id)
@@ -4701,6 +6271,8 @@
       let r2Matches = [];
       let r2ToernooiSettings = {};
       let r2PoulesCache = [];
+      // ===== FINALE =====
+      let finaleCandidates = [];
 
       /* =========================================================
          2E RONDE RESULTATEN – UI HELPERS
@@ -4837,7 +6409,7 @@
         }
 
         // UI opnieuw opbouwen
-        await loadR2MatchesFromFirestore();
+        // await loadR2MatchesFromFirestore();
       }
 
       /* =========================================================
@@ -5006,19 +6578,24 @@
             html += `</div></div>`;
             wrapper.insertAdjacentHTML("beforeend", html);
 
-            // in/uitklappen – beginstatus: ingeklapt
+            // in/uitklappen – beginstatus: gebruik eerder gekozen open/dicht toestand
             const headerEl = document.getElementById(headerId);
             const bodyEl = document.getElementById(bodyId);
 
-            // bij initial render alles dicht
-            bodyEl.style.display = "none";
-            headerEl.style.borderRadius = "8px";
+            // beginstatus op basis van pouleOpenStateR2
+            if (wasOpen) {
+              bodyEl.style.display = "block";
+              headerEl.style.borderRadius = "8px 8px 0 0";
+            } else {
+              bodyEl.style.display = "none";
+              headerEl.style.borderRadius = "8px";
+            }
 
             headerEl.addEventListener("click", () => {
-              const hidden = bodyEl.style.display === "none";
-              bodyEl.style.display = hidden ? "block" : "none";
-              headerEl.style.borderRadius = hidden ? "8px 8px 0 0" : "8px";
-              pouleOpenStateR2[pouleNaam] = hidden; // onthouden
+              const nowOpen = bodyEl.style.display === "none";
+              bodyEl.style.display = nowOpen ? "block" : "none";
+              headerEl.style.borderRadius = nowOpen ? "8px 8px 0 0" : "8px";
+              pouleOpenStateR2[pouleNaam] = nowOpen; // onthouden
             });
 
             // factor-knop koppelen (voorkom dat de header inklapt)
@@ -5236,15 +6813,30 @@
           "r2_wedstrijden",
           matchId
         );
+
+        // 1) Updaten in Firestore
         await updateDoc(ref, update);
+
+        // 2) Lokale cache bijwerken
+        if (Array.isArray(r2Matches)) {
+          const idx = r2Matches.findIndex((m) => m.id === matchId);
+          if (idx !== -1) {
+            r2Matches[idx] = { ...r2Matches[idx], ...update };
+          }
+        }
+
+        // 3) UI verversen, maar open/dicht-status van poules behouden
         showR2PopupMessage("✅ Wedstrijd opgeslagen", false);
-        await loadR2MatchesFromFirestore();
+        renderR2Matches();
+        updateR2ResultsButtons();
       }
+
       async function resetR2MatchResult(matchId) {
         const ok = confirm(
           "Alleen de ingevoerde resultaten van deze wedstrijd verwijderen?"
         );
         if (!ok) return;
+
         const ref = doc(
           db,
           "toernooien",
@@ -5252,6 +6844,8 @@
           "r2_wedstrijden",
           matchId
         );
+
+        // 1) Firestore resetten
         await updateDoc(ref, {
           gemaakteX: null,
           gemaakteY: null,
@@ -5261,8 +6855,28 @@
           afgerond: false,
           resultaat: null,
         });
+
+        // 2) Lokale cache resetten
+        if (Array.isArray(r2Matches)) {
+          const idx = r2Matches.findIndex((m) => m.id === matchId);
+          if (idx !== -1) {
+            r2Matches[idx] = {
+              ...r2Matches[idx],
+              gemaakteX: null,
+              gemaakteY: null,
+              beurten: null,
+              puntenX: null,
+              puntenY: null,
+              afgerond: false,
+              resultaat: null,
+            };
+          }
+        }
+
+        // 3) UI verversen, maar open/dicht-status behouden
         showR2PopupMessage("🗑️ Uitslag verwijderd", false);
-        await loadR2MatchesFromFirestore();
+        renderR2Matches();
+        updateR2ResultsButtons();
       }
 
       /* =========================================================
