@@ -379,7 +379,8 @@
         white-space: nowrap;
       }
 
-      #bcr-toernooi-app #r1resultaten .actie-btn {
+      /*
+        #bcr-toernooi-app #r1resultaten .actie-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -389,7 +390,7 @@
         border-radius: 6px;
         background: #fff;
         cursor: pointer;
-        font-size: 1.3rem; /* groter icoon */
+        font-size: 1.3rem;
         line-height: 1;
         transition: all 0.2s ease;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
@@ -402,7 +403,7 @@
         transform: scale(0.96);
       }
 
-      /* kleurtjes per soort */
+    
       #bcr-toernooi-app #r1resultaten .actie-btn.save {
         color: #198754;
         border-color: #198754;
@@ -411,7 +412,7 @@
         color: #dc3545;
         border-color: #dc3545;
       }
-
+*/
       /* =========================================================
    VISUELE UPDATE: BASIS, HEADER, TABS, FORM & KNOPPEN
    (inspiratie: schapp-chat)
@@ -1664,187 +1665,273 @@
       <!-- ===== END TAB: SPELERS ===== -->
 
       <!-- ===== START TAB: 1E RONDE POULES ===== -->
+      <!-- ===== START TAB: 1E RONDE POULES ===== -->
       <div id="r1poules" class="tab-content">
-        <h3>1e Ronde – Poule-indeling</h3>
+        <!-- BLOK 1: KOP + INLEIDING + KNOPPEN -->
+        <div class="toernooi-block">
+          <div class="toernooi-block-header">
+            <h3>1e Ronde - poule-indeling</h3>
+          </div>
+          <div class="toernooi-block-body">
+            <div
+              id="noTournamentPoulesNotice"
+              class="tab-notice"
+              style="display: none"
+            >
+              ⚠️ Geen toernooi geselecteerd. Selecteer eerst een toernooi om
+              poules te beheren.
+            </div>
 
-        <div id="noTournamentPoulesNotice" style="display: none">
-          ⚠️ Geen toernooi geselecteerd. Selecteer eerst een toernooi om poules
-          te beheren.
+            <div id="poulesIntro" style="margin-bottom: 10px">
+              <p>
+                Hier kun je de spelers van het toernooi indelen in poules. Elke
+                poule heeft standaard 4 spelers (indien mogelijk). Klik op een
+                speler links en vervolgens op de poule waarin je deze wilt
+                plaatsen.
+              </p>
+            </div>
+
+            <div id="poulesControls" class="button-row">
+              <!-- 1: Poules aanmaken (witte knop) -->
+              <button
+                type="button"
+                id="createPoulesBtn"
+                class="btn btn-secondary"
+              >
+                <span class="btn-icon" aria-hidden="true">➕</span>
+                <span class="btn-label">Poules aanmaken</span>
+              </button>
+
+              <!-- 2: Basisindeling (witte knop) -->
+              <button
+                type="button"
+                id="baseLayoutBtn"
+                class="btn btn-secondary"
+                title="Kies een standaardindeling (willekeurig, op sterkte, gelijkmatig, enz.)"
+              >
+                <span class="btn-icon" aria-hidden="true">🧩</span>
+                <span class="btn-label">Kies basisindeling</span>
+              </button>
+
+              <!-- 3: Indeling opslaan (witte knop) -->
+              <button
+                type="button"
+                id="savePoulesBtn"
+                class="btn btn-secondary"
+              >
+                <span class="btn-icon" aria-hidden="true">💾</span>
+                <span class="btn-label">Indeling opslaan</span>
+              </button>
+
+              <!-- 4: Alles wissen (rode knop) -->
+              <button type="button" id="clearPoulesBtn" class="btn btn-delete">
+                <span class="btn-icon" aria-hidden="true">🗑️</span>
+                <span class="btn-label">Alles wissen</span>
+              </button>
+            </div>
+
+            <!-- Info over verdeling blijft inhoudelijk gelijk, alleen binnen dit blok -->
+            <div
+              id="poulesDistributionInfo"
+              style="
+                margin-top: 10px;
+                font-weight: 600;
+                color: #333;
+                background: #f8f9fa;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 8px 12px;
+                display: none;
+              "
+            ></div>
+          </div>
         </div>
 
-        <div id="poulesIntro" style="margin-bottom: 15px">
-          <p>
-            Hier kun je de spelers van het toernooi indelen in poules. Elke
-            poule heeft standaard 4 spelers (indien mogelijk). Klik op een
-            speler links en vervolgens op de poule waarin je deze wilt plaatsen.
-          </p>
-        </div>
-
-        <div id="poulesControls" class="button-row">
-          <button type="button" id="createPoulesBtn" class="btn btn-save">
-            ➕ Poules aanmaken
-          </button>
-          <button
-            type="button"
-            id="baseLayoutBtn"
-            class="btn btn-save"
-            title="Kies een standaardindeling (willekeurig, op sterkte, gelijkmatig, enz.)"
-          >
-            🧩 Kies basisindeling
-          </button>
-          <button type="button" id="savePoulesBtn" class="btn btn-lock">
-            💾 Indeling opslaan
-          </button>
-          <button type="button" id="clearPoulesBtn" class="btn btn-delete">
-            🗑️ Alles wissen
-          </button>
-        </div>
-
-        <!-- ✅ Info over verdeling -->
-        <div
-          id="poulesDistributionInfo"
-          style="
-            margin-top: 10px;
-            font-weight: 600;
-            color: #333;
-            background: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 8px 12px;
-            display: none;
-          "
-        ></div>
-
+        <!-- BLOK 2 + 3: BESCHIKBARE SPELERS / HUIDIGE POULES -->
         <div
           id="poulesContent"
-          style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px"
+          class="toernooi-block-row"
+          style="margin-top: 10px"
         >
-          <!-- Linkerkant: beschikbare spelers -->
-          <div style="flex: 1; min-width: 280px">
-            <h4>Beschikbare spelers</h4>
-            <div
-              id="availablePlayers"
-              class="list-box"
-              style="
-                border: 1px solid #ccc;
-                border-radius: 8px;
-                padding: 10px;
-                min-height: 250px;
-                background: #fafafa;
-              "
-            >
-              <p style="color: #777">Nog geen spelers geladen.</p>
+          <!-- BLOK 2: Beschikbare spelers (links) -->
+          <div class="toernooi-block" style="flex: 1">
+            <div class="toernooi-block-header">
+              <h3>Beschikbare spelers</h3>
+            </div>
+            <div class="toernooi-block-body">
+              <div
+                id="availablePlayers"
+                class="list-box"
+                style="
+                  border: 1px solid #ccc;
+                  border-radius: 8px;
+                  padding: 10px;
+                  min-height: 250px;
+                  background: #fafafa;
+                "
+              >
+                <p style="color: #777">Nog geen spelers geladen.</p>
+              </div>
             </div>
           </div>
-          <!-- Rechterkant: poules -->
-          <div style="flex: 2; min-width: 400px">
-            <h4>Huidige poules</h4>
-            <div
-              id="poulesContainer"
-              style="
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-                gap: 15px;
-              "
-            >
-              <!-- Poule-kaarten worden hier dynamisch toegevoegd -->
+
+          <!-- BLOK 3: Huidige poules (rechts) -->
+          <div class="toernooi-block" style="flex: 2">
+            <div class="toernooi-block-header">
+              <h3>Huidige poules</h3>
+            </div>
+            <div class="toernooi-block-body">
+              <div
+                id="poulesContainer"
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                  gap: 15px;
+                "
+              >
+                <!-- Poule-kaarten worden hier dynamisch toegevoegd -->
+              </div>
             </div>
           </div>
         </div>
 
-        <div id="poulesFeedback" style="margin-top: 15px"></div>
+        <!-- BLOK 4: BEHEER (Word-export + feedback) -->
+        <div class="toernooi-block" style="margin-top: 10px">
+          <div class="toernooi-block-header">
+            <h3>Beheer</h3>
+          </div>
+          <div class="toernooi-block-body">
+            <div
+              id="poulesExportRow"
+              class="button-row"
+              style="margin-top: 0; justify-content: flex-end"
+            >
+              <button
+                type="button"
+                id="exportPoulesWordBtn"
+                class="btn btn-secondary"
+                title="Poule-indeling van de 1e ronde opslaan als Word-bestand"
+              >
+                <span class="btn-icon" aria-hidden="true">⬇️</span>
+                <span class="btn-label">Poule-indeling opslaan (Word)</span>
+              </button>
+            </div>
 
-        <!-- Nieuw: export naar Word -->
-        <div
-          id="poulesExportRow"
-          class="button-row"
-          style="margin-top: 12px; justify-content: flex-end"
-        >
-          <button
-            type="button"
-            id="exportPoulesWordBtn"
-            class="btn btn-secondary"
-            title="Poule-indeling van de 1e ronde opslaan als Word-bestand"
-          >
-            <span class="btn-icon" aria-hidden="true">⬇️</span>
-            <span class="btn-label">Poule-indeling opslaan (Word)</span>
-          </button>
+            <div id="poulesFeedback" style="margin-top: 10px"></div>
+          </div>
         </div>
       </div>
+      <!-- ===== END TAB: 1E RONDE POULES ===== -->
+
       <!-- ===== END TAB: 1E RONDE POULES ===== -->
 
       <!-- ===== END TAB: 1E RONDE POULES ===== -->
 
       <!-- ===== START TAB: 1E RONDE RESULTATEN ===== -->
+      <!-- ===== START TAB: 1E RONDE RESULTATEN ===== -->
       <div id="r1resultaten" class="tab-content">
-        <h3>1e Ronde – Wedstrijden & Resultaten</h3>
+        <!-- BLOK 1: 1e ronde Wedstrijdschema -->
+        <div class="toernooi-block">
+          <div class="toernooi-block-header">
+            <h3>1e ronde Wedstrijdschema</h3>
+          </div>
+          <div class="toernooi-block-body">
+            <div id="noTournamentR1ResNotice" style="display: none">
+              ⚠️ Geen toernooi geselecteerd. Selecteer eerst een toernooi om
+              wedstrijden te beheren.
+            </div>
 
-        <div id="noTournamentR1ResNotice" style="display: none">
-          ⚠️ Geen toernooi geselecteerd. Selecteer eerst een toernooi om
-          wedstrijden te beheren.
+            <!-- Overzicht scoringsregels (ongewijzigde inhoud) -->
+            <div
+              id="r1ScoringOverview"
+              style="
+                margin-bottom: 15px;
+                font-weight: 500;
+                color: #333;
+                background: #f8f9fa;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 8px 12px;
+                display: none;
+              "
+            ></div>
+
+            <!-- Actieknoppen: wit + rood, met icon-spans -->
+            <div class="button-row" style="margin-bottom: 10px; gap: 8px">
+              <button
+                type="button"
+                id="createMatchesBtn"
+                class="btn btn-secondary"
+              >
+                <span class="btn-icon" aria-hidden="true">➕</span>
+                <span class="btn-label">Wedstrijdschema aanmaken</span>
+              </button>
+              <button
+                type="button"
+                id="deleteMatchesBtn"
+                class="btn btn-delete"
+              >
+                <span class="btn-icon" aria-hidden="true">🗑️</span>
+                <span class="btn-label">Wedstrijden wissen</span>
+              </button>
+            </div>
+
+            <!-- Algemeen voortgang (totaal gespeeld-informatie) -->
+            <div
+              id="r1OverallProgress"
+              style="
+                margin-bottom: 0;
+                font-weight: 600;
+                color: #333;
+                background: #f8f9fa;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 8px 12px;
+                display: none;
+              "
+            ></div>
+          </div>
         </div>
 
-        <!-- Overzicht scoringsregels -->
-        <div
-          id="r1ScoringOverview"
-          style="
-            margin-bottom: 15px;
-            font-weight: 500;
-            color: #333;
-            background: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 8px 12px;
-            display: none;
-          "
-        ></div>
-
-        <!-- Actieknoppen -->
-        <div class="button-row" style="margin-bottom: 15px">
-          <button type="button" id="createMatchesBtn" class="btn btn-save">
-            ➕ Wedstrijdschema aanmaken
-          </button>
-          <button type="button" id="deleteMatchesBtn" class="btn btn-delete">
-            🗑️ Wedstrijden wissen
-          </button>
+        <!-- BLOK 2: 1e Ronde Uitslagen -->
+        <div class="toernooi-block">
+          <div class="toernooi-block-header">
+            <h3>1e Ronde Uitslagen</h3>
+          </div>
+          <div class="toernooi-block-body">
+            <!-- Poule-blokken (inhoud ongewijzigd) -->
+            <div
+              id="r1matchesWrapper"
+              style="display: flex; flex-direction: column; gap: 16px"
+            ></div>
+          </div>
         </div>
 
-        <!-- Algemeen voortgang -->
-        <div
-          id="r1OverallProgress"
-          style="
-            margin-bottom: 15px;
-            font-weight: 600;
-            color: #333;
-            background: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 8px 12px;
-            display: none;
-          "
-        ></div>
-
-        <!-- Poule-blokken -->
-        <div
-          id="r1matchesWrapper"
-          style="display: flex; flex-direction: column; gap: 16px"
-        ></div>
-
-        <!-- Globale eindstand -->
-        <div
-          id="r1GlobalStandWrapper"
-          style="
-            margin-top: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 12px;
-            background: #fff;
-          "
-        >
-          <h4 style="margin-top: 0">Eindstand 1e ronde (alle poules)</h4>
-          <div id="r1GlobalStandTable" style="overflow-x: auto"></div>
+        <!-- BLOK 3: 1e Ronde Stand -->
+        <div class="toernooi-block">
+          <div class="toernooi-block-header">
+            <h3>1e Ronde Stand</h3>
+          </div>
+          <div class="toernooi-block-body">
+            <!-- Globale eindstand (inhoud ongewijzigd: wrapper + h4 + table) -->
+            <div
+              id="r1GlobalStandWrapper"
+              style="
+                margin-top: 0;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                padding: 12px;
+                background: #fff;
+              "
+            >
+              <h4 style="margin-top: 0">Eindstand 1e ronde (alle poules)</h4>
+              <div id="r1GlobalStandTable" style="overflow-x: auto"></div>
+            </div>
+          </div>
         </div>
       </div>
+      <!-- ===== END TAB: 1E RONDE RESULTATEN ===== -->
+
       <!-- ===== END TAB: 1E RONDE RESULTATEN ===== -->
 
       <!-- ===== BEGIN TAB: 2E RONDE POULES ===== -->
@@ -1964,7 +2051,19 @@
             </div>
           </div>
         </div>
-
+        <div
+          id="r2PoulesExportRow"
+          style="margin-top: 12px; display: flex; justify-content: flex-end"
+        >
+          <button
+            type="button"
+            id="exportR2PoulesWordBtn"
+            class="btn btn-secondary"
+            title="Exporteer de poule-indeling van de 2e ronde naar Word"
+          >
+            📄 Poule-indeling 2e ronde opslaan (Word)
+          </button>
+        </div>
         <div id="r2poulesFeedback" style="margin-top: 15px"></div>
       </div>
       <!-- ===== END TAB: 2E RONDE POULES ===== -->
@@ -4011,6 +4110,16 @@
         "noTournamentPoulesNotice"
       );
 
+      const exportR2PoulesWordBtn = document.getElementById(
+        "exportR2PoulesWordBtn"
+      );
+      if (exportR2PoulesWordBtn) {
+        exportR2PoulesWordBtn.addEventListener(
+          "click",
+          openExportR2PoulesWordDialog
+        );
+      }
+
       let currentPoules = []; // [{ naam, maxSpelers, spelers:[{id,naam,caramboles,...}] }, ...]
       let selectedPlayer = null; // spelerobject die is aangeklikt links
       let availablePlayers = []; // spelers die nog NIET in een poule zitten
@@ -5112,8 +5221,8 @@
             logoRun = new ImageRun({
               data: buf,
               transformation: {
-                width: 120,
-                height: 120,
+                width: 100,
+                height: 100,
               },
             });
           }
@@ -5145,7 +5254,7 @@
               }),
             ],
             alignment: AlignmentType.CENTER,
-            spacing: { after: 100 },
+            spacing: { after: 40 },
           })
         );
 
@@ -5403,6 +5512,370 @@
         return blob;
       }
 
+      // Bouwt een DOCX-blob met alle 2e ronde poules (2 naast elkaar) + kolom Telefoon
+      async function buildR2PoulesWordDocumentBlob() {
+        if (!window.docx) {
+          throw new Error("docx-library is niet geladen.");
+        }
+
+        const {
+          Document,
+          Packer,
+          Paragraph,
+          Table,
+          TableRow,
+          TableCell,
+          WidthType,
+          HeadingLevel,
+          AlignmentType,
+          ImageRun,
+          TextRun,
+          BorderStyle,
+        } = docx;
+
+        const noTableBorders = {
+          top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+          bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+          left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+          right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+          insideHorizontal: {
+            style: BorderStyle.NONE,
+            size: 0,
+            color: "FFFFFF",
+          },
+          insideVertical: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+        };
+
+        const nameEl = document.getElementById("tournamentName");
+        const yearEl = document.getElementById("tournamentYear");
+        const tName = (nameEl?.value || "").trim();
+        const tYear = (yearEl?.value || "").trim();
+
+        const poules = Array.isArray(r2CurrentPoules)
+          ? [...r2CurrentPoules]
+          : [];
+        if (!poules.length) {
+          throw new Error("Er zijn geen poules om te exporteren (2e ronde).");
+        }
+
+        poules.sort((a, b) => (a.naam || "").localeCompare(b.naam || ""));
+
+        let mainTitle = tName || "Biljarttoernooi";
+        if (tYear) {
+          mainTitle += ` ${tYear}`;
+        }
+
+        const doc = new Document({
+          creator: "BC Raalte 90",
+          title: mainTitle,
+          description: "Poule-indeling 2e ronde",
+          styles: {
+            default: {
+              document: {
+                run: {
+                  font: "Arial",
+                  size: 20, // 11pt
+                },
+                paragraph: {
+                  spacing: { after: 10 },
+                },
+              },
+            },
+          },
+          sections: [], // net als bij R1; addSection doen we later
+        });
+
+        // Probeer logo te laden
+        let logoRun = null;
+        try {
+          const logoUrl =
+            "https://hhweemink.github.io/biljart-toernooi/logobcr90-klein-vk.png";
+          const resp = await fetch(logoUrl);
+          if (resp.ok) {
+            const arrayBuf = await resp.arrayBuffer();
+            logoRun = new ImageRun({
+              data: arrayBuf,
+              transformation: { width: 100, height: 100 },
+            });
+          }
+        } catch (e) {
+          console.warn(
+            "Logo kon niet worden geladen voor Word-export (R2):",
+            e
+          );
+        }
+
+        const children = [];
+
+        // 1) Titel + subtitel gecentreerd
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: mainTitle,
+                bold: true,
+                size: 32,
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 10 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Indeling 2e ronde",
+                bold: true,
+                size: 26,
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 40 },
+          })
+        );
+
+        // 2) Logo links, tekstvak met border rechts
+        const headerLayoutTable = new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          borders: noTableBorders,
+          rows: [
+            new TableRow({
+              children: [
+                new TableCell({
+                  width: { size: 15, type: WidthType.PERCENTAGE },
+                  borders: noTableBorders,
+                  children: logoRun
+                    ? [
+                        new Paragraph({
+                          children: [logoRun],
+                          alignment: AlignmentType.LEFT,
+                        }),
+                      ]
+                    : [new Paragraph({ text: "" })],
+                }),
+                new TableCell({
+                  width: { size: 85, type: WidthType.PERCENTAGE },
+                  borders: {
+                    top: {
+                      style: BorderStyle.SINGLE,
+                      size: 6,
+                      color: "000000",
+                    },
+                    bottom: {
+                      style: BorderStyle.SINGLE,
+                      size: 6,
+                      color: "000000",
+                    },
+                    left: {
+                      style: BorderStyle.SINGLE,
+                      size: 6,
+                      color: "000000",
+                    },
+                    right: {
+                      style: BorderStyle.SINGLE,
+                      size: 6,
+                      color: "000000",
+                    },
+                  },
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: "[Hier kan de uitnodigingstekst / toelichting worden geplaatst.]",
+                          italics: true,
+                          size: 22,
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+
+        children.push(
+          headerLayoutTable,
+          new Paragraph({
+            text: "",
+            spacing: { after: 0 },
+          })
+        );
+
+        // 3) Poules: twee naast elkaar, vaste breedte, kleine tussenruimte
+        const poulesPerRow = 2;
+
+        for (let i = 0; i < poules.length; i += poulesPerRow) {
+          const groep = poules.slice(i, i + poulesPerRow);
+
+          const outerCells = groep.map((poule) => {
+            const spelers = Array.isArray(poule.spelers) ? poule.spelers : [];
+
+            // Kopregel binnen de poule: Nr, Naam, Telefoon, Car.
+            // Nr & Car smaller + gecentreerd
+            const headerCells = [
+              new TableCell({
+                width: { size: 8, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({
+                    children: [new TextRun({ text: "Nr", bold: true })],
+                    alignment: AlignmentType.CENTER,
+                  }),
+                ],
+                margins: { top: 20, bottom: 20, left: 120, right: 120 },
+              }),
+              new TableCell({
+                width: { size: 46, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({
+                    children: [new TextRun({ text: "Naam", bold: true })],
+                  }),
+                ],
+                margins: { top: 20, bottom: 20, left: 120, right: 120 },
+              }),
+              new TableCell({
+                width: { size: 34, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({
+                    children: [new TextRun({ text: "Telefoon", bold: true })],
+                  }),
+                ],
+                margins: { top: 20, bottom: 20, left: 120, right: 120 },
+              }),
+              new TableCell({
+                width: { size: 12, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({
+                    children: [new TextRun({ text: "Car.", bold: true })],
+                    alignment: AlignmentType.CENTER,
+                  }),
+                ],
+                margins: { top: 20, bottom: 20, left: 120, right: 120 },
+              }),
+            ];
+
+            // Spelersregels
+            const playerRows = spelers.map((speler, idx) => {
+              const nummer = (idx + 1).toString();
+              const naam = speler.naam || "";
+              const telefoon = speler.telefoon || "";
+              const car = (speler.carambolesR2 ?? "").toString();
+
+              return new TableRow({
+                children: [
+                  new TableCell({
+                    width: { size: 8, type: WidthType.PERCENTAGE },
+                    children: [
+                      new Paragraph({
+                        text: nummer,
+                        alignment: AlignmentType.CENTER,
+                      }),
+                    ],
+                    margins: { top: 20, bottom: 20, left: 120, right: 120 },
+                  }),
+                  new TableCell({
+                    width: { size: 46, type: WidthType.PERCENTAGE },
+                    children: [new Paragraph(naam)],
+                    margins: { top: 20, bottom: 20, left: 120, right: 120 },
+                  }),
+                  new TableCell({
+                    width: { size: 34, type: WidthType.PERCENTAGE },
+                    children: [new Paragraph(telefoon)],
+                    margins: { top: 20, bottom: 20, left: 120, right: 120 },
+                  }),
+                  new TableCell({
+                    width: { size: 12, type: WidthType.PERCENTAGE },
+                    children: [
+                      new Paragraph({
+                        text: car,
+                        alignment: AlignmentType.CENTER,
+                      }),
+                    ],
+                    margins: { top: 20, bottom: 20, left: 120, right: 120 },
+                  }),
+                ],
+              });
+            });
+
+            const innerTable = new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: [
+                new TableRow({
+                  tableHeader: true,
+                  children: headerCells,
+                }),
+                ...playerRows,
+              ],
+            });
+
+            // Cel voor één poule (vaste 50% breedte, kleine marge)
+            return new TableCell({
+              width: { size: 50, type: WidthType.PERCENTAGE }, // vaste breedte per poule
+              children: [
+                new Paragraph({
+                  text: poule.naam || "",
+                  heading: HeadingLevel.HEADING_3,
+                  spacing: { after: 10 },
+                }),
+                innerTable,
+              ],
+              margins: {
+                top: 120,
+                bottom: 120,
+                left: 120,
+                right: 120, // kleine "tussenruimte" tussen de twee poules
+              },
+            });
+          });
+
+          // Bij oneven aantal poules: lege rechtercel voor symmetrische layout
+          if (outerCells.length < poulesPerRow) {
+            outerCells.push(
+              new TableCell({
+                width: { size: 50, type: WidthType.PERCENTAGE },
+                children: [new Paragraph("")],
+              })
+            );
+          }
+
+          const outerTable = new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            borders: noTableBorders, // ← toevoegen
+            rows: [
+              new TableRow({
+                borders: noTableBorders, // ← toevoegen
+                children: outerCells.map(
+                  (cell) =>
+                    new TableCell({
+                      ...cell.options, // behoud originele inhoud
+                      borders: noTableBorders, // ← forceer borderless op cel
+                    })
+                ),
+              }),
+            ],
+          });
+
+          children.push(outerTable);
+        }
+
+        // Eén sectie met alle content, met smalle marges
+        doc.addSection({
+          properties: {
+            page: {
+              margin: {
+                top: 720, // 1,27 cm – Word "smal"
+                bottom: 720,
+                left: 720,
+                right: 720,
+              },
+            },
+          },
+          children,
+        });
+
+        const blob = await Packer.toBlob(doc);
+        return blob;
+      }
+
       // Dialoog + aanroepen van DOCX-export
       function openExportPoulesWordDialog() {
         if (!Array.isArray(currentPoules) || currentPoules.length === 0) {
@@ -5453,6 +5926,63 @@
             );
           }
         })();
+      }
+
+      async function openExportR2PoulesWordDialog() {
+        try {
+          if (!activeTournamentId) {
+            alert("Selecteer eerst een toernooi.");
+            return;
+          }
+
+          const hasPoules =
+            Array.isArray(r2CurrentPoules) &&
+            r2CurrentPoules.some(
+              (p) => Array.isArray(p.spelers) && p.spelers.length > 0
+            );
+
+          if (!hasPoules) {
+            alert("Er zijn nog geen poules voor de 2e ronde om te exporteren.");
+            return;
+          }
+
+          // Gebruik dezelfde bronnen als in de R1-export
+          const tName = (
+            document.getElementById("tournamentName")?.value || ""
+          ).trim();
+          const tYear = (
+            document.getElementById("tournamentYear")?.value || ""
+          ).trim();
+
+          let safeName =
+            tName
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "") // accenten weg
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/gi, "_")
+              .replace(/^_+|_+$/g, "") || "toernooi";
+
+          let yearPart = tYear || new Date().getFullYear();
+
+          // Bestandsnaam zoals bij R1, maar met R2
+          const defaultFileName = `poules_R2_${safeName}_${yearPart}.docx`;
+
+          const blob = await buildR2PoulesWordDocumentBlob();
+
+          await saveFileWithDialog(
+            blob,
+            defaultFileName,
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          );
+        } catch (err) {
+          console.error(
+            "Fout bij genereren of opslaan Word-document (2e ronde):",
+            err
+          );
+          alert(
+            "Er ging iets mis bij het genereren of opslaan van het Word-document (2e ronde). Zie de console voor details."
+          );
+        }
       }
 
       // ----- event listeners -----
@@ -6947,8 +7477,20 @@
                       <td style="padding:6px 4px;text-align:right"><input type="number" value="${b}" class="r1-input" data-field="beurten"   style="width:70px;text-align:right"></td>
                       <td style="padding:6px 4px;text-align:center;font-weight:600">${uitslag}</td>
                       <td style="padding:6px 4px;text-align:center">
-                        <button class="actie-btn save" data-action="save" title="Opslaan">💾</button>
-                        <button class="actie-btn reset" data-action="reset" title="Uitslag verwijderen">🗑️</button>
+                        <button
+                          class="actie-btn save btn btn-secondary btn-icon-only"
+                          data-action="save"
+                          title="Opslaan"
+                        >
+                          <span class="btn-icon" aria-hidden="true">💾</span>
+                        </button>
+                        <button
+                          class="actie-btn reset btn btn-delete btn-icon-only"
+                          data-action="reset"
+                          title="Uitslag verwijderen"
+                        >
+                          <span class="btn-icon" aria-hidden="true">🗑️</span>
+                        </button>
                       </td>
                     </tr>`;
             });
@@ -8557,6 +9099,28 @@
         const hasR2Poules =
           Array.isArray(r2CurrentPoules) && r2CurrentPoules.length > 0;
 
+        const exportR2WordBtn = document.getElementById(
+          "exportR2PoulesWordBtn"
+        );
+
+        // Export naar Word 2e ronde: actief als er een toernooi is en er poules met spelers zijn
+        if (exportR2WordBtn) {
+          const canExportWord =
+            hasTournament &&
+            hasR2Poules &&
+            r2CurrentPoules.some(
+              (p) => Array.isArray(p.spelers) && p.spelers.length > 0
+            );
+
+          exportR2WordBtn.disabled = !canExportWord;
+          exportR2WordBtn.style.opacity = exportR2WordBtn.disabled
+            ? "0.4"
+            : "1";
+          exportR2WordBtn.style.cursor = exportR2WordBtn.disabled
+            ? "not-allowed"
+            : "pointer";
+        }
+
         // Wedstrijdschema 2e ronde bestaat zodra r2Matches bestaan
         const hasR2Schedule = Array.isArray(r2Matches) && r2Matches.length > 0;
 
@@ -8994,8 +9558,20 @@
                       <td style="padding:6px 4px;text-align:right"><input type="number" value="${b}" class="r2-input" data-field="beurten" style="width:70px;text-align:right"></td>
                       <td style="padding:6px 4px;text-align:center;font-weight:600">${uitslag}</td>
                       <td style="padding:6px 4px;text-align:center">
-                        <button class="actie-btn save" data-action="save" title="Opslaan">💾</button>
-                        <button class="actie-btn reset" data-action="reset" title="Uitslag verwijderen">🗑️</button>
+                        <button
+                          class="actie-btn save btn btn-secondary btn-icon-only"
+                          data-action="save"
+                          title="Opslaan"
+                        >
+                          <span class="btn-icon" aria-hidden="true">💾</span>
+                        </button>
+                        <button
+                          class="actie-btn reset btn btn-delete btn-icon-only"
+                          data-action="reset"
+                          title="Uitslag verwijderen"
+                        >
+                          <span class="btn-icon" aria-hidden="true">🗑️</span>
+                        </button>
                       </td>
                     </tr>`;
             });
