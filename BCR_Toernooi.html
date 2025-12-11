@@ -22,10 +22,71 @@
       #bcr-toernooi-app header {
         background: #b30000;
         color: white;
-        text-align: center;
-        padding: 10px;
+        padding: 10px 12px;
         font-size: 1.4em;
         font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* Titel in het midden houden */
+      #bcr-toernooi-app header .header-title {
+        flex: 1;
+        text-align: center;
+      }
+
+      /* Smallere én hogere help-knop */
+      /* Help-knop: exact 60px breed, mooi hoog, en consistent met btn-secondary */
+      #bcr-toernooi-app .help-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center; /* centreren icoon + tekst */
+        gap: 4px;
+
+        width: 60px; /* 🔥 vaste breedte 60px */
+        min-width: 60px;
+        max-width: 60px;
+        overflow: hidden; /* dwingt breedte af */
+
+        height: 34px; /* mooie hoogte in de header */
+        padding: 4px 0; /* geen extra breedte toevoegen */
+        font-size: 0.75em;
+        border-radius: 6px;
+        white-space: nowrap; /* geen wrap van tekst */
+      }
+
+      #bcr-toernooi-app .help-btn {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      /* Klein rond “i”-icoon */
+      #bcr-toernooi-app .help-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 1px solid #444;
+
+        font-size: 0.75em;
+        font-weight: 600;
+        color: #444;
+        background: white;
+      }
+
+      #bcr-toernooi-app .help-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      /* Optioneel: iets meer ruimte in de helptekst */
+      #bcr-toernooi-app .help-body p {
+        margin: 0 0 8px;
       }
 
       #bcr-toernooi-app .active-tournament {
@@ -197,6 +258,11 @@
         transform: scale(0.97);
       }
 
+      /* Help-knop in header: bij klikken wél schalen, maar gecentreerd blijven */
+      #bcr-toernooi-app .help-btn:active {
+        transform: translateY(-50%) scale(0.97);
+      }
+
       /* Opslaan */
       #bcr-toernooi-app .btn-save {
         background-color: #007bff;
@@ -221,14 +287,14 @@
         background-color: #ff0019;
       }
 
-      /* Extra knoppen in spelers-tab */
+      /* Extra knoppen in spelers-tab
       #bcr-toernooi-app .btn-secondary {
         background-color: #6c757d;
       }
       #bcr-toernooi-app .btn-secondary:hover {
         background-color: #555d63;
       }
-
+*/
       #bcr-toernooi-app .btn-lock {
         background-color: #198754;
       }
@@ -600,13 +666,45 @@
         min-width: 120px;
       }
 
+      /* Help-knop mag smaller zijn dan standaardknoppen */
+      #bcr-toernooi-app .help-btn {
+        min-width: 80px !important;
+        width: 80px !important;
+        max-width: 80px !important;
+      }
+
+      /* Knoppen die alleen ter illustratie in de Info-tekst staan */
+      #bcr-toernooi-app .help-inline-btn,
+      #bcr-toernooi-app .help-inline-icon-btn {
+        pointer-events: none;
+        cursor: default;
+        opacity: 1; /* gewoon goed zichtbaar houden */
+        margin: 0 2px;
+      }
+
+      #bcr-toernooi-app .help-inline-btn {
+        font-size: 0.85rem;
+        padding: 3px 10px;
+      }
+
+      #bcr-toernooi-app .help-inline-icon-btn {
+        transform: scale(0.9);
+        vertical-align: middle;
+      }
+
       #bcr-toernooi-app .btn:hover {
         background: #7a0a00;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
       }
 
-      #bcr-toernooi-app .btn:active {
+      /* Alle knoppen behalve de help-knop klikken iets in */
+      #bcr-toernooi-app .btn:active:not(.help-btn) {
         transform: scale(0.97);
+      }
+
+      /* Help-knop: ingedrukt effect, maar gecentreerd blijven */
+      #bcr-toernooi-app .help-btn:active {
+        transform: translateY(-50%) scale(0.97);
       }
 
       /* Primair: opslaan / hoofdacties */
@@ -818,6 +916,10 @@
       #bcr-toernooi-app #noTournamentNotice {
         display: none !important;
       }
+      /* Titel van de Info-popup in accentkleur */
+      #bcr-toernooi-app #helpModalTitle {
+        color: var(--kleur-accent1);
+      }
 
       /* ===== Algemeen: modale pop-ups (speler bewerken e.d.) ===== */
 
@@ -958,8 +1060,18 @@
     </div>
 
     <div id="bcr-toernooi-app">
-      <header style="text-align: center">
-        Clubkampioenschappen BC Raalte 90
+      <header>
+        <button
+          type="button"
+          id="helpBtn"
+          class="btn btn-secondary help-btn"
+          title="Uitleg over dit tabblad"
+        >
+          <span class="help-icon">i</span>
+          Info
+        </button>
+
+        <div class="header-title">Clubkampioenschappen BC Raalte 90</div>
       </header>
 
       <div class="active-tournament no-tournament" id="activeTournamentBanner">
@@ -1269,214 +1381,15 @@
         </form>
       </div>
       <!-- ===== END TAB: TOERNOOI ===== -->
-
-      <!-- ===== START TAB: SPELERS ===== 
-      <div id="spelers" class="tab-content" style="position: relative">
-        <h3>Deelnemers</h3>
-
-        <div id="noTournamentNotice" style="display: none">
-          ⚠️ Geen toernooi geselecteerd. Selecteer eerst een toernooi om
-          deelnemers te beheren.
-        </div>
-
-        <form id="playerForm" class="form-grid">
-          <div>
-            <label>Naam speler</label>
-            <input type="text" id="playerName" required />
-          </div>
-          <div>
-            <label>E-mailadres</label>
-            <input type="text" id="playerEmail" />
-          </div>
-          <div>
-            <label>Telefoonnummer</label>
-            <input type="text" id="playerPhone" />
-          </div>
-          <div>
-            <label>Te maken caramboles (1e ronde)</label>
-            <input
-              type="number"
-              id="playerCaramboles"
-              min="0"
-              max="999"
-              class="small"
-            />
-          </div>
-          <div style="grid-column: 1/-1; text-align: right">
-            <button
-              type="submit"
-              class="btn btn-secondary"
-              id="addPlayerBtn"
-              style="min-width: 190px"
-            >
-              <span class="btn-icon" aria-hidden="true">➕</span>
-              <span class="btn-label">Speler toevoegen</span>
-            </button>
-          </div>
-        </form>
-
-        <div class="button-row">
-          <button type="button" id="sortByName" class="btn btn-secondary">
-            Sorteer op naam
-          </button>
-          <button type="button" id="sortByCaramboles" class="btn btn-secondary">
-            Sorteer op caramboles
-          </button>
-        </div>
-
-        <div
-          id="playerCount"
-          style="margin-top: 10px; font-weight: 600; color: #333"
-        >
-          Aantal deelnemers: 0
-        </div>
-        <div
-          id="playersFinalizedNotice"
-          style="
-            display: none;
-            background: #ca3535;
-            color: #ffffff;
-            border: 1px solid #ca3535;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            margin-top: 12px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          "
-        >
-          🔒 De spelerslijst is definitief. Alleen het wijzigen van het
-          e-mailadres en het telefoonnummer is mogelijk.
-        </div>
-        <div
-          id="playersTableContainer"
-          style="position: relative; margin-top: 10px"
-        >
-          <table
-            id="playerTable"
-            class="player-table"
-            style="width: 100%; border-collapse: collapse"
-          >
-            <thead>
-              <tr>
-                <th>Naam</th>
-                <th>E-mail</th>
-                <th>Telefoon</th>
-                <th>Caramboles</th>
-                <th style="text-align: center">Acties</th>
-              </tr>
-            </thead>
-            <tbody id="playerTableBody"></tbody>
-          </table>
-        -->
-      <!-- ✅ Overlay die verschijnt bij definitieve lijst 
-          <div
-            id="playersLockOverlay"
-            style="
-              display: none;
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 80%;
-              height: 100%;
-              background: rgba(240, 240, 240, 0.75);
-              backdrop-filter: blur(2px);
-              border-radius: 10px;
-              justify-content: center;
-              align-items: center;
-              font-size: 1.2em;
-              color: #555;
-              font-weight: 600;
-              pointer-events: none;
-            "
-          >
-            🔒 Spelerslijst is definitief
-          </div>
-        </div>
-
-        <div class="button-row" style="margin-top: 15px">
-          <button type="button" id="finalizePlayers" class="btn btn-secondary">
-            <span class="btn-icon" aria-hidden="true">🔒</span>
-            <span class="btn-label">Lijst definitief maken</span>
-          </button>
-          <button type="button" id="editPlayers" class="btn btn-secondary">
-            <span class="btn-icon" aria-hidden="true">🔓</span>
-            <span class="btn-label">Lijst bewerken</span>
-          </button>
-        </div>
-
-        <div id="playerFeedback"></div>
-      -->
-      <!-- ✅ Popup voor wijzigen van speler 
-        <div
-          id="editPlayerModal"
-          style="
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-          "
-        >
-          <div
-            style="
-              background: #fff;
-              padding: 20px;
-              border-radius: 10px;
-              width: 320px;
-              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            "
-          >
-            <h4 style="margin-top: 0">Speler wijzigen</h4>
-            <form id="editPlayerForm" class="form-grid">
-              <div>
-                <label>Naam</label>
-                <input type="text" id="editName" required />
-              </div>
-              <div>
-                <label>E-mail</label>
-                <input type="text" id="editEmail" />
-              </div>
-              <div>
-                <label>Telefoon</label>
-                <input type="text" id="editPhone" />
-              </div>
-              <div>
-                <label>Caramboles</label>
-                <input
-                  type="number"
-                  id="editCaramboles"
-                  min="0"
-                  max="999"
-                  class="small"
-                />
-              </div>
-              <div class="button-row" style="margin-top: 15px">
-                <button type="submit" class="btn btn-save">Opslaan</button>
-                <button type="button" id="cancelEdit" class="btn btn-delete">
-                  Annuleren
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    -->
-      <!-- ===== END TAB: SPELERS ===== -->
-
-      <!-- ===== START TAB: SPELERS ===== -->
+      <div id="spelers" class="tab-content">
+        <!-- ===== START TAB: SPELERS ===== -->
+        <!--
       <div
         id="spelers"
         class="tab-content spelers-tab"
         style="position: relative"
       >
+      -->
         <!-- BLOK 1: NIEUWE DEELNEMER -->
         <div class="toernooi-block spelers-form-block">
           <div class="toernooi-block-header">
@@ -1686,6 +1599,25 @@
         </div>
       </div>
       <!-- ===== END TAB: SPELERS ===== -->
+
+      <!-- HELP MODAL: helptekst per tabblad -->
+      <div id="helpModal" class="modal">
+        <div class="modal-content">
+          <h3 id="helpModalTitle">Help</h3>
+          <div id="helpModalBody" class="help-body">
+            <p>Dit is een (fake) helptekst.</p>
+          </div>
+          <div style="text-align: right; margin-top: 12px">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="helpModalCloseBtn"
+            >
+              Sluiten
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- ===== START TAB: 1E RONDE POULES ===== -->
       <!-- ===== START TAB: 1E RONDE POULES ===== -->
@@ -2773,6 +2705,7 @@
                                                        GLOBALE STATE VOOR ACTIEF TOERNOOI
                                                        ========================================================= */
       let activeTournamentId = null; // bv. "OpenKampioenschap_2025"
+      let activeTabId = "toernooi"; // ✅ nieuw: onthoud welk tabblad actief is
       const pouleOpenState = {}; // 1e ronde: poule-naam → boolean
       const pouleOpenStateR2 = {}; // 2e ronde: poule-naam → boolean
       let playersFinalized = false; // of de spelerslijst op slot staat
@@ -2780,6 +2713,95 @@
 
       // ✅ TOEVOEGEN: Status of er al poules zijn aangemaakt in ronde 1
       let r1PoulesExist = false;
+
+      const tabHelpTexts = {
+        toernooi: {
+          title: "Help – tabblad Toernooigegevens",
+          body: `
+      <p>Deze (fake) helptekst hoort bij het tabblad <strong>Toernooigegevens</strong>.</p>
+      <p>Hier beheer je de algemene gegevens van het toernooi, zoals naam, datum en locatie.</p>
+    `,
+        },
+        spelers: {
+          title: "Info – tabblad Spelers",
+          body: `
+            <p>
+              Op dit tabblad leg je de deelnemers aan het toernooi vast. Voer de gegevens van de deelnemer in en klik op de knop
+              <button type="button" class="btn btn-secondary help-inline-btn">
+                <span class="btn-icon" aria-hidden="true">➕</span>
+                <span class="btn-label">Speler toevoegen</span>
+              </button>.
+              De speler wordt dan toegevoegd aan de deelnemerslijst.
+            </p>
+
+            <p>
+              Als alle deelnemers zijn ingevoerd, klik dan op de knop
+              <button type="button" class="btn btn-secondary help-inline-btn">
+                <span class="btn-label">Lijst definitief maken</span>
+              </button>.
+              Mocht je toch nog iets willen wijzigen, maak dan de lijst weer beschikbaar met de knop
+              <button type="button" class="btn btn-secondary help-inline-btn">
+                <span class="btn-label">Lijst bewerken</span>
+              </button>.
+              Let op: als er poules voor de 1e ronde zijn opgeslagen, kun je de lijst niet meer bewerken. Je kunt dan alleen het e-mailadres of het telefoonnummer van een deelnemer wijzigen.
+            </p>
+
+            <p>
+              Als je de gegevens van een speler op de deelnemerslijst wilt wijzigen, klik dan op de knop
+              <button type="button" class="btn btn-secondary btn-icon-only help-inline-icon-btn">
+                <span class="btn-icon" aria-hidden="true">✏️</span>
+              </button>
+              achter de naam van de speler. Wil je een speler van de deelnemerslijst verwijderen, klik dan op de rode knop
+              <button type="button" class="btn btn-delete btn-icon-only help-inline-icon-btn">
+                <span class="btn-icon" aria-hidden="true">🗑️</span>
+              </button>.
+            </p>
+          `,
+        },
+
+        r1poules: {
+          title: "Help – tabblad 1e ronde poules",
+          body: `
+      <p>Deze (fake) helptekst hoort bij het tabblad <strong>1e ronde poules</strong>.</p>
+      <p>Hier maak je de poule-indeling voor de eerste ronde en exporteer je evt. pouleoverzichten.</p>
+    `,
+        },
+        r1resultaten: {
+          title: "Help – tabblad 1e ronde resultaten",
+          body: `
+      <p>Deze (fake) helptekst hoort bij het tabblad <strong>1e ronde resultaten</strong>.</p>
+      <p>Hier registreer je uitslagen van de eerste ronde en bekijk je de tussenstanden.</p>
+    `,
+        },
+        r2poules: {
+          title: "Help – tabblad 2e ronde poules",
+          body: `
+      <p>Deze (fake) helptekst hoort bij het tabblad <strong>2e ronde poules</strong>.</p>
+      <p>Hier beheer je de poule-indeling van de tweede ronde op basis van de resultaten uit ronde 1.</p>
+    `,
+        },
+        r2resultaten: {
+          title: "Help – tabblad 2e ronde resultaten",
+          body: `
+      <p>Deze (fake) helptekst hoort bij het tabblad <strong>2e ronde resultaten</strong>.</p>
+      <p>Hier registreer je uitslagen van de tweede ronde en bekijk je de bijgewerkte standen.</p>
+    `,
+        },
+        finale: {
+          title: "Help – tabblad Finale",
+          body: `
+      <p>Deze (fake) helptekst hoort bij het tabblad <strong>Finale</strong>.</p>
+      <p>Hier leg je de finalewedstrijden vast en de definitieve einduitslag.</p>
+    `,
+        },
+        admin: {
+          title: "Help – tabblad Admin",
+          body: `
+      <p>Deze (fake) helptekst hoort bij het tabblad <strong>Admin</strong>.</p>
+      <p>Hier beheer je gebruikers, rechten en koppel je toernooien aan gebruikers.</p>
+    `,
+        },
+      };
 
       /* =========================================================
          SIMPELE LOGIN / AUTH STATE
@@ -3275,6 +3297,7 @@
             btn.classList.add("active");
             const pane = document.getElementById(btn.dataset.tab);
             pane.classList.add("active");
+            activeTabId = btn.dataset.tab; // ✅ nieuw: onthoud het actieve tabblad
 
             // Speciale regel: als je naar "spelers" gaat -> check of er een toernooi actief is
             if (btn.dataset.tab === "spelers") {
@@ -3888,18 +3911,8 @@
         if (playerForm) {
           [...playerForm.querySelectorAll("input,button")].forEach((el) => {
             if (el.id === "addPlayerBtn") {
-              // Speler toevoegen mag NIET als: geen toernooi OF lijst definitief OF er al poules zijn
               const blockAdd = disabled || playersFinalized || hasPoules;
               el.disabled = blockAdd;
-              if (blockAdd) {
-                el.style.backgroundColor = "#ccc";
-                el.style.cursor = "not-allowed";
-                el.style.opacity = "0.7";
-              } else {
-                el.style.backgroundColor = "";
-                el.style.cursor = "pointer";
-                el.style.opacity = "1";
-              }
             } else {
               // overige velden alleen blokkeren als er nog geen toernooi is
               el.disabled = disabled;
@@ -7253,6 +7266,54 @@
       if (finaleClearBtn) {
         finaleClearBtn.addEventListener("click", async () => {
           await resetFinaleAll();
+        });
+      }
+
+      /* =========================================================
+   HELP-KNOP / HELP-MODAL
+   ========================================================= */
+      const helpBtn = document.getElementById("helpBtn");
+      const helpModal = document.getElementById("helpModal");
+      const helpModalTitle = document.getElementById("helpModalTitle");
+      const helpModalBody = document.getElementById("helpModalBody");
+      const helpModalCloseBtn = document.getElementById("helpModalCloseBtn");
+
+      function openHelpModal() {
+        const cfg = tabHelpTexts[activeTabId] || tabHelpTexts.toernooi;
+
+        helpModalTitle.textContent = cfg.title;
+        // body als HTML zodat we <p> etc. kunnen gebruiken
+        helpModalBody.innerHTML = cfg.body;
+
+        helpModal.style.display = "flex";
+      }
+
+      function closeHelpModal() {
+        helpModal.style.display = "none";
+      }
+
+      if (
+        helpBtn &&
+        helpModal &&
+        helpModalTitle &&
+        helpModalBody &&
+        helpModalCloseBtn
+      ) {
+        helpBtn.addEventListener("click", openHelpModal);
+        helpModalCloseBtn.addEventListener("click", closeHelpModal);
+
+        // Klik naast de content sluit ook de modal
+        helpModal.addEventListener("click", (evt) => {
+          if (evt.target === helpModal) {
+            closeHelpModal();
+          }
+        });
+
+        // Optioneel: Escape sluit de modal
+        document.addEventListener("keydown", (evt) => {
+          if (evt.key === "Escape" && helpModal.style.display === "flex") {
+            closeHelpModal();
+          }
         });
       }
 
