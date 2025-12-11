@@ -887,6 +887,29 @@
       #bcr-toernooi-app table.player-table td.num {
         text-align: center !important;
       }
+
+      /* Finale-eindstand: inputs iets compacter en zonder spinners */
+      #bcr-toernooi-app #finaleResultsBody input[type="number"] {
+        font-size: 0.85rem;
+        padding: 2px 3px;
+        box-sizing: border-box;
+      }
+
+      /* Nummer-spinners verbergen (Chrome/Edge) */
+      #bcr-toernooi-app
+        #finaleResultsBody
+        input[type="number"]::-webkit-outer-spin-button,
+      #bcr-toernooi-app
+        #finaleResultsBody
+        input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      /* Nummer-spinners verbergen (Firefox) */
+      #bcr-toernooi-app #finaleResultsBody input[type="number"] {
+        -moz-appearance: textfield;
+      }
     </style>
   </head>
 
@@ -1935,67 +1958,111 @@
       <!-- ===== END TAB: 1E RONDE RESULTATEN ===== -->
 
       <!-- ===== BEGIN TAB: 2E RONDE POULES ===== -->
+      <!-- ===== BEGIN TAB: 2E RONDE POULES ===== -->
       <div id="r2poules" class="tab-content">
-        <h3>2e Ronde – Poule-indeling</h3>
+        <!-- BLOK 1: 2e Ronde - Poule-indeling -->
+        <div class="toernooi-block">
+          <div class="toernooi-block-header">
+            <h3>2e Ronde - Poule-indeling</h3>
+          </div>
+          <div class="toernooi-block-body">
+            <div
+              id="noTournamentR2PoulesNotice"
+              class="tab-notice"
+              style="display: none"
+            >
+              ⚠️ Geen toernooi geselecteerd. Selecteer eerst een toernooi om
+              poules te beheren.
+            </div>
 
-        <div id="noTournamentR2PoulesNotice" style="display: none">
-          ⚠️ Geen toernooi geselecteerd. Selecteer eerst een toernooi om poules
-          te beheren.
+            <div id="r2poulesIntro" style="margin-bottom: 10px">
+              <p>
+                Links vind je de globale eindstand van de 1e ronde. Klik op een
+                speler en vervolgens op een poule om deze toe te voegen.
+              </p>
+            </div>
+
+            <div id="r2poulesControls" class="button-row">
+              <!-- 1: Poules aanmaken (wit) -->
+              <button
+                type="button"
+                id="createR2PoulesBtn"
+                class="btn btn-secondary"
+              >
+                <span class="btn-icon" aria-hidden="true">➕</span>
+                <span class="btn-label">Poules aanmaken</span>
+              </button>
+
+              <!-- 2: Basisindeling (wit) -->
+              <button
+                type="button"
+                id="r2BaseLayoutBtn"
+                class="btn btn-secondary"
+                title="Kies de standaardindeling (gelijkmatig, slingerend, op basis van ranglijst)"
+              >
+                <span class="btn-icon" aria-hidden="true">🧩</span>
+                <span class="btn-label">Kies basisindeling</span>
+              </button>
+
+              <!-- 3: Indeling opslaan (wit) -->
+              <button
+                type="button"
+                id="saveR2PoulesBtn"
+                class="btn btn-secondary"
+              >
+                <span class="btn-icon" aria-hidden="true">💾</span>
+                <span class="btn-label">Indeling opslaan</span>
+              </button>
+
+              <!-- 4: Alles wissen (rood) -->
+              <button
+                type="button"
+                id="clearR2PoulesBtn"
+                class="btn btn-delete"
+              >
+                <span class="btn-icon" aria-hidden="true">🗑️</span>
+                <span class="btn-label">Alles wissen</span>
+              </button>
+
+              <!-- 5: Update 2e ronde caramboles (wit) -->
+              <button
+                type="button"
+                id="resetCarambolesR2Btn"
+                class="btn btn-secondary"
+              >
+                <span class="btn-icon" aria-hidden="true">♻️</span>
+                <span class="btn-label">Update 2e ronde caramboles</span>
+              </button>
+            </div>
+
+            <div
+              id="r2poulesDistributionInfo"
+              style="
+                margin-top: 10px;
+                font-weight: 600;
+                color: #333;
+                background: #f8f9fa;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 8px 12px;
+                display: none;
+              "
+            ></div>
+          </div>
         </div>
 
-        <div id="r2poulesIntro" style="margin-bottom: 15px">
-          <p>
-            Links vind je de globale eindstand van de 1e ronde. Klik op een
-            speler en vervolgens op een poule om deze toe te voegen.
-          </p>
-        </div>
-
-        <div id="r2poulesControls" class="button-row">
-          <button type="button" id="createR2PoulesBtn" class="btn btn-save">
-            ➕ Poules aanmaken
-          </button>
-          <button
-            type="button"
-            id="r2BaseLayoutBtn"
-            class="btn btn-save"
-            title="Kies de standaardindeling (gelijkmatig, slingerend, op basis van ranglijst)"
-          >
-            🧩 Kies basisindeling
-          </button>
-          <button type="button" id="saveR2PoulesBtn" class="btn btn-lock">
-            💾 Indeling opslaan
-          </button>
-          <button type="button" id="clearR2PoulesBtn" class="btn btn-delete">
-            🗑️ Alles wissen
-          </button>
-          <button type="button" id="resetCarambolesR2Btn" class="btn btn-save">
-            Update 2e ronde caramboles
-          </button>
-        </div>
-
-        <div
-          id="r2poulesDistributionInfo"
-          style="
-            margin-top: 10px;
-            font-weight: 600;
-            color: #333;
-            background: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 8px 12px;
-            display: none;
-          "
-        ></div>
-
+        <!-- BLOK 2 + 3: Ranglijst 1e ronde / Huidige poules -->
         <div
           id="r2poulesContent"
-          style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px"
+          class="toernooi-block-row"
+          style="margin-top: 10px"
         >
-          <!-- Linkerkant: ranglijst 1e ronde -->
-          <div style="flex: 1; min-width: 280px">
-            <!-- ===== 2E RONDE POULES – LINKERKANT: RANGLIJST 1E RONDE ===== -->
-            <div style="flex: 1; min-width: 280px">
-              <h4>Ranglijst 1e ronde</h4>
+          <!-- BLOK 2: Ranglijst 1e ronde (links) -->
+          <div class="toernooi-block" style="flex: 1; min-width: 280px">
+            <div class="toernooi-block-header">
+              <h3>Ranglijst 1e ronde</h3>
+            </div>
+            <div class="toernooi-block-body">
               <table
                 id="r2RankTable"
                 style="width: 100%; border-collapse: collapse; font-size: 0.9em"
@@ -2023,128 +2090,185 @@
 
                 <tbody id="r2RankTableBody"></tbody>
               </table>
-              <!-- Nieuwe knop onder de tabel -->
+
+              <!-- Knop onder de tabel: opslaan car. 2e ronde (wit) -->
               <div style="margin-top: 8px">
                 <button
                   type="button"
                   id="saveCarambolesR2Btn"
-                  class="btn btn-save"
+                  class="btn btn-secondary"
                 >
-                  💾 Opslaan car. 2e ronde
+                  <span class="btn-icon" aria-hidden="true">💾</span>
+                  <span class="btn-label">Opslaan car. 2e ronde</span>
                 </button>
               </div>
             </div>
           </div>
 
-          <!-- Rechterkant: poules -->
-          <div style="flex: 2; min-width: 400px">
-            <h4>Huidige poules</h4>
-            <div
-              id="r2PoulesContainer"
-              style="
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-                gap: 15px;
-              "
-            >
-              <!-- Poule-kaarten komen hier -->
+          <!-- BLOK 3: Huidige poules (rechts) -->
+          <div class="toernooi-block" style="flex: 2; min-width: 400px">
+            <div class="toernooi-block-header">
+              <h3>Huidige poules</h3>
+            </div>
+            <div class="toernooi-block-body">
+              <div
+                id="r2PoulesContainer"
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                  gap: 15px;
+                "
+              >
+                <!-- Poule-kaarten komen hier -->
+              </div>
             </div>
           </div>
         </div>
-        <div
-          id="r2PoulesExportRow"
-          style="margin-top: 12px; display: flex; justify-content: flex-end"
-        >
-          <button
-            type="button"
-            id="exportR2PoulesWordBtn"
-            class="btn btn-secondary"
-            title="Exporteer de poule-indeling van de 2e ronde naar Word"
-          >
-            📄 Poule-indeling 2e ronde opslaan (Word)
-          </button>
+
+        <!-- BLOK 4: Beheer (Word-export + feedback) -->
+        <div class="toernooi-block" style="margin-top: 10px">
+          <div class="toernooi-block-header">
+            <h3>Beheer</h3>
+          </div>
+          <div class="toernooi-block-body">
+            <div
+              id="r2PoulesExportRow"
+              class="button-row"
+              style="margin-top: 0; justify-content: flex-end"
+            >
+              <button
+                type="button"
+                id="exportR2PoulesWordBtn"
+                class="btn btn-secondary"
+                title="Exporteer de poule-indeling van de 2e ronde naar Word"
+              >
+                <span class="btn-icon" aria-hidden="true">⬇️</span>
+                <span class="btn-label"
+                  >Poule-indeling 2e ronde opslaan (Word)</span
+                >
+              </button>
+            </div>
+
+            <div id="r2poulesFeedback" style="margin-top: 10px"></div>
+          </div>
         </div>
-        <div id="r2poulesFeedback" style="margin-top: 15px"></div>
       </div>
       <!-- ===== END TAB: 2E RONDE POULES ===== -->
 
+      <!-- ===== END TAB: 2E RONDE POULES ===== -->
+
+      <!-- ===== BEGIN TAB: 2E RONDE RESULTATEN ===== -->
       <!-- ===== BEGIN TAB: 2E RONDE RESULTATEN ===== -->
       <div id="r2resultaten" class="tab-content">
-        <h3>2e Ronde – Wedstrijden & Resultaten</h3>
+        <!-- BLOK 1: 2e ronde Wedstrijdschema -->
+        <div class="toernooi-block">
+          <div class="toernooi-block-header">
+            <h3>2e ronde Wedstrijdschema</h3>
+          </div>
+          <div class="toernooi-block-body">
+            <div
+              id="noTournamentR2ResNotice"
+              class="tab-notice"
+              style="display: none"
+            >
+              ⚠️ Geen toernooi geselecteerd. Selecteer eerst een toernooi om
+              wedstrijden te beheren.
+            </div>
 
-        <div id="noTournamentR2ResNotice" style="display: none">
-          ⚠️ Geen toernooi geselecteerd. Selecteer eerst een toernooi om
-          wedstrijden te beheren.
+            <!-- Overzicht scoringsregels -->
+            <div
+              id="r2ScoringOverview"
+              style="
+                margin-bottom: 15px;
+                font-weight: 500;
+                color: #333;
+                background: #f8f9fa;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 8px 12px;
+                display: none;
+              "
+            ></div>
+
+            <!-- Actieknoppen -->
+            <div class="button-row" style="margin-bottom: 10px; gap: 8px">
+              <button
+                type="button"
+                id="createR2MatchesBtn"
+                class="btn btn-secondary"
+              >
+                <span class="btn-icon" aria-hidden="true">➕</span>
+                <span class="btn-label">Wedstrijdschema aanmaken</span>
+              </button>
+              <button
+                type="button"
+                id="deleteR2MatchesBtn"
+                class="btn btn-delete"
+              >
+                <span class="btn-icon" aria-hidden="true">🗑️</span>
+                <span class="btn-label">Wedstrijden wissen</span>
+              </button>
+            </div>
+
+            <!-- Algemeen voortgang (totaal gespeeld) -->
+            <div
+              id="r2OverallProgress"
+              style="
+                margin-bottom: 0;
+                font-weight: 600;
+                color: #333;
+                background: #f8f9fa;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                padding: 8px 12px;
+                display: none;
+              "
+            ></div>
+          </div>
         </div>
 
-        <!-- Overzicht scoringsregels -->
-        <div
-          id="r2ScoringOverview"
-          style="
-            margin-bottom: 15px;
-            font-weight: 500;
-            color: #333;
-            background: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 8px 12px;
-            display: none;
-          "
-        ></div>
-
-        <!-- Actieknoppen -->
-        <div class="button-row" style="margin-bottom: 15px">
-          <button type="button" id="createR2MatchesBtn" class="btn btn-save">
-            ➕ Wedstrijdschema aanmaken
-          </button>
-          <button type="button" id="deleteR2MatchesBtn" class="btn btn-delete">
-            🗑️ Wedstrijden wissen
-          </button>
+        <!-- BLOK 2: 2e Ronde Uitslagen -->
+        <div class="toernooi-block">
+          <div class="toernooi-block-header">
+            <h3>2e Ronde Uitslagen</h3>
+          </div>
+          <div class="toernooi-block-body">
+            <div
+              id="r2matchesWrapper"
+              style="display: flex; flex-direction: column; gap: 16px"
+            ></div>
+          </div>
         </div>
 
-        <!-- Algemeen voortgang -->
-        <div
-          id="r2OverallProgress"
-          style="
-            margin-bottom: 15px;
-            font-weight: 600;
-            color: #333;
-            background: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 8px 12px;
-            display: none;
-          "
-        ></div>
-
-        <!-- Poule-blokken -->
-        <div
-          id="r2matchesWrapper"
-          style="display: flex; flex-direction: column; gap: 16px"
-        ></div>
-
-        <!-- Globale eindstand -->
-        <div
-          style="
-            margin-top: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 12px;
-            background: #fff;
-          "
-        >
-          <h4 style="margin-top: 0">Eindstand 2e ronde (alle poules)</h4>
-          <div id="r2GlobalStandTable" style="overflow-x: auto"></div>
+        <!-- BLOK 3: 2e Ronde Stand -->
+        <div class="toernooi-block">
+          <div class="toernooi-block-header">
+            <h3>2e Ronde Stand</h3>
+          </div>
+          <div class="toernooi-block-body">
+            <div
+              style="
+                margin-top: 0;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                padding: 12px;
+                background: #fff;
+              "
+            >
+              <h4 style="margin-top: 0">Eindstand 2e ronde (alle poules)</h4>
+              <div id="r2GlobalStandTable" style="overflow-x: auto"></div>
+            </div>
+          </div>
         </div>
       </div>
+      <!-- ===== END TAB: 2E RONDE RESULTATEN ===== -->
+
       <!-- ===== END TAB: 2E RONDE RESULTATEN ===== -->
 
       <!-- ===== START TAB: ANDERE PLACEHOLDERS ===== -->
 
       <!-- Tab 6: Finale -->
       <div id="finale" class="tab-content">
-        <h3>Finale</h3>
-
         <div
           id="finaleNoTournament"
           style="
@@ -2162,332 +2286,318 @@
         </div>
 
         <div id="finaleContent" style="display: none">
-          <!-- NIEUW: stap 0 – aantal finalisten vastleggen -->
-          <div
-            style="
-              border: 1px solid #ddd;
-              border-radius: 8px;
-              padding: 10px;
-              margin-bottom: 12px;
-              background: #fff;
-            "
-          >
-            <h3 style="margin-top: 0; font-size: 1.05rem">
-              Aantal deelnemers finale
-            </h3>
-            <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: #555">
-              Leg hier vast met hoeveel spelers de finale wordt gespeeld. Dit
-              bepaalt hoeveel spelers boven de streep als finalist worden
-              aangemerkt. Bij afmelding schuift de eerstvolgende speler door.
-            </p>
-            <div
-              style="
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                flex-wrap: wrap;
-              "
-            >
-              <label for="finaleAantalInput" style="font-weight: 600"
-                >Aantal finalisten:</label
-              >
-              <input
-                type="number"
-                id="finaleAantalInput"
-                min="1"
-                max="32"
-                value="8"
-                style="width: 80px; padding: 4px"
-              />
-              <button
-                id="finaleSaveCountBtn"
-                type="button"
+          <!-- BLOK 1: Aantal deelnemers finale -->
+          <div class="toernooi-block">
+            <div class="toernooi-block-header">
+              <h3>Aantal deelnemers finale</h3>
+            </div>
+            <div class="toernooi-block-body">
+              <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: #555">
+                Leg hier vast met hoeveel spelers de finale wordt gespeeld. Dit
+                bepaalt hoeveel spelers boven de streep als finalist worden
+                aangemerkt. Bij afmelding schuift de eerstvolgende speler door.
+              </p>
+              <div
                 style="
-                  padding: 6px 10px;
-                  border-radius: 4px;
-                  border: 1px solid var(--kleur-accent1, #8d0c00);
-                  background: var(--kleur-accent1, #8d0c00);
-                  color: #fff;
-                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  flex-wrap: wrap;
                 "
               >
-                💾 Vastleggen aantal finalisten
-              </button>
+                <label for="finaleAantalInput" style="font-weight: 600"
+                  >Aantal finalisten:</label
+                >
+                <input
+                  type="number"
+                  id="finaleAantalInput"
+                  min="1"
+                  max="32"
+                  value="8"
+                  style="width: 80px; padding: 4px"
+                />
+                <button
+                  id="finaleSaveCountBtn"
+                  type="button"
+                  class="btn btn-secondary"
+                >
+                  <span class="btn-icon" aria-hidden="true">💾</span>
+                  <span class="btn-label">Vastleggen aantal finalisten</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Kaart 1: finalisten + caramboles -->
-          <div
-            style="
-              border: 1px solid #dee2e6;
-              border-radius: 10px;
-              padding: 12px 14px;
-              margin-bottom: 18px;
-              background: #f8f9fa;
-            "
-          >
-            <h4 style="margin-top: 0; margin-bottom: 6px">
-              Finalisten en caramboles
-            </h4>
-            <p
-              style="
-                margin-top: 0;
-                margin-bottom: 10px;
-                font-size: 0.9em;
-                color: #555;
-              "
-            >
-              De acht hoogst geplaatste spelers uit de
-              <strong>totaalstand van de 2e ronde</strong> plaatsen zich
-              automatisch voor de finale. Hier kun je het aantal te maken
-              caramboles in de finale aanpassen en aangeven of een speler zich
-              heeft afgemeld.
-            </p>
-
-            <div style="overflow-x: auto">
-              <table
+          <!-- BLOK 2: Finalisten en caramboles -->
+          <div class="toernooi-block">
+            <div class="toernooi-block-header">
+              <h3>Finalisten en caramboles</h3>
+            </div>
+            <div class="toernooi-block-body">
+              <p
                 style="
-                  width: 100%;
-                  border-collapse: collapse;
+                  margin-top: 0;
+                  margin-bottom: 10px;
                   font-size: 0.9em;
-                  background: #fff;
+                  color: #555;
                 "
               >
-                <thead style="background: #f1f3f5">
-                  <tr>
-                    <th
-                      style="
-                        text-align: left;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                        width: 40px;
-                      "
-                    >
-                      R2
-                    </th>
-                    <th
-                      style="
-                        text-align: center;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                        width: 40px;
-                      "
-                      title="Afgemeld"
-                    >
-                      ❌
-                    </th>
-                    <th
-                      style="
-                        text-align: left;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                      "
-                    >
-                      Speler
-                    </th>
-                    <th
-                      style="
-                        text-align: right;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                        width: 80px;
-                      "
-                    >
-                      Car. 2e&nbsp;ronde
-                    </th>
-                    <th
-                      style="
-                        text-align: right;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                        width: 90px;
-                      "
-                    >
-                      Car. finale
-                    </th>
-                  </tr>
-                </thead>
-                <tbody id="finalePlayersBody"></tbody>
-              </table>
-            </div>
+                De acht hoogst geplaatste spelers uit de
+                <strong>totaalstand van de 2e ronde</strong> plaatsen zich
+                automatisch voor de finale. Hier kun je het aantal te maken
+                caramboles in de finale aanpassen en aangeven of een speler zich
+                heeft afgemeld.
+              </p>
 
-            <div class="button-row" style="margin-top: 8px; gap: 8px">
-              <button
-                type="button"
-                id="finaleSaveCarambolesBtn"
-                class="btn btn-save"
-              >
-                💾 Opslaan car. finale
-              </button>
-            </div>
+              <div style="overflow-x: auto">
+                <table
+                  style="
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 0.9em;
+                    background: #fff;
+                  "
+                >
+                  <thead style="background: #f1f3f5">
+                    <tr>
+                      <th
+                        style="
+                          text-align: left;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                          width: 40px;
+                        "
+                      >
+                        R2
+                      </th>
+                      <th
+                        style="
+                          text-align: center;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                          width: 40px;
+                        "
+                        title="Afgemeld"
+                      >
+                        ❌
+                      </th>
+                      <th
+                        style="
+                          text-align: left;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                        "
+                      >
+                        Speler
+                      </th>
+                      <th
+                        style="
+                          text-align: right;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                          width: 80px;
+                        "
+                      >
+                        Car. 2e&nbsp;ronde
+                      </th>
+                      <th
+                        style="
+                          text-align: right;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                          width: 90px;
+                        "
+                      >
+                        Car. finale
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="finalePlayersBody"></tbody>
+                </table>
+              </div>
 
-            <div
-              id="finaleFeedback"
-              style="margin-top: 8px; font-size: 0.9em; min-height: 18px"
-            ></div>
+              <div class="button-row" style="margin-top: 8px; gap: 8px">
+                <button
+                  type="button"
+                  id="finaleSaveCarambolesBtn"
+                  class="btn btn-secondary"
+                >
+                  <span class="btn-icon" aria-hidden="true">💾</span>
+                  <span class="btn-label">Opslaan car. finale</span>
+                </button>
+              </div>
+
+              <div
+                id="finaleFeedback"
+                style="margin-top: 8px; font-size: 0.9em; min-height: 18px"
+              ></div>
+            </div>
           </div>
 
-          <!-- Kaart 2: eindstand finale -->
-          <div
-            style="
-              border: 1px solid #dee2e6;
-              border-radius: 10px;
-              padding: 12px 14px;
-              background: #f8f9fa;
-            "
-          >
-            <h4 style="margin-top: 0; margin-bottom: 6px">Eindstand finale</h4>
-            <p
-              style="
-                margin-top: 0;
-                margin-bottom: 10px;
-                font-size: 0.9em;
-                color: #555;
-              "
-            >
-              De wedstrijden van de finale worden in een ander programma
-              bijgehouden. Vul hier de
-              <strong>definitieve eindstand</strong> in. De eindstand wordt
-              getoond op basis van de ingevulde <strong>positie</strong>.
-            </p>
-
-            <div style="overflow-x: auto">
-              <table
+          <!-- BLOK 3: Eindstand finale -->
+          <div class="toernooi-block">
+            <div class="toernooi-block-header">
+              <h3>Eindstand finale</h3>
+            </div>
+            <div class="toernooi-block-body">
+              <p
                 style="
-                  width: 100%;
-                  border-collapse: collapse;
+                  margin-top: 0;
+                  margin-bottom: 10px;
                   font-size: 0.9em;
-                  background: #fff;
+                  color: #555;
                 "
               >
-                <thead style="background: #f1f3f5">
-                  <tr>
-                    <th
-                      style="
-                        text-align: right;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                        width: 55px;
-                      "
-                    >
-                      Pos.
-                    </th>
-                    <th
-                      style="
-                        text-align: left;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                      "
-                    >
-                      Speler
-                    </th>
-                    <th
-                      style="
-                        text-align: right;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                        width: 80px;
-                      "
-                    >
-                      Car. finale
-                    </th>
-                    <th
-                      style="
-                        text-align: right;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                        width: 40px;
-                      "
-                    >
-                      Gesp.
-                    </th>
-                    <th
-                      style="
-                        text-align: right;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                        width: 40px;
-                      "
-                    >
-                      Pnt.
-                    </th>
-                    <th
-                      style="
-                        text-align: right;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                        width: 50px;
-                      "
-                    >
-                      Car.
-                    </th>
-                    <th
-                      style="
-                        text-align: right;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                        width: 50px;
-                      "
-                    >
-                      HS
-                    </th>
-                    <th
-                      style="
-                        text-align: right;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                        width: 40px;
-                      "
-                    >
-                      Beurten
-                    </th>
-                    <th
-                      style="
-                        text-align: right;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                        width: 50px;
-                      "
-                    >
-                      Moy.
-                    </th>
-                    <th
-                      style="
-                        text-align: right;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                        width: 50px;
-                      "
-                    >
-                      Moy&nbsp;%
-                    </th>
-                    <th
-                      style="
-                        text-align: right;
-                        padding: 6px 4px;
-                        border-bottom: 1px solid #dee2e6;
-                        width: 50px;
-                      "
-                    >
-                      Car&nbsp;%
-                    </th>
-                  </tr>
-                </thead>
-                <tbody id="finaleResultsBody"></tbody>
-              </table>
-            </div>
+                De wedstrijden van de finale worden in een ander programma
+                bijgehouden. Vul hier de
+                <strong>definitieve eindstand</strong> in. De eindstand wordt
+                getoond op basis van de ingevulde <strong>positie</strong>.
+              </p>
 
-            <div class="button-row" style="margin-top: 8px; gap: 8px">
-              <button
-                type="button"
-                id="finaleSaveResultsBtn"
-                class="btn btn-save"
-              >
-                💾 Eindstand opslaan
-              </button>
-              <button type="button" id="finaleClearBtn" class="btn btn-delete">
-                🗑️ Alles wissen
-              </button>
+              <div style="overflow-x: auto">
+                <table
+                  style="
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 0.9em;
+                    background: #fff;
+                  "
+                >
+                  <thead style="background: #f1f3f5">
+                    <tr>
+                      <th
+                        style="
+                          text-align: right;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                          width: 55px;
+                        "
+                      >
+                        Pos.
+                      </th>
+                      <th
+                        style="
+                          text-align: left;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                        "
+                      >
+                        Speler
+                      </th>
+                      <th
+                        style="
+                          text-align: right;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                          width: 80px;
+                        "
+                      >
+                        Car. finale
+                      </th>
+                      <th
+                        style="
+                          text-align: right;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                          width: 40px;
+                        "
+                      >
+                        Gesp.
+                      </th>
+                      <th
+                        style="
+                          text-align: right;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                          width: 40px;
+                        "
+                      >
+                        Pnt.
+                      </th>
+                      <th
+                        style="
+                          text-align: right;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                          width: 50px;
+                        "
+                      >
+                        Car.
+                      </th>
+                      <th
+                        style="
+                          text-align: right;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                          width: 50px;
+                        "
+                      >
+                        HS
+                      </th>
+                      <th
+                        style="
+                          text-align: right;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                          width: 40px;
+                        "
+                      >
+                        Beurten
+                      </th>
+                      <th
+                        style="
+                          text-align: right;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                          width: 50px;
+                        "
+                      >
+                        Moy.
+                      </th>
+                      <th
+                        style="
+                          text-align: right;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                          width: 50px;
+                        "
+                      >
+                        Moy&nbsp;%
+                      </th>
+                      <th
+                        style="
+                          text-align: right;
+                          padding: 6px 4px;
+                          border-bottom: 1px solid #dee2e6;
+                          width: 50px;
+                        "
+                      >
+                        Car&nbsp;%
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="finaleResultsBody"></tbody>
+                </table>
+              </div>
+
+              <div class="button-row" style="margin-top: 8px; gap: 8px">
+                <button
+                  type="button"
+                  id="finaleSaveResultsBtn"
+                  class="btn btn-secondary"
+                >
+                  <span class="btn-icon" aria-hidden="true">💾</span>
+                  <span class="btn-label">Eindstand opslaan</span>
+                </button>
+                <button
+                  type="button"
+                  id="finaleClearBtn"
+                  class="btn btn-delete"
+                >
+                  <span class="btn-icon" aria-hidden="true">🗑️</span>
+                  <span class="btn-label">Alles wissen</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -2496,73 +2606,89 @@
       <!-- ===== END TAB: ANDERE PLACEHOLDERS ===== -->
 
       <!-- ===== START TAB: ADMIN ===== -->
+
+      <!-- ===== START TAB: ADMIN ===== -->
       <div id="admin" class="tab-content">
-        <h3>Gebruikersbeheer</h3>
+        <!-- BLOK 1: Gebruikersbeheer -->
+        <div class="toernooi-block">
+          <div class="toernooi-block-header">
+            <h3>Gebruikersbeheer</h3>
+          </div>
+          <div class="toernooi-block-body">
+            <form id="userForm" class="form-grid" style="margin-bottom: 10px">
+              <div>
+                <label>Gebruikersnaam (login) *</label>
+                <input type="text" id="uUsername" required />
+              </div>
+              <div>
+                <label>Weergavenaam *</label>
+                <input type="text" id="uDisplay" required />
+              </div>
+              <div>
+                <label>Wachtwoord *</label>
+                <input type="password" id="uPassword" required />
+              </div>
+              <div>
+                <label>Rol</label>
+                <select id="uRole">
+                  <option value="user">Gebruiker</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
 
-        <form id="userForm" class="form-grid" style="margin-bottom: 10px">
-          <div>
-            <label>Gebruikersnaam (login) *</label>
-            <input type="text" id="uUsername" required />
-          </div>
-          <div>
-            <label>Weergavenaam *</label>
-            <input type="text" id="uDisplay" required />
-          </div>
-          <div>
-            <label>Wachtwoord *</label>
-            <input type="password" id="uPassword" required />
-          </div>
-          <div>
-            <label>Rol</label>
-            <select id="uRole">
-              <option value="user">Gebruiker</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
+              <div style="grid-column: 1/-1; text-align: right">
+                <button class="btn btn-secondary" type="submit">
+                  <span class="btn-icon" aria-hidden="true">💾</span>
+                  <span class="btn-label">Gebruiker opslaan</span>
+                </button>
+              </div>
+            </form>
 
-          <div style="grid-column: 1/-1; text-align: right">
-            <button class="btn btn-save" type="submit">
-              ➕ Gebruiker opslaan
-            </button>
+            <div id="usersTableWrap"></div>
           </div>
-        </form>
+        </div>
 
-        <div id="usersTableWrap"></div>
-
-        <hr style="margin: 18px 0" />
-
-        <h3>Toernooien koppelen aan gebruiker</h3>
-        <div class="form-grid">
-          <div>
-            <label>Kies gebruiker</label>
-            <select id="linkUserSelect"></select>
+        <!-- BLOK 2: Toernooien koppelen aan gebruiker -->
+        <div class="toernooi-block">
+          <div class="toernooi-block-header">
+            <h3>Toernooien koppelen aan gebruiker</h3>
           </div>
-          <div>
-            <label>Kies toernooien</label>
-            <div
-              id="linkTournamentsList"
-              style="
-                border: 1px solid #ccc;
-                border-radius: 6px;
-                padding: 8px;
-                max-height: 220px;
-                overflow: auto;
-              "
-            >
-              <em>laden...</em>
+          <div class="toernooi-block-body">
+            <div class="form-grid">
+              <div>
+                <label>Kies gebruiker</label>
+                <select id="linkUserSelect"></select>
+              </div>
+              <div>
+                <label>Kies toernooien</label>
+                <div
+                  id="linkTournamentsList"
+                  style="
+                    border: 1px solid #ccc;
+                    border-radius: 6px;
+                    padding: 8px;
+                    max-height: 220px;
+                    overflow: auto;
+                  "
+                >
+                  <em>laden.</em>
+                </div>
+              </div>
             </div>
+
+            <div class="button-row" style="margin-top: 10px">
+              <button type="button" id="saveLinksBtn" class="btn btn-secondary">
+                <span class="btn-icon" aria-hidden="true">💾</span>
+                <span class="btn-label">Koppelingen opslaan</span>
+              </button>
+            </div>
+
+            <div id="adminFeedback"></div>
           </div>
         </div>
-        <div class="button-row">
-          <button type="button" id="saveLinksBtn" class="btn btn-save">
-            💾 Koppelingen opslaan
-          </button>
-        </div>
-
-        <div id="adminFeedback"></div>
       </div>
+      <!-- ===== END TAB: ADMIN ===== -->
     </div>
-    <!-- ===== END TAB: ADMIN ===== -->
 
     <script type="module">
       /* Firebase imports */
@@ -6606,7 +6732,7 @@
                 type="number"
                 class="finale-pos-input"
                 min="1"
-                style="width:30px;text-align:right;"
+                style="width:40px;text-align:right;"
                 value="${c.finalPos ?? ""}"
               />
             </td>
@@ -6621,7 +6747,7 @@
                 type="number"
                 class="finale-games-input"
                 min="0"
-                style="width:30px;text-align:right;"
+                style="width:40px;text-align:right;"
                 value="${c.finalGames ?? ""}"
               />
             </td>
@@ -6630,7 +6756,7 @@
                 type="number"
                 class="finale-pts-input"
                 min="0"
-                style="width:40px;text-align:right;"
+                style="width:50px;text-align:right;"
                 value="${c.finalPts ?? ""}"
               />
             </td>
@@ -6639,7 +6765,7 @@
                 type="number"
                 class="finale-caramboles-input"
                 min="0"
-                style="width:50px;text-align:right;"
+                style="width:60px;text-align:right;"
                 value="${c.finalCaramboles ?? ""}"
               />
             </td>
@@ -6648,7 +6774,7 @@
                 type="number"
                 class="finale-hs-input"
                 min="0"
-                style="width:40px;text-align:right;"
+                style="width:50px;text-align:right;"
                 value="${c.finalHS ?? ""}"
               />
             </td>
@@ -6657,7 +6783,7 @@
                 type="number"
                 class="finale-beurten-input"
                 min="0"
-                style="width:50px;text-align:right;"
+                style="width:60px;text-align:right;"
                 value="${c.finalBeurten ?? ""}"
               />
             </td>
@@ -6667,7 +6793,7 @@
                 step="0.001"
                 class="finale-moy-input"
                 min="0"
-                style="width:60px;text-align:right;"
+                style="width:70px;text-align:right;"
                 value="${c.finalMoy ?? ""}"
               />
             </td>
@@ -6677,7 +6803,7 @@
                 step="0.1"
                 class="finale-moyperc-input"
                 min="0"
-                style="width:60px;text-align:right;"
+                style="width:70px;text-align:right;"
                 value="${c.finalMoyPerc ?? ""}"
               />
             </td>
@@ -6687,7 +6813,7 @@
                 step="0.1"
                 class="finale-carperc-input"
                 min="0"
-                style="width:60px;text-align:right;"
+                style="width:70px;text-align:right;"
                 value="${c.finalCarPerc ?? ""}"
               />
             </td>
@@ -9484,17 +9610,17 @@
             const wasOpen = pouleOpenStateR2[pouleNaam] === true;
 
             let html = `
-                    <div class="poule-block" data-poule="${pouleNaam}" style="border:1px solid #ccc;border-radius:8px;background:#fff;margin-bottom:16px">
+                    <div class="poule-block" data-poule="${pouleNaam}">
                       <div
                         id="${headerId}"
                         class="poule-header"
-                        style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:#e9f5ff;padding:8px 10px;border-radius:8px 8px 0 0;font-weight:600"
+                        style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:8px 10px;margin-bottom:4px;background:#f8f9fa;border-radius:8px;border:1px solid #dee2e6"
                       >
                         <div style="display:flex;align-items:center;gap:6px;">
                           <strong>${pouleNaam}</strong>
                           ${
                             factorText
-                              ? `<span style="font-size:0.85em;color:#0c6dfd;">${factorText}</span>`
+                              ? `<span style="font-size:0.85em;color:#b02a37;">${factorText}</span>`
                               : ""
                           }
                           ${factorBadge}
@@ -9513,7 +9639,8 @@
                          <div id="${bodyId}" class="poule-body"
                           style="display:${
                             wasOpen ? "block" : "none"
-                          };padding:10px 10px 12px">
+                          };padding:10px;border:1px solid #dee2e6;border-top:none;border-radius:0 0 8px 8px;background:white;">
+
 
                       <table style="width:100%;border-collapse:collapse;font-size:0.92em">
                         <thead style="background:#eef2f6">
@@ -10095,38 +10222,53 @@
         }
 
         let html = `
-          <table class="player-table">
-            <thead>
-              <tr>
-                <th>Gebruikersnaam</th>
-                <th>Naam</th>
-                <th>Rol</th>
-                <th>Toernooien</th>
-                <th style="text-align:center;">Acties</th>
-              </tr>
-            </thead>
-            <tbody>`;
+    <table class="player-table">
+      <thead>
+        <tr>
+          <th>Gebruikersnaam</th>
+          <th>Naam</th>
+          <th>Rol</th>
+          <th>Toernooien</th>
+          <th style="text-align:center;">Acties</th>
+        </tr>
+      </thead>
+      <tbody>`;
 
         adminUsersCache.forEach((u) => {
           html += `
-            <tr data-uid="${u.id}">
-              <td>${u.username || ""}</td>
-              <td>${u.displayName || ""}</td>
-              <td>${u.role || "user"}</td>
-              <td>
-                ${renderTournamentBadges(u.tournaments || [])}
-              </td>
+      <tr data-uid="${u.id}">
+        <td>${u.username || ""}</td>
+        <td>${u.displayName || ""}</td>
+        <td>${u.role || "user"}</td>
+        <td>
+          ${renderTournamentBadges(u.tournaments || [])}
+        </td>
 
-              <td class="actions">
-                <button class="edit-user-btn" style="background:#0d6efd;color:#fff;border:none;border-radius:6px;padding:4px 8px;">✏️</button>
-                <button class="delete-user-btn" style="background:#dc3545;color:#fff;border:none;border-radius:6px;padding:4px 8px;">🗑️</button>
-              </td>
-            </tr>`;
+        <td class="actions" style="text-align:right;">
+          <div class="button-row" style="justify-content:flex-end; gap:6px; margin:0;">
+            <button
+              type="button"
+              class="btn btn-secondary btn-icon-only edit-user-btn"
+              title="Gebruiker bewerken"
+            >
+              <span class="btn-icon" aria-hidden="true">✏️</span>
+            </button>
+            <button
+              type="button"
+              class="btn btn-delete btn-icon-only delete-user-btn"
+              title="Gebruiker verwijderen"
+            >
+              <span class="btn-icon" aria-hidden="true">🗑️</span>
+            </button>
+          </div>
+        </td>
+      </tr>`;
         });
 
         html += `</tbody></table>`;
         usersTableWrap.innerHTML = html;
 
+        // events blijven EXACT hetzelfde
         usersTableWrap.querySelectorAll(".edit-user-btn").forEach((btn) => {
           btn.addEventListener("click", () => {
             const tr = btn.closest("tr");
