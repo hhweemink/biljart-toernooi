@@ -1008,9 +1008,11 @@
         margin: 0;
       }
 
-      /* Nummer-spinners verbergen (Firefox) */
+      /* Nummer-spinners verbergen */
       #bcr-toernooi-app #finaleResultsBody input[type="number"] {
-        -moz-appearance: textfield;
+        -webkit-appearance: textfield; /* Chrome, Edge, Safari */
+        -moz-appearance: textfield; /* Firefox */
+        appearance: textfield; /* toekomstige/standaard syntax */
       }
     </style>
   </head>
@@ -1361,7 +1363,7 @@
               <div class="button-row">
                 <button type="submit" id="saveBtn" class="btn btn-secondary">
                   <span class="btn-icon" aria-hidden="true">💾</span>
-                  <span class="btn-label">Opslaan nieuw toernooi</span>
+                  <span class="btn-label">Opslaan toernooi info</span>
                 </button>
 
                 <button type="button" id="loadBtn" class="btn btn-load">
@@ -1614,6 +1616,177 @@
               id="helpModalCloseBtn"
             >
               Sluiten
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Export toernooi modal -->
+      <div id="exportTournamentModal" class="modal" aria-hidden="true">
+        <div class="modal-content" style="max-width: 760px">
+          <h3 style="margin-top: 0">Export – actieve toernooi (ZIP)</h3>
+          <div
+            class="info-box"
+            style="
+              margin-top: 10px;
+              border: 1px solid #f0c36d;
+              background: #fff6df;
+              padding: 10px 12px;
+              border-radius: 8px;
+            "
+          >
+            <div style="font-weight: 700; margin-bottom: 4px">
+              Let op (Windows)
+            </div>
+            <div style="font-size: 0.95em; line-height: 1.35">
+              Windows kan een gedownloade ZIP en de uitgepakte bestanden
+              blokkeren. De beste oplossing:
+              <strong
+                >rechtsklik op het ZIP-bestand → Eigenschappen → vink
+                “Blokkering opheffen” aan → Toepassen</strong
+              >, en pak daarna pas uit. Zie ook <strong>readme.txt</strong>.
+            </div>
+          </div>
+
+          <div style="margin-top: 10px">
+            <div
+              style="
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+                align-items: center;
+                margin-bottom: 8px;
+              "
+            >
+              <button
+                type="button"
+                class="btn btn-secondary"
+                id="exportSelectAllBtn"
+              >
+                Alles aanvinken
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                id="exportSelectNoneBtn"
+              >
+                Alles uitvinken
+              </button>
+            </div>
+
+            <div
+              class="form-grid"
+              style="grid-template-columns: 1fr 1fr; gap: 8px 16px"
+            >
+              <label style="display: flex; gap: 8px; align-items: center">
+                <input type="checkbox" id="ex_toernooi" checked />
+                <span>Toernooi-info (toernooi.csv)</span>
+              </label>
+              <label style="display: flex; gap: 8px; align-items: center">
+                <input type="checkbox" id="ex_spelers" checked />
+                <span>Deelnemers (spelers.csv)</span>
+              </label>
+
+              <label style="display: flex; gap: 8px; align-items: center">
+                <input type="checkbox" id="ex_r1_poules" checked />
+                <span>R1 poules (poules_r1.csv)</span>
+              </label>
+              <label style="display: flex; gap: 8px; align-items: center">
+                <input type="checkbox" id="ex_r1_wed" checked />
+                <span>R1 wedstrijden/uitslagen (r1_wedstrijden.csv)</span>
+              </label>
+
+              <label style="display: flex; gap: 8px; align-items: center">
+                <input type="checkbox" id="ex_r1_stand" checked />
+                <span>R1 standen (standen_r1.csv)</span>
+              </label>
+              <label style="display: flex; gap: 8px; align-items: center">
+                <input type="checkbox" id="ex_r2_poules" checked />
+                <span>R2 poules (poules_r2.csv)</span>
+              </label>
+
+              <label style="display: flex; gap: 8px; align-items: center">
+                <input type="checkbox" id="ex_r2_wed" checked />
+                <span>R2 wedstrijden/uitslagen (r2_wedstrijden.csv)</span>
+              </label>
+              <label style="display: flex; gap: 8px; align-items: center">
+                <input type="checkbox" id="ex_r2_stand" checked />
+                <span>R2 standen (standen_r2.csv)</span>
+              </label>
+
+              <label style="display: flex; gap: 8px; align-items: center">
+                <input type="checkbox" id="ex_finale" checked />
+                <span>Finale eindstand (finale_eindstand.csv)</span>
+              </label>
+              <label style="display: flex; gap: 8px; align-items: center">
+                <input type="checkbox" id="ex_moy" checked />
+                <span>Gebruikte moyenne→car tabel (moyCarTable.csv)</span>
+              </label>
+
+              <label
+                style="
+                  display: flex;
+                  gap: 8px;
+                  align-items: center;
+                  grid-column: 1/-1;
+                "
+              >
+                <input type="checkbox" id="ex_readme" checked />
+                <span>README (readme.txt)</span>
+              </label>
+            </div>
+          </div>
+
+          <div
+            id="exportProgressWrap"
+            style="
+              display: none;
+              margin-top: 14px;
+              padding-top: 10px;
+              border-top: 1px solid #ddd;
+            "
+          >
+            <div
+              id="exportProgressText"
+              style="margin-bottom: 8px; font-size: 0.95em"
+            ></div>
+            <div
+              style="
+                height: 12px;
+                border: 1px solid #bbb;
+                border-radius: 8px;
+                overflow: hidden;
+              "
+            >
+              <div
+                id="exportProgressBar"
+                style="
+                  height: 100%;
+                  width: 0%;
+                  background: var(--kleur-accent1);
+                "
+              ></div>
+            </div>
+          </div>
+
+          <div
+            style="
+              display: flex;
+              justify-content: flex-end;
+              gap: 10px;
+              margin-top: 14px;
+            "
+          >
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="exportCancelBtn"
+            >
+              Sluiten
+            </button>
+            <button type="button" class="btn btn-secondary" id="exportStartBtn">
+              <span class="btn-icon" aria-hidden="true">⬇️</span>
+              <span class="btn-label">Start export</span>
             </button>
           </div>
         </div>
@@ -2614,13 +2787,50 @@
                 <span class="btn-label">Koppelingen opslaan</span>
               </button>
             </div>
+          </div>
+        </div>
+
+            <!-- BLOK 3: Export -->
+            <div class="toernooi-block" style="margin-top: 14px">
+              <div class="toernooi-block-header">
+                <h3>Export</h3>
+              </div>
+              <div class="toernooi-block-body">
+                <p style="margin-top: 0">
+                  Exporteer een complete snapshot van het actieve toernooi als
+                  <strong>ZIP</strong> met meerdere
+                  <strong>CSV</strong>-bestanden (incl. afgeleide tabellen zoals
+                  standen).
+                </p>
+                <div class="button-row">
+                  <button
+                    type="button"
+                    id="exportTournamentBtn"
+                    class="btn btn-secondary"
+                  >
+                    <span class="btn-icon" aria-hidden="true">📦</span>
+                    <span class="btn-label">Export toernooi (ZIP)</span>
+                  </button>
+                </div>
+                <div
+                  id="exportAdminMiniStatus"
+                  style="margin-top: 8px; font-size: 0.92em; opacity: 0.9"
+                ></div>
+                <div style="margin-top: 6px; font-size: 0.9em; opacity: 0.85">
+                  Tip: Windows kan dit ZIP-bestand blokkeren. Deblokkeer eerst
+                  het ZIP-bestand (Eigenschappen → “Blokkering opheffen”).
+                </div>
+              </div>
+            </div>
 
             <div id="adminFeedback"></div>
           </div>
-        </div>
+        
       </div>
       <!-- ===== END TAB: ADMIN ===== -->
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
     <script type="module">
       /* Firebase imports */
@@ -2725,6 +2935,7 @@
         spelers: {
           title: "Info – tabblad Spelers",
           body: `
+           <hr>
             <p>
               Op dit tabblad leg je de deelnemers aan het toernooi vast. Voer de gegevens van de deelnemer in en klik op de knop
               <button type="button" class="btn btn-secondary help-inline-btn">
@@ -2733,19 +2944,22 @@
               </button>.
               De speler wordt dan toegevoegd aan de deelnemerslijst.
             </p>
-
+<hr>
             <p>
               Als alle deelnemers zijn ingevoerd, klik dan op de knop
               <button type="button" class="btn btn-secondary help-inline-btn">
-                <span class="btn-label">Lijst definitief maken</span>
+                <span class="btn-icon" aria-hidden="true">🔒</span><span class="btn-label">Lijst definitief maken</span>
               </button>.
               Mocht je toch nog iets willen wijzigen, maak dan de lijst weer beschikbaar met de knop
               <button type="button" class="btn btn-secondary help-inline-btn">
-                <span class="btn-label">Lijst bewerken</span>
-              </button>.
-              Let op: als er poules voor de 1e ronde zijn opgeslagen, kun je de lijst niet meer bewerken. Je kunt dan alleen het e-mailadres of het telefoonnummer van een deelnemer wijzigen.
-            </p>
+                <span class="btn-icon" aria-hidden="true">✏️</span><span class="btn-label">Lijst bewerken</span>
+              </button>.</p>
 
+              <hr>
+              <p>
+              <i>Let op:</i> als er poules voor de 1e ronde zijn opgeslagen, kun je de lijst niet meer bewerken. Je kunt dan alleen het e-mailadres of het telefoonnummer van een deelnemer wijzigen.
+            </p>
+<hr>
             <p>
               Als je de gegevens van een speler op de deelnemerslijst wilt wijzigen, klik dan op de knop
               <button type="button" class="btn btn-secondary btn-icon-only help-inline-icon-btn">
@@ -2756,6 +2970,7 @@
                 <span class="btn-icon" aria-hidden="true">🗑️</span>
               </button>.
             </p>
+            <hr>
           `,
         },
 
@@ -10223,6 +10438,738 @@
         "linkTournamentsList"
       );
       const saveLinksBtn = document.getElementById("saveLinksBtn");
+
+      // ===== Export (ZIP met CSV's) =====
+      const exportTournamentBtn = document.getElementById(
+        "exportTournamentBtn"
+      );
+      const exportAdminMiniStatus = document.getElementById(
+        "exportAdminMiniStatus"
+      );
+
+      const exportTournamentModal = document.getElementById(
+        "exportTournamentModal"
+      );
+      const exportStartBtn = document.getElementById("exportStartBtn");
+      const exportCancelBtn = document.getElementById("exportCancelBtn");
+      const exportSelectAllBtn = document.getElementById("exportSelectAllBtn");
+      const exportSelectNoneBtn = document.getElementById(
+        "exportSelectNoneBtn"
+      );
+      const exportProgressWrap = document.getElementById("exportProgressWrap");
+      const exportProgressText = document.getElementById("exportProgressText");
+      const exportProgressBar = document.getElementById("exportProgressBar");
+
+      function openExportTournamentModal() {
+        if (!isAdmin) {
+          showAdminFeedback("Alleen admins kunnen exporteren.", "error");
+          return;
+        }
+        if (!activeTournamentId) {
+          showAdminFeedback("Selecteer eerst een toernooi.", "error");
+          return;
+        }
+        exportProgressWrap.style.display = "none";
+        exportProgressText.textContent = "";
+        exportProgressBar.style.width = "0%";
+        exportStartBtn.disabled = false;
+        exportTournamentModal.style.display = "flex";
+        exportTournamentModal.setAttribute("aria-hidden", "false");
+      }
+
+      function closeExportTournamentModal() {
+        exportTournamentModal.style.display = "none";
+        exportTournamentModal.setAttribute("aria-hidden", "true");
+      }
+
+      function getExportOptions() {
+        const byId = (id) => !!document.getElementById(id)?.checked;
+        return {
+          toernooi: byId("ex_toernooi"),
+          spelers: byId("ex_spelers"),
+          r1Poules: byId("ex_r1_poules"),
+          r1Wed: byId("ex_r1_wed"),
+          r1Stand: byId("ex_r1_stand"),
+          r2Poules: byId("ex_r2_poules"),
+          r2Wed: byId("ex_r2_wed"),
+          r2Stand: byId("ex_r2_stand"),
+          finale: byId("ex_finale"),
+          moy: byId("ex_moy"),
+          readme: byId("ex_readme"),
+        };
+      }
+
+      function setExportProgress(pct, msg) {
+        exportProgressWrap.style.display = "block";
+        exportProgressText.textContent = msg || "";
+        exportProgressBar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+      }
+
+      function csvEscape(val, sep = ";") {
+        if (val == null) return "";
+        const s = String(val);
+        const needsQuote =
+          s.includes(sep) ||
+          s.includes("\n") ||
+          s.includes("\r") ||
+          s.includes('"');
+        if (!needsQuote) return s;
+        return '"' + s.replace(/"/g, '""') + '"';
+      }
+
+      function objectsToCsv(rows, sep = ";") {
+        const arr = Array.isArray(rows) ? rows : [];
+        const keys = Array.from(
+          arr.reduce((set, r) => {
+            Object.keys(r || {}).forEach((k) => set.add(k));
+            return set;
+          }, new Set())
+        );
+        const header = keys.map((k) => csvEscape(k, sep)).join(sep);
+        const lines = arr.map((r) =>
+          keys.map((k) => csvEscape(r?.[k], sep)).join(sep)
+        );
+        return "\uFEFF" + [header, ...lines].join("\n");
+
+      }
+
+      function downloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+      }
+
+      function safeFilenamePart(s) {
+        return (
+          String(s || "")
+            .trim()
+            .replace(/\s+/g, "_")
+            .replace(/[^A-Za-z0-9_\-]+/g, "")
+            .slice(0, 60) || "toernooi"
+        );
+      }
+
+      function buildReadmeTxt(meta) {
+        const now = new Date();
+        const iso = now.toISOString();
+        const local = now.toLocaleString("nl-NL");
+        const appVersion =
+          window.BCR_APP_VERSION ||
+          document.querySelector('meta[name="bcr-app-version"]')?.content ||
+          "";
+
+        const lines = [
+          "Export toernooi – BC Raalte 90",
+          "=============================",
+          "",
+          `Exportdatum (lokaal): ${local}`,
+          `Exportdatum (ISO): ${iso}`,
+          `Toernooi-id: ${meta?.tournamentId || ""}`,
+          `Naam: ${meta?.naam || ""}`,
+          `Jaar: ${meta?.jaar || ""}`,
+          `App-versie: ${appVersion || "(onbekend)"}`,
+          "",
+          "CSV-instellingen:",
+          "- Scheidingsteken: ;",
+          "- Decimaalteken: .",
+          "- Encoding: UTF-8",
+          "",
+          "Bestanden in deze ZIP (afhankelijk van gekozen opties):",
+          "- toernooi.csv: snapshot van toernooi-document",
+          "- spelers.csv: deelnemers (incl. caramboles/flags/eindstandvelden)",
+          "- poules_r1.csv / poules_r2.csv: poule-indelingen",
+          "- r1_wedstrijden.csv / r2_wedstrijden.csv: wedstrijden + uitslagen",
+          "- standen_r1.csv / standen_r2.csv: berekende standen (snapshot)",
+          "- finale_eindstand.csv: opgeslagen finale-eindstand",
+          "- moyCarTable.csv: gebruikte moyenne→caramboles tabel",
+          "",
+          "BELANGRIJK – Windows-beveiligingsmelding",
+          "----------------------------------------",
+          "Windows kan bestanden uit een ZIP blokkeren als deze via internet zijn gedownload.",
+          "Dit is een standaard beveiligingsmaatregel en betekent NIET dat de bestanden onveilig zijn.",
+          "",
+          "Beste oplossing (aanrader):",
+          "1) Sluit alle geopende bestanden uit de ZIP",
+          "2) Ga naar het ZIP-bestand (nog NIET uitgepakt)",
+          "3) Rechtsklik op het ZIP-bestand → Eigenschappen",
+          '4) Vink onderaan aan: "Blokkering opheffen"',
+          "5) Klik op Toepassen → OK",
+          "6) Pak daarna pas het ZIP-bestand uit",
+          "",
+        ];
+
+        return lines.join("\r\n");
+      }
+
+      function computePouleStandRows(pouleNaam, matches, pouleDoc, rondeHint = "") {
+  // rondeHint: "r1" of "r2" (anders fallback op beschikbare velden)
+  const pickTeMaken = (s) => {
+    if (rondeHint === "r1") return s?.carambolesR1 ?? s?.caramboles ?? 0;
+    if (rondeHint === "r2") return s?.carambolesR2 ?? s?.carambolesR1 ?? s?.caramboles ?? 0;
+    return s?.carambolesR2 ?? s?.carambolesR1 ?? s?.caramboles ?? 0;
+  };
+
+  const spelers = (pouleDoc?.spelers || []).map((s) => ({
+    id: s.id,
+    naam: s.naam,
+    teMaken: pickTeMaken(s),
+  }));
+
+  const stats = new Map();
+  spelers.forEach((s) =>
+    stats.set(s.id, {
+      poule: pouleNaam || pouleDoc?.naam || "",
+      spelerId: s.id,
+      spelerNaam: s.naam || "",
+      teMaken: Number(s.teMaken) || 0,
+      punten: 0,
+      car: 0,
+      beurten: 0,
+      gespeeld: 0,
+    })
+  );
+
+  (matches || []).forEach((m) => {
+    if (!m) return;
+
+    if (m.gemaakteX != null) {
+      const sX = stats.get(m.spelerX?.id);
+      if (sX) {
+        sX.car += Number(m.gemaakteX) || 0;
+        sX.beurten += Number(m.beurten) || 0;
+        if (m.puntenX != null) sX.punten += Number(m.puntenX) || 0;
+        if (m.afgerond) sX.gespeeld += 1;
+      }
+    }
+
+    if (m.gemaakteY != null) {
+      const sY = stats.get(m.spelerY?.id);
+      if (sY) {
+        sY.car += Number(m.gemaakteY) || 0;
+        sY.beurten += Number(m.beurten) || 0;
+        if (m.puntenY != null) sY.punten += Number(m.puntenY) || 0;
+        if (m.afgerond) sY.gespeeld += 1;
+      }
+    }
+  });
+
+  // eerst "ruwe" rows
+  let rows = Array.from(stats.values()).map((s) => {
+    const moy = s.beurten > 0 ? s.car / s.beurten : 0;
+
+    // ✅ %Car zoals in totaaloverzicht:
+    // gemaakte car / (gespeelde wedstrijden * teMaken) * 100
+    const denom = (Number(s.gespeeld) || 0) * (Number(s.teMaken) || 0);
+    const perc = denom > 0 ? (s.car / denom) * 100 : 0;
+
+    return {
+      poule: s.poule,
+      spelerId: s.spelerId, // (tijdelijk, halen we erna weg)
+      spelerNaam: s.spelerNaam,
+      teMaken: s.teMaken,
+      gespeeld: s.gespeeld,
+      punten: s.punten,
+      caramboles: s.car,
+      beurten: s.beurten,
+      moyenne: Number.isFinite(moy) ? moy.toFixed(3) : "",
+      perc: Number.isFinite(perc) ? perc.toFixed(1) : "",
+    };
+  });
+
+  rows.sort((a, b) => {
+    // punten desc, percentage desc, moyenne desc, caramboles desc
+    const p = (b.punten || 0) - (a.punten || 0);
+    if (p) return p;
+    const pe = (parseFloat(b.perc) || 0) - (parseFloat(a.perc) || 0);
+    if (pe) return pe;
+    const mo = (parseFloat(b.moyenne) || 0) - (parseFloat(a.moyenne) || 0);
+    if (mo) return mo;
+    return (b.caramboles || 0) - (a.caramboles || 0);
+  });
+
+  // pos bepalen
+  rows.forEach((r, i) => (r.pos = i + 1));
+
+  // ✅ definitieve kolomvolgorde + spelerId weg
+  rows = rows.map((r) => ({
+    poule: r.poule,
+    pos: r.pos,
+    spelerNaam: r.spelerNaam,
+    teMaken: r.teMaken,
+    gespeeld: r.gespeeld,
+    punten: r.punten,
+    caramboles: r.caramboles,
+    beurten: r.beurten,
+    moyenne: r.moyenne,
+    perc: r.perc,
+  }));
+
+  return rows;
+}
+
+
+      function flattenMatch(m) {
+return {
+  // id en pouleId -> weg
+  pouleNaam: m?.pouleNaam || "",
+
+  // spelerXid/spelerYid -> weg (alleen namen exporteren)
+  spelerX_naam: m?.spelerX?.naam || "",
+  spelerY_naam: m?.spelerY?.naam || "",
+
+  // teMakenX/teMakenY vullen: in jouw app zit dit doorgaans op spelerX.teMaken / spelerY.teMaken
+  teMakenX: m?.teMakenX ?? m?.spelerX?.teMaken ?? m?.carambolesX ?? "",
+  teMakenY: m?.teMakenY ?? m?.spelerY?.teMaken ?? m?.carambolesY ?? "",
+
+  gemaakteX: m?.gemaakteX ?? "",
+  gemaakteY: m?.gemaakteY ?? "",
+  beurten: m?.beurten ?? "",
+  puntenX: m?.puntenX ?? "",
+  puntenY: m?.puntenY ?? "",
+  afgerond: m?.afgerond ?? false,
+
+
+};
+
+      }
+
+      function flattenPoule(p) {
+        return {
+          // id -> weg laten (staat al in "naam")
+          naam: p?.naam || "",
+
+          // ronde zat niet in Firestore, dus vullen we via meegegeven hint (_ronde),
+          // en alleen als die er niet is, via p.ronde
+          ronde: p?._ronde || p?.ronde || "",
+
+          maxSpelers: p?.maxSpelers ?? "",
+
+          // spelers: alleen namen (geen ids)
+          spelers: Array.isArray(p?.spelers)
+            ? p.spelers.map((s) => `${s.naam || ""}`).join(" | ")
+            : "",
+        };
+      }
+
+
+      function flattenPlayer(p) {
+        // We nemen bewust veel velden mee (ook als niet altijd gebruikt), zodat de export zo compleet mogelijk is.
+        return {
+          // id -> weg laten
+          naam: p?.naam || "",
+          email: p?.email || "",
+          telefoon: p?.telefoon || "",
+
+          // ✅ 1 kolom: carambolesR1 gevuld met de huidige caramboles
+          carambolesR1: p?.caramboles ?? "",
+
+          // R2 blijft zoals hij is
+          carambolesR2: p?.carambolesR2 ?? "",
+
+          // ✅ 1 kolom carFinale: de bewust opgeslagen waarde uit tab Finale
+          // (wordt opgeslagen als 'carambolesFinale')
+          carFinale: p?.carambolesFinale ?? "",
+
+          // afmeldingen
+          withdraw: p?.withdraw ?? false,
+          withdrawR2: p?.withdrawR2 ?? false,
+          withdrawFinale: p?.withdrawFinale ?? false,
+
+          // ✅ Finale-eindstand (in Firestore zijn dit finalPts/finalCaramboles/finalBeurten)
+          finalPos: p?.finalPos ?? "",
+          finalGames: p?.finalGames ?? "",
+          finalPoints: p?.finalPts ?? p?.finalPoints ?? "",
+          finalCar: p?.finalCaramboles ?? p?.finalCar ?? "",
+          finalBrt: p?.finalBeurten ?? p?.finalBrt ?? "",
+          finalMoy: p?.finalMoy ?? "",
+          finalHS: p?.finalHS ?? "",
+
+          // ✅ Moy% en Car% toevoegen (zoals opgeslagen vanuit Finale)
+          "Moy%": p?.finalMoyPerc ?? "",
+          "Car%": p?.finalCarPerc ?? "",
+        };
+      }
+
+      function flattenTournamentForExport(tourn, moyTable) {
+        const datums = tourn?.datums || {};
+        const punten = tourn?.punten || {};
+
+        // maxBeurten moet "nvt" zijn als leeg/null/undefined
+        const maxBeurten =
+          tourn?.maxBeurten === "" || tourn?.maxBeurten == null ? "nvt" : tourn.maxBeurten;
+
+        return {
+          id: activeTournamentId,
+
+          // basis velden (laat deze staan; evt. later kunnen we uitbreiden)
+          naam: tourn?.naam || "",
+          jaar: tourn?.jaar || "",
+          organisatie: tourn?.organisatie || "",
+          publiceerPubliek: tourn?.publiceerPubliek ?? false,
+          playersFinalized: tourn?.playersFinalized ?? false,
+          moyCarTabel: moyTable?.name || moyTable?.naam || "",
+
+
+          aangemaaktOp: tourn?.aangemaaktOp || "",
+
+          // ✅ 4 losse datumkolommen
+          dateEndR1: datums?.endR1 ?? "",
+          dateEndR2: datums?.endR2 ?? "",
+          dateStartFinale: datums?.startFinale ?? "",
+          dateEndFinale: datums?.endFinale ?? "",
+
+          // ✅ max beurten (met "nvt")
+          maxBeurten: maxBeurten,
+
+          // ✅ 6 losse puntenkolommen
+          pointsWinLess: punten?.winLess ?? "",
+          pointsDrawLess: punten?.drawLess ?? "",
+          pointsLoseLess: punten?.loseLess ?? "",
+          pointsWinMax: maxBeurten === "nvt" ? "nvt" : (punten?.winMax ?? ""),
+          pointsDrawMax: maxBeurten === "nvt" ? "nvt" : (punten?.drawMax ?? ""),
+          pointsLoseMax: maxBeurten === "nvt" ? "nvt" : (punten?.loseMax ?? ""),
+        };
+      }
+
+
+      async function startExportTournamentZip() {
+        const opts = getExportOptions();
+        const wanted = Object.entries(opts)
+          .filter(([k, v]) => v)
+          .map(([k]) => k);
+        if (wanted.length === 0) {
+          showAdminFeedback("Kies minimaal één export-onderdeel.", "error");
+          return;
+        }
+        if (typeof JSZip === "undefined") {
+          showAdminFeedback(
+            "JSZip library ontbreekt (kan niet exporteren).",
+            "error"
+          );
+          return;
+        }
+
+        exportStartBtn.disabled = true;
+        setExportProgress(1, "Voorbereiden...");
+
+        const totalSteps = wanted.length + 2; // + data ophalen + zip bouwen
+        let step = 0;
+        const bump = (msg) => {
+          step++;
+          const pct = Math.round((step / totalSteps) * 100);
+          setExportProgress(pct, msg);
+        };
+
+        try {
+          bump("Toernooi-data ophalen...");
+
+          const tournRef = doc(db, "toernooien", activeTournamentId);
+          const tournSnap = await getDoc(tournRef);
+          const tourn = tournSnap.exists() ? tournSnap.data() : {};
+          const meta = {
+            tournamentId: activeTournamentId,
+            naam: tourn?.naam || "",
+            jaar: tourn?.jaar || "",
+          };
+
+          // Subcollecties
+          const fetchSub = async (sub) => {
+            const ref = collection(db, "toernooien", activeTournamentId, sub);
+            const snap = await getDocs(ref);
+            return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+          };
+
+          // We halen alleen op wat nodig is (maar standings hebben poules+wedstrijden nodig)
+          const spelers =
+            opts.spelers || opts.finale ? await fetchSub("spelers") : [];
+const poulesR1 =
+  opts.r1Poules || opts.r1Stand || opts.r1Wed
+    ? await fetchSub("poules_r1")
+    : [];
+          const wedR1 =
+            opts.r1Wed || opts.r1Stand ? await fetchSub("r1_wedstrijden") : [];
+const poulesR2 =
+  opts.r2Poules || opts.r2Stand || opts.r2Wed
+    ? await fetchSub("poules_r2")
+    : [];
+          const wedR2 =
+            opts.r2Wed || opts.r2Stand ? await fetchSub("r2_wedstrijden") : [];
+
+          // Moy table
+          let moyTable = null;
+          if (opts.moy || opts.toernooi) {
+
+            const tableId = tourn?.moyCarTableId;
+            if (tableId) {
+              const tRef = doc(db, "moyCarTables", tableId);
+              const tSnap = await getDoc(tRef);
+              moyTable = tSnap.exists()
+                ? { id: tSnap.id, ...tSnap.data() }
+                : null;
+            }
+          }
+
+          // ZIP bouwen
+          const zip = new JSZip();
+
+          // readme (optioneel; als geselecteerd altijd eerst toevoegen)
+          if (opts.readme) {
+            zip.file("readme.txt", buildReadmeTxt(meta));
+            bump("readme.txt toegevoegd...");
+          }
+if (opts.toernooi) {
+  const toernooiRow = flattenTournamentForExport(tourn || {}, moyTable);
+  zip.file("toernooi.csv", objectsToCsv([toernooiRow], ";"));
+  bump("toernooi.csv toegevoegd...");
+}
+
+
+
+          if (opts.spelers) {
+            zip.file(
+              "spelers.csv",
+              objectsToCsv(spelers.map(flattenPlayer), ";")
+            );
+            bump("spelers.csv toegevoegd...");
+          }
+
+if (opts.r1Poules) {
+  zip.file(
+    "poules_r1.csv",
+    objectsToCsv(poulesR1.map((p) => flattenPoule({ ...p, _ronde: "r1" })), ";")
+  );
+  bump("poules_r1.csv toegevoegd...");
+}
+
+if (opts.r1Wed) {
+  // pouleId -> pouleNaam
+  const pouleNaamMap = Object.fromEntries(
+    (poulesR1 || []).map((p) => [p.id, p?.naam || ""])
+  );
+
+  // verrijk wedstrijden met pouleNaam op basis van pouleId
+  const wedR1Export = (wedR1 || []).map((m) => ({
+    ...m,
+    pouleNaam: pouleNaamMap[m?.poule || m?.pouleId] || "",
+  }));
+
+  zip.file(
+    "r1_wedstrijden.csv",
+    objectsToCsv(wedR1Export.map(flattenMatch), ";")
+  );
+  bump("r1_wedstrijden.csv toegevoegd...");
+}
+
+
+
+          if (opts.r1Stand) {
+            const allRows = [];
+            poulesR1.forEach((p) => {
+              const matches = wedR1.filter((m) => (m?.pouleId || m?.poule) === p.id);
+
+              allRows.push(...computePouleStandRows(p?.naam || "", matches, p, "r1"));
+
+            });
+            zip.file("standen_r1.csv", objectsToCsv(allRows, ";"));
+            bump("standen_r1.csv toegevoegd...");
+          }
+
+if (opts.r2Poules) {
+  zip.file(
+    "poules_r2.csv",
+    objectsToCsv(poulesR2.map((p) => flattenPoule({ ...p, _ronde: "r2" })), ";")
+  );
+  bump("poules_r2.csv toegevoegd...");
+}
+
+
+if (opts.r2Wed) {
+  const pouleNaamMap = Object.fromEntries(
+    (poulesR2 || []).map((p) => [p.id, p?.naam || ""])
+  );
+
+  const wedR2Export = (wedR2 || []).map((m) => ({
+    ...m,
+    pouleNaam: pouleNaamMap[m?.poule || m?.pouleId] || "",
+  }));
+
+  zip.file(
+    "r2_wedstrijden.csv",
+    objectsToCsv(wedR2Export.map(flattenMatch), ";")
+  );
+  bump("r2_wedstrijden.csv toegevoegd...");
+}
+
+
+
+          if (opts.r2Stand) {
+            const allRows = [];
+            poulesR2.forEach((p) => {
+              const matches = wedR2.filter((m) => (m?.pouleId || m?.poule) === p.id);
+
+              allRows.push(...computePouleStandRows(p?.naam || "", matches, p, "r2"));
+
+
+            });
+            zip.file("standen_r2.csv", objectsToCsv(allRows, ";"));
+            bump("standen_r2.csv toegevoegd...");
+          }
+
+          if (opts.finale) {
+            const finaleRows = (spelers || [])
+              .filter((p) => typeof p.finalPos === "number" && p.finalPos > 0)
+              .map((p) => ({
+  // 1) GEEN id meer
+
+  // 2) finalPos als 1e kolom
+  finalPos: p?.finalPos ?? "",
+
+  // 3) naam
+  naam: p?.naam || "",
+
+  // 4) te maken caramboles in de finale (opgeslagen via knop Finale)
+  teMakenFinale: p?.carambolesFinale ?? "",
+
+  // 5) wél vullen vanuit de velden die saveFinaleResults() opslaat
+  finalGames: p?.finalGames ?? "",
+  finalPoints: p?.finalPts ?? "",               // <-- was finalPoints
+  finalCar: p?.finalCaramboles ?? "",           // <-- was finalCar
+  finalBrt: p?.finalBeurten ?? "",              // <-- was finalBrt
+
+  // overige (zoals je al had)
+  finalMoy:
+    typeof p?.finalMoy === "number"
+      ? p.finalMoy.toFixed(3)
+      : p?.finalMoy ?? "",
+  finalHS: p?.finalHS ?? "",
+
+  // 6) Moy% en Car% toevoegen (zoals opgeslagen)
+  "moy%":
+    typeof p?.finalMoyPerc === "number"
+      ? p.finalMoyPerc.toFixed(1)
+      : p?.finalMoyPerc ?? "",
+  "car%":
+    typeof p?.finalCarPerc === "number"
+      ? p.finalCarPerc.toFixed(1)
+      : p?.finalCarPerc ?? "",
+}))
+
+              .sort((a, b) => (a.finalPos || 999) - (b.finalPos || 999));
+            zip.file("finale_eindstand.csv", objectsToCsv(finaleRows, ";"));
+            bump("finale_eindstand.csv toegevoegd...");
+          }
+
+          if (opts.moy) {
+            const tableId =
+              (moyTable && moyTable.id) || tourn?.moyCarTableId || "";
+            const tableName = moyTable?.naam || moyTable?.name || "";
+            const rows = Array.isArray(moyTable?.rows) ? moyTable.rows : [];
+            const exportRows = rows.map((r, idx) => ({
+              tableName,
+              van: r?.van ?? "",
+              tot: r?.tot ?? "",
+              car: r?.car ?? "",
+            }));
+            zip.file("moyCarTable.csv", objectsToCsv(exportRows, ";"));
+            bump("moyCarTable.csv toegevoegd...");
+          }
+
+          bump("ZIP genereren...");
+
+          const blob = await zip.generateAsync({ type: "blob" }, (metadata) => {
+            const pct = Math.round(metadata.percent || 0);
+            // laat de progress niet teruglopen:
+            const base = Math.round((step / totalSteps) * 100);
+            setExportProgress(
+              Math.max(base, pct),
+              `ZIP comprimeren... (${pct}%)`
+            );
+          });
+
+          const fileName = `Toernooi_${safeFilenamePart(
+            meta.naam
+          )}_${safeFilenamePart(meta.jaar)}_${new Date()
+            .toISOString()
+            .slice(0, 10)}.zip`;
+
+          downloadBlob(blob, fileName);
+
+          setExportProgress(100, "✅ Klaar! Download gestart.");
+          if (exportAdminMiniStatus)
+            exportAdminMiniStatus.textContent = `✅ Laatste export: ${new Date().toLocaleString()}`;
+        } catch (err) {
+          console.error("Export fout:", err);
+          showAdminFeedback(
+            "⚠️ Export mislukt: " + (err?.message || err),
+            "error"
+          );
+          setExportProgress(0, "⚠️ Export mislukt (zie console).");
+        } finally {
+          exportStartBtn.disabled = false;
+        }
+      }
+
+      // Events
+      if (exportTournamentBtn)
+        exportTournamentBtn.addEventListener(
+          "click",
+          openExportTournamentModal
+        );
+      if (exportCancelBtn)
+        exportCancelBtn.addEventListener("click", closeExportTournamentModal);
+      if (exportStartBtn)
+        exportStartBtn.addEventListener("click", startExportTournamentZip);
+
+      if (exportTournamentModal) {
+        exportTournamentModal.addEventListener("click", (e) => {
+          if (e.target === exportTournamentModal) closeExportTournamentModal();
+        });
+      }
+
+      if (exportSelectAllBtn) {
+        exportSelectAllBtn.addEventListener("click", () => {
+          [
+            "ex_toernooi",
+            "ex_spelers",
+            "ex_r1_poules",
+            "ex_r1_wed",
+            "ex_r1_stand",
+            "ex_r2_poules",
+            "ex_r2_wed",
+            "ex_r2_stand",
+            "ex_finale",
+            "ex_moy",
+          ].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) el.checked = true;
+          });
+        });
+      }
+
+      if (exportSelectNoneBtn) {
+        exportSelectNoneBtn.addEventListener("click", () => {
+          [
+            "ex_toernooi",
+            "ex_spelers",
+            "ex_r1_poules",
+            "ex_r1_wed",
+            "ex_r1_stand",
+            "ex_r2_poules",
+            "ex_r2_wed",
+            "ex_r2_stand",
+            "ex_finale",
+            "ex_moy",
+          ].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) el.checked = false;
+          });
+        });
+      }
 
       let adminUsersCache = [];
       let adminTournamentsCache = [];

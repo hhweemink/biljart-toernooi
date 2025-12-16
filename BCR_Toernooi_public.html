@@ -291,26 +291,32 @@
         verschillende rondes.
       </p>
 
-      <div class="card">
-        <div class="selector-row">
-          <label for="yearSelect">Jaar:</label>
-          <select id="yearSelect" style="width: 80px; min-width: 80px">
-            <option value="">Kies…</option>
-          </select>
+      <div id="tournamentSelectorWrap" class="selector-wrap">
+        <div id="tournamentSelectorCard" class="card selector-card">
+          <div class="selector-row">
+            <label for="yearSelect">Jaar:</label>
+            <select id="yearSelect" style="width: 80px; min-width: 80px">
+              <option value="">Kies…</option>
+            </select>
 
-          <label for="tournamentSelect">Toernooi:</label>
-          <select id="tournamentSelect" disabled>
-            <option value="">Kies eerst een jaar…</option>
-          </select>
+            <label for="tournamentSelect">Toernooi:</label>
+            <select id="tournamentSelect" disabled>
+              <option value="">Kies eerst een jaar…</option>
+            </select>
 
-          <span id="tournamentMeta" class="selector-meta"></span>
+            <span id="tournamentMeta" class="selector-meta"></span>
+          </div>
+
+          <div id="tournamentSelectNotice" class="small-muted">
+            Alleen toernooien die door de organisatie als “gepubliceerd” zijn
+            ingesteld, zijn hier zichtbaar.
+          </div>
+          <div
+            id="tournamentError"
+            class="error-msg"
+            style="display: none"
+          ></div>
         </div>
-
-        <div id="tournamentSelectNotice" class="small-muted">
-          Alleen toernooien die door de organisatie als “gepubliceerd” zijn
-          ingesteld, zijn hier zichtbaar.
-        </div>
-        <div id="tournamentError" class="error-msg" style="display: none"></div>
       </div>
 
       <div class="tabs">
@@ -458,6 +464,11 @@
       // ====== Kleine helpers ======
       function $(id) {
         return document.getElementById(id);
+      }
+
+      function hideTournamentSelector() {
+        const wrap = document.getElementById("tournamentSelectorWrap");
+        if (wrap) wrap.style.display = "none";
       }
 
       function assignRankPoints(sortedArray, field, targetField) {
@@ -1316,10 +1327,93 @@
         });
       }
 
+      function setActiveTab(tabId) {
+        const buttons = document.querySelectorAll(".tab-btn");
+        buttons.forEach((b) => b.classList.remove("active"));
+        const btn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+        if (btn && !btn.classList.contains("disabled"))
+          btn.classList.add("active");
+
+        document
+          .querySelectorAll(".tab-panel")
+          .forEach((panel) => panel.classList.remove("active"));
+        const panel = document.getElementById(tabId);
+        if (panel) panel.classList.add("active");
+      }
+
+      async function applyUrlTournamentSelection() {
+        const params = new URLSearchParams(window.location.search);
+
+        // Ondersteun een paar aliassen (handig bij later aanpassen)
+        const tournamentId =
+          params.get("toernooi") ||
+          params.get("toernooiId") ||
+          params.get("tid");
+
+        const hideSelector =
+          params.get("hideSelector") === "1" ||
+          params.get("hideSelector") === "true";
+
+        const tabFromUrl = params.get("tab"); // bv. tab-r1u
+
+        if (!tournamentId) {
+          // Geen url-param => niets doen, normale dropdown-flow blijft gelden
+          if (tabFromUrl) setActiveTab(tabFromUrl);
+          return false;
+        }
+
+        // Zorg dat publishedTournaments beschikbaar is (die vul je in loadPublishedTournaments)
+        if (
+          !Array.isArray(publishedTournaments) ||
+          publishedTournaments.length === 0
+        ) {
+          await loadPublishedTournaments();
+        }
+
+        // Veiligheid: alleen gepubliceerde toernooien toestaan op de publieke pagina
+        const isPublished = publishedTournaments.some(
+          (t) => t.id === tournamentId
+        );
+        if (!isPublished) {
+          const errorEl = $("tournamentError");
+          errorEl.style.display = "block";
+          errorEl.textContent =
+            "Dit toernooi is niet gevonden of niet gepubliceerd (publieke weergave).";
+          // UI leegmaken
+          await loadTournament(null);
+          return true; // we hebben URL wel verwerkt
+        }
+
+        // URL bepaalt het toernooi: geen selectie voor bezoeker
+        hideTournamentSelector();
+
+        // Laad het toernooi
+        await loadTournament(tournamentId);
+
+        // Eventueel direct naar tab uit URL
+        if (tabFromUrl) setActiveTab(tabFromUrl);
+
+        return true;
+      }
+
       // ====== INIT ======
-      document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("DOMContentLoaded", async () => {
         initTabs();
-        loadPublishedTournaments();
+
+        // Eerst published ophalen (nodig voor dropdown én voor URL-check)
+        await loadPublishedTournaments();
+
+        // Als URL een toernooi afdwingt: laden en (optioneel) selectors verbergen
+        const handledByUrl = await applyUrlTournamentSelection();
+
+        // Als URL-toernooi actief is, wil je meestal niet dat dropdown-changes “per ongeluk” overschrijven.
+        // We laten de listeners wel bestaan, maar ze doen dan alleen iets als gebruiker toch kiest.
+        // (Als je dat niet wil: zet disabled=true wanneer handledByUrl true is.)
+        if (handledByUrl) {
+          // Optioneel: selectors locken i.p.v. verbergen
+          // $("yearSelect").disabled = true;
+          // $("tournamentSelect").disabled = true;
+        }
 
         // Stap 1: jaar kiezen
         $("yearSelect").addEventListener("change", (e) => {
@@ -1328,7 +1422,6 @@
           const metaEl = $("tournamentMeta");
 
           if (!year) {
-            // Jaar leeg: reset alles
             tournamentSelect.innerHTML =
               '<option value="">Kies eerst een jaar…</option>';
             tournamentSelect.disabled = true;
@@ -1337,7 +1430,6 @@
             return;
           }
 
-          // Filter gepubliceerde toernooien op gekozen jaar
           const fromYear = publishedTournaments.filter(
             (t) => String(t.jaar) === String(year)
           );
@@ -1362,19 +1454,16 @@
             .forEach((t) => {
               const opt = document.createElement("option");
               opt.value = t.id;
-              const naam = t.naam || t.id;
-              opt.textContent = naam;
+              opt.textContent = t.naam || t.id;
               tournamentSelect.appendChild(opt);
             });
 
           tournamentSelect.disabled = false;
           metaEl.textContent = "Kies een toernooi in " + year + ".";
-
-          // Eventuele eerder getoonde data leegmaken
           loadTournament(null);
         });
 
-        // Stap 2: toernooi binnen gekozen jaar kiezen
+        // Stap 2: toernooi kiezen
         $("tournamentSelect").addEventListener("change", (e) => {
           loadTournament(e.target.value);
         });
