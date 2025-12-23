@@ -36,6 +36,73 @@
         text-align: center;
       }
 
+      /* Rechterkant header: login-status + connection-status + uitloggen */
+      .header-right {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+        white-space: nowrap;
+      }
+
+      .login-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid #aaa;
+        background: #fafafa;
+        color: #222;
+        font-size: 0.82rem;
+        font-weight: 600;
+        line-height: 1.2;
+        white-space: nowrap;
+      }
+
+      .login-status .login-icon {
+        font-size: 0.95rem;
+        line-height: 1;
+      }
+
+      .login-status .login-name b {
+        font-weight: 800;
+      }
+
+      .login-role {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        border: 1px solid #bbb;
+        background: #f2f2f2;
+        color: #222;
+        text-transform: lowercase;
+      }
+      .login-role.role-admin {
+        border-color: #8d0c00;
+        background: #fff0f0;
+        color: #8d0c00;
+      }
+      .login-role.role-manager {
+        border-color: #666;
+        background: #f2f2f2;
+        color: #222;
+      }
+
+      #bcr-toernooi-app .btn-logout {
+        white-space: nowrap;
+        padding: 8px 10px;
+        min-width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+      }
+
+
       /* Smallere én hogere help-knop */
       /* Help-knop: exact 60px breed, mooi hoog, en consistent met btn-secondary */
       #bcr-toernooi-app .help-btn {
@@ -55,14 +122,14 @@
         border-radius: 6px;
         white-space: nowrap; /* geen wrap van tekst */
       }
-
+/*
       #bcr-toernooi-app .help-btn {
         position: absolute;
         left: 18px;
         top: 50%;
         transform: translateY(-50%);
       }
-
+*/
       /* Klein rond “i”-icoon */
       #bcr-toernooi-app .help-icon {
         display: inline-flex;
@@ -311,10 +378,10 @@
 
       /* Klein statusblok voor Firestore verbinding */
       #bcr-toernooi-app .connection-status {
-        position: absolute;
-        right: 18px;
-        top: 50%;
-        transform: translateY(-50%);
+        position: static;
+        right: auto;
+        top: auto;
+        transform: none;
 
         display: inline-flex;
         align-items: center;
@@ -326,7 +393,7 @@
         background: #e6f4ea;
         color: #137333;
         font-size: 0.78rem;
-        font-weight: 500;
+        font-weight: 600;
         box-shadow: none;
         white-space: nowrap;
       }
@@ -516,13 +583,60 @@
         font-weight: 650;
         border-bottom: 1px solid #e1e1e1;
 
-        /* voor subtiele Firestore badge rechts */
-        display: flex;
+        /* 3 zones: links (Info), midden (titel), rechts (status + uitloggen) */
+        display: grid;
+        grid-template-columns: auto 1fr auto;
         align-items: center;
-        justify-content: center; /* titel in het midden */
-        position: relative;
-        text-align: center;
+        column-gap: 14px;
       }
+
+      #bcr-toernooi-app header .header-title {
+        justify-self: center;
+        text-align: center;
+        line-height: 1.2;
+        padding: 0 8px;
+        white-space: nowrap;
+      }
+
+      #bcr-toernooi-app header .header-right {
+        justify-self: end;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        white-space: nowrap;
+      }
+
+      /* Zorg dat header-right items NOOIT meegroeien door .btn { flex:1 } */
+      #bcr-toernooi-app header .header-right > * {
+        flex: 0 0 auto !important;
+      }
+      #bcr-toernooi-app header .header-right .btn {
+        flex: 0 0 auto !important;
+      }
+
+      /* Compacte icoon-knop (logout) */
+      #bcr-toernooi-app .btn-logout {
+        width: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        padding: 8px 0 !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+      }
+
+      #bcr-toernooi-app .btn-logout .btn-icon {
+        display: inline-flex;
+        width: 18px;
+        height: 18px;
+      }
+      #bcr-toernooi-app .btn-logout .btn-icon svg {
+        width: 18px;
+        height: 18px;
+        display: block;
+      }
+
 
       /* Actief toernooi-balk onder de header */
       #bcr-toernooi-app .active-tournament {
@@ -1063,7 +1177,7 @@
 
     <div id="bcr-toernooi-app">
       <header>
-        <button
+<div class="header-left" id="headerLeft"><button
           type="button"
           id="helpBtn"
           class="btn btn-secondary help-btn"
@@ -1071,9 +1185,24 @@
         >
           <span class="help-icon">i</span>
           Info
-        </button>
+        </button></div>
 
         <div class="header-title">Clubkampioenschappen BC Raalte 90</div>
+
+        <div class="header-right" id="headerRight">
+                  
+          <div id="loginStatus" class="login-status" style="display:none"></div>
+
+          <button
+            type="button"
+            id="logoutBtn"
+            class="btn btn-secondary btn-logout"
+            style="display: none"
+            title="Uitloggen"
+          >
+            <span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 7V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6 9l-3 3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </button>
+        </div>
       </header>
 
       <div class="active-tournament no-tournament" id="activeTournamentBanner">
@@ -2720,7 +2849,11 @@
             <h3>Gebruikersbeheer</h3>
           </div>
           <div class="toernooi-block-body">
-            <form id="userForm" class="form-grid" style="margin-bottom: 10px">
+            <p class="muted" style="margin:0 0 10px 0;">
+              Gebruikers aanmaken, wachtwoorden wijzigen en rollen (custom claims) aanpassen doe je voorlopig lokaal (setup-users.js).
+              In deze app zie je de gebruikers en kun je toernooien koppelen.
+            </p>
+            <form id="userForm" class="form-grid" style="margin-bottom: 10px; display:none">
               <div>
                 <label>Gebruikersnaam (login) *</label>
                 <input type="text" id="uUsername" required />
@@ -2847,6 +2980,13 @@
         writeBatch,
         updateDoc,
       } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+        onAuthStateChanged,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
 
       /* Firebase config */
       const firebaseConfig = {
@@ -2862,6 +3002,7 @@
       /* Init Firestore */
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
+      const auth = getAuth(app);
 
       /* =========================================================
          LOGIN FLOW
@@ -2869,43 +3010,185 @@
       const loginOverlay = document.getElementById("loginOverlay");
       const loginForm = document.getElementById("loginForm");
       const loginMsg = document.getElementById("loginMsg");
+const logoutBtn = document.getElementById("logoutBtn");
+      const loginStatusEl = document.getElementById("loginStatus");
 
-      loginForm.addEventListener("submit", async (e) => {
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", async () => {
+          try {
+            await signOut(auth);
+          } catch (e) {
+            console.error("Logout fout:", e);
+          }
+        });
+      }
+
+
+      
+loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         loginMsg.textContent = "";
 
         const username = document.getElementById("loginUsername").value.trim();
         const password = document.getElementById("loginPassword").value;
 
+        // username -> pseudo-email (geen extern account nodig)
+        const u = username.toLowerCase();
+        if (!/^[a-z0-9._-]+$/.test(u)) {
+          loginMsg.textContent =
+            "Ongeldige gebruikersnaam (gebruik letters/cijfers en .-_).";
+          return;
+        }
+        const email = `${u}@bcr.local`;
+
         try {
-          // user zoeken op username
-          const usersSnap = await getDocs(collection(db, "users"));
-          const match = usersSnap.docs
-            .map((d) => ({ id: d.id, ...d.data() }))
-            .find(
-              (u) => (u.username || "").toLowerCase() === username.toLowerCase()
-            );
-
-          if (!match) {
-            loginMsg.textContent = "Onbekende gebruiker.";
-            return;
-          }
-
-          if (password !== match.password) {
-            loginMsg.textContent = "Wachtwoord onjuist.";
-            return;
-          }
-
-          currentUser = match;
-          isAdmin = match.role === "admin";
-          loginOverlay.style.display = "none";
-
-          applyPermissions();
-          await loadTournamentList(); // toernooilijst verversen
-          await loadMoyCarTables(); // beschikbare moyenne→caramboles-tabellen laden
+          await signInWithEmailAndPassword(auth, email, password);
+          // verdere init verloopt via onAuthStateChanged
         } catch (err) {
-          console.error(err);
-          loginMsg.textContent = "Inloggen mislukt.";
+          console.error("Login fout:", err);
+          loginMsg.textContent = "Inloggen mislukt (naam of wachtwoord onjuist).";
+        }
+      });
+
+      async function loadUserProfileByUid(uid) {
+        // Nieuw model: users/{uid}
+        const snap = await getDoc(doc(db, "users", uid));
+        if (snap.exists()) return { id: snap.id, ...snap.data() };
+
+        // Fallback: oud model (random doc-id) met opgeslagen uid (indien aanwezig)
+        const usersSnap = await getDocs(collection(db, "users"));
+        const all = usersSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        return all.find((u) => u.uid === uid) || null;
+      }
+
+      async function ensureUidUserDoc(uid, profile) {
+        // Maak (eenmalig) users/{uid} aan als hij nog niet bestaat.
+        // Let op: we nemen GEEN password veld mee.
+        if (!profile) return;
+        const targetRef = doc(db, "users", uid);
+        const targetSnap = await getDoc(targetRef);
+        if (targetSnap.exists()) return;
+
+        const data = {
+          username: profile.username || "",
+          displayName: profile.displayName || profile.username || "",
+          role: profile.role || "user",
+          tournaments: Array.isArray(profile.tournaments) ? profile.tournaments : [],
+        };
+        await setDoc(targetRef, data, { merge: true });
+      }
+
+      async function refreshClaimsAndRole(user) {
+        isAdmin = false;
+        isManager = false;
+
+        // Claims uit token (admin/manager). Dit is de “echte” autoriteit.
+        const token = await user.getIdTokenResult(true);
+        const claims = token?.claims || {};
+
+        // Ondersteun zowel {role:"admin"} als booleans (voor flexibiliteit)
+        const role = (claims.role || "").toString().toLowerCase();
+        if (role === "admin" || claims.admin === true) isAdmin = true;
+        if (role === "manager" || claims.manager === true) isManager = true;
+
+        // Fallback voor overgang: rol uit Firestore-profiel (alleen UI, niet bedoeld als beveiliging)
+        if (!isAdmin && currentUser?.role === "admin") isAdmin = true;
+        if (!isManager && currentUser?.role === "manager") isManager = true;
+      }
+
+      function escapeHtml(str) {
+        return String(str ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function showLoggedInUi() {
+        loginMsg.textContent = "";
+        loginOverlay.style.display = "none";
+        if (logoutBtn) logoutBtn.style.display = "";
+
+        // Status rechtsboven
+        if (loginStatusEl) {
+          const fallbackName =
+            auth?.currentUser?.email?.split("@")?.[0] || "";
+          const name =
+            currentUser?.displayName ||
+            currentUser?.username ||
+            fallbackName;
+
+          if (name) {
+            const roleLabel = isAdmin ? "admin" : (isManager ? "manager" : "");
+            const roleHtml = roleLabel
+              ? `<span class="login-role role-${roleLabel}">${roleLabel}</span>`
+              : "";
+            loginStatusEl.style.display = "inline-flex";
+            loginStatusEl.innerHTML = `<span class="login-icon" aria-hidden="true">👤</span>` +
+              `<span class="login-name">Ingelogd als: <b>${escapeHtml(name)}</b></span>` +
+              roleHtml;
+          } else {
+            loginStatusEl.style.display = "none";
+            loginStatusEl.textContent = "";
+          }
+        }
+      }
+
+
+      function showLoggedOutUi(msg = "") {
+        currentUser = null;
+        isAdmin = false;
+        isManager = false;
+        if (logoutBtn) logoutBtn.style.display = "none";
+
+        if (loginStatusEl) {
+          loginStatusEl.style.display = "none";
+          loginStatusEl.textContent = "";
+        }
+
+        loginOverlay.style.display = "flex";
+        if (msg) loginMsg.textContent = msg;
+      }
+
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          showLoggedOutUi();
+          applyPermissions();
+          return;
+        }
+
+        try {
+          const profile = await loadUserProfileByUid(user.uid);
+          currentUser = profile;
+
+          // (optioneel) migratiepad: zorg dat users/{uid} bestaat
+          await ensureUidUserDoc(user.uid, profile);
+
+          await refreshClaimsAndRole(user);
+
+          // Alleen admin/manager mag deze beheer-app gebruiken
+          if (!isAdmin && !isManager) {
+            await signOut(auth);
+            showLoggedOutUi("Je hebt geen beheer-rechten.");
+            applyPermissions();
+            return;
+          }
+
+          showLoggedInUi();
+          applyPermissions();
+
+          // Verversen data zoals voorheen na login
+          await loadTournamentList();
+          await loadMoyCarTables();
+        } catch (e) {
+          console.error("Auth init fout:", e);
+          try {
+            await signOut(auth);
+          } catch {}
+          showLoggedOutUi("Er ging iets mis bij het laden van je profiel.");
+          applyPermissions();
         }
       });
 
@@ -3023,6 +3306,7 @@
       ========================================================= */
       let currentUser = null; // {id, username, role, tournaments, displayName}
       let isAdmin = false;
+      let isManager = false;
 
       /* =========================================================
                                                        GEMEENSCHAPPELIJKE UI HELPERS
@@ -3034,10 +3318,16 @@
         const header = host.querySelector("header");
         if (!header) return;
 
+        // Plaats status netjes rechts in de header (niet overlappend)
+        const right = header.querySelector("#headerRight") || header;
+
+        // voorkom dubbele badges
+        if (right.querySelector(".connection-status")) return;
+
         const statusDiv = document.createElement("div");
         statusDiv.className = "connection-status";
-        statusDiv.innerHTML = "✓ Firestore";
-        header.appendChild(statusDiv);
+        statusDiv.innerHTML = "✓"
+        right.insertBefore(statusDiv, right.firstChild);
       }
 
       function showFeedback(msg, type = "info") {
@@ -11196,7 +11486,10 @@ if (opts.r2Wed) {
 
       async function loadUsersAdminTab() {
         const snap = await getDocs(collection(db, "users"));
-        adminUsersCache = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        adminUsersCache = snap.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          // legacy users (met password veld) niet tonen in de beheer-app
+          .filter((u) => !("password" in u));
         renderUsersTable();
         buildLinkUserSelect();
       }
@@ -11229,6 +11522,7 @@ if (opts.r2Wed) {
           return;
         }
 
+        // Alleen tonen (geen bewerken/verwijderen vanuit de webapp)
         let html = `
     <table class="player-table">
       <thead>
@@ -11237,158 +11531,33 @@ if (opts.r2Wed) {
           <th>Naam</th>
           <th>Rol</th>
           <th>Toernooien</th>
-          <th style="text-align:center;">Acties</th>
+          <th style="white-space:nowrap;">UID</th>
         </tr>
       </thead>
-      <tbody>`;
+      <tbody>
+  `;
 
         adminUsersCache.forEach((u) => {
           html += `
-      <tr data-uid="${u.id}">
+      <tr>
         <td>${u.username || ""}</td>
         <td>${u.displayName || ""}</td>
         <td>${u.role || "user"}</td>
-        <td>
-          ${renderTournamentBadges(u.tournaments || [])}
-        </td>
-
-        <td class="actions" style="text-align:right;">
-          <div class="button-row" style="justify-content:flex-end; gap:6px; margin:0;">
-            <button
-              type="button"
-              class="btn btn-secondary btn-icon-only edit-user-btn"
-              title="Gebruiker bewerken"
-            >
-              <span class="btn-icon" aria-hidden="true">✏️</span>
-            </button>
-            <button
-              type="button"
-              class="btn btn-delete btn-icon-only delete-user-btn"
-              title="Gebruiker verwijderen"
-            >
-              <span class="btn-icon" aria-hidden="true">🗑️</span>
-            </button>
-          </div>
-        </td>
+        <td>${renderTournamentBadges(u.tournaments || [])}</td>
+        <td style="font-size:12px;word-break:break-all;"><code>${u.id}</code></td>
       </tr>`;
         });
 
         html += `</tbody></table>`;
         usersTableWrap.innerHTML = html;
-
-        // events blijven EXACT hetzelfde
-        usersTableWrap.querySelectorAll(".edit-user-btn").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const tr = btn.closest("tr");
-            const u = adminUsersCache.find((x) => x.id === tr.dataset.uid);
-            if (!u) return;
-            document.getElementById("uUsername").value = u.username || "";
-            document.getElementById("uDisplay").value = u.displayName || "";
-            document.getElementById("uRole").value = u.role || "user";
-            document.getElementById("uPassword").value = ""; // leeg laten => alleen wijzigen als ingevuld
-            userForm.dataset.editing = u.id;
-            showAdminFeedback(`Bewerken: ${u.username}`, "info");
-          });
-        });
-
-        usersTableWrap.querySelectorAll(".delete-user-btn").forEach((btn) => {
-          btn.addEventListener("click", async () => {
-            const tr = btn.closest("tr");
-            const uid = tr.dataset.uid;
-            const u = adminUsersCache.find((x) => x.id === uid);
-            if (!u) return;
-
-            // ✅ Check: laatste admin mag niet verwijderd worden
-            if (u.role === "admin") {
-              const adminsLeft = adminUsersCache.filter(
-                (x) => x.role === "admin" && x.id !== uid
-              );
-              if (adminsLeft.length === 0) {
-                showAdminFeedback(
-                  "Je kunt de laatste admin niet verwijderen.",
-                  "error"
-                );
-                return;
-              }
-            }
-
-            if (!confirm(`Verwijder gebruiker "${u.username}"?`)) return;
-
-            await deleteDoc(doc(db, "users", uid));
-            showAdminFeedback("Gebruiker verwijderd.", "success");
-            await loadUsersAdminTab();
-          });
-        });
       }
 
-      userForm?.addEventListener("submit", async (e) => {
+      userForm?.addEventListener("submit", (e) => {
         e.preventDefault();
-        const username = document.getElementById("uUsername").value.trim();
-        const displayName = document.getElementById("uDisplay").value.trim();
-        const password = document.getElementById("uPassword").value;
-        const role = document.getElementById("uRole").value;
-
-        if (!username || !displayName) {
-          showAdminFeedback("Gebruikersnaam en naam zijn verplicht.", "error");
-          return;
-        }
-
-        const editingId = userForm.dataset.editing || null;
-
-        // ✅ check: laatste admin mag niet gedegradeerd worden
-        if (editingId) {
-          const existing = adminUsersCache.find((x) => x.id === editingId);
-          if (existing?.role === "admin" && role !== "admin") {
-            const otherAdmins = adminUsersCache.filter(
-              (x) => x.role === "admin" && x.id !== editingId
-            );
-            if (otherAdmins.length === 0) {
-              showAdminFeedback(
-                "Je kunt de laatste admin niet omzetten naar gebruiker.",
-                "error"
-              );
-              return;
-            }
-          }
-        }
-
-        // wachtwoord alleen verplicht bij nieuwe user
-        if (!editingId && !password) {
-          showAdminFeedback(
-            "Wachtwoord is verplicht bij nieuwe gebruiker.",
-            "error"
-          );
-          return;
-        }
-
-        // username uniek houden
-        const lower = username.toLowerCase();
-        const conflict = adminUsersCache.find(
-          (u) => u.username?.toLowerCase() === lower && u.id !== editingId
+        showAdminFeedback(
+          "Gebruikers aanmaken/wachtwoorden wijzigen/rollen aanpassen gebeurt voorlopig lokaal (setup-users.js).",
+          "info"
         );
-        if (conflict) {
-          showAdminFeedback("Gebruikersnaam bestaat al.", "error");
-          return;
-        }
-
-        const data = { username, displayName, role };
-
-        if (password) {
-          data.password = password;
-        }
-
-        if (editingId) {
-          await setDoc(doc(db, "users", editingId), data, { merge: true });
-          showAdminFeedback("Gebruiker bijgewerkt.", "success");
-          userForm.dataset.editing = "";
-        } else {
-          data.tournaments = [];
-          await addDoc(collection(db, "users"), data);
-          showAdminFeedback("Gebruiker toegevoegd.", "success");
-        }
-
-        userForm.reset();
-        await loadUsersAdminTab();
       });
 
       /* =========================================================
