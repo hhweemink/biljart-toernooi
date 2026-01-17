@@ -102,7 +102,6 @@
         gap: 0;
       }
 
-
       /* Smallere én hogere help-knop */
       /* Help-knop: exact 60px breed, mooi hoog, en consistent met btn-secondary */
       #bcr-toernooi-app .help-btn {
@@ -122,7 +121,7 @@
         border-radius: 6px;
         white-space: nowrap; /* geen wrap van tekst */
       }
-/*
+      /*
       #bcr-toernooi-app .help-btn {
         position: absolute;
         left: 18px;
@@ -637,7 +636,6 @@
         display: block;
       }
 
-
       /* Actief toernooi-balk onder de header */
       #bcr-toernooi-app .active-tournament {
         padding: 8px 18px;
@@ -1128,6 +1126,50 @@
         -moz-appearance: textfield; /* Firefox */
         appearance: textfield; /* toekomstige/standaard syntax */
       }
+
+      .old-player-suggest {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 100%;
+        margin-top: 6px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        max-height: 240px;
+        overflow: auto;
+        z-index: 2500;
+      }
+
+      .old-player-suggest .item {
+        padding: 10px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+      }
+
+      .old-player-suggest .item:last-child {
+        border-bottom: none;
+      }
+
+      .old-player-suggest .item:hover {
+        background: #f8f9fa;
+      }
+
+      .old-player-suggest .name {
+        font-weight: 600;
+      }
+
+      .old-player-suggest .meta {
+        font-size: 0.85em;
+        color: #666;
+      }
+
+      .old-player-picked {
+        margin-top: 6px;
+        font-size: 0.85em;
+        color: #555;
+      }
     </style>
   </head>
 
@@ -1177,21 +1219,26 @@
 
     <div id="bcr-toernooi-app">
       <header>
-<div class="header-left" id="headerLeft"><button
-          type="button"
-          id="helpBtn"
-          class="btn btn-secondary help-btn"
-          title="Uitleg over dit tabblad"
-        >
-          <span class="help-icon">i</span>
-          Info
-        </button></div>
+        <div class="header-left" id="headerLeft">
+          <button
+            type="button"
+            id="helpBtn"
+            class="btn btn-secondary help-btn"
+            title="Uitleg over dit tabblad"
+          >
+            <span class="help-icon">i</span>
+            Info
+          </button>
+        </div>
 
         <div class="header-title">Clubkampioenschappen BC Raalte 90</div>
 
         <div class="header-right" id="headerRight">
-                  
-          <div id="loginStatus" class="login-status" style="display:none"></div>
+          <div
+            id="loginStatus"
+            class="login-status"
+            style="display: none"
+          ></div>
 
           <button
             type="button"
@@ -1200,7 +1247,33 @@
             style="display: none"
             title="Uitloggen"
           >
-            <span class="btn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 7V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6 9l-3 3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="btn-icon" aria-hidden="true"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 7V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-2"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M14 12H3"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M6 9l-3 3 3 3"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                /></svg
+            ></span>
           </button>
         </div>
       </header>
@@ -1482,6 +1555,107 @@
               </div>
             </div>
           </div>
+          <!-- BLOK: CARAMBOLES-LIJSTEN (voor caramboles-hulp) -->
+          <div
+            class="toernooi-block punten-block"
+            id="prevTournamentsBlock"
+            style="margin-top: 14px"
+          >
+            <div class="toernooi-block-header">
+              <h3>Carambole-lijsten (voor caramboles-hulp)</h3>
+            </div>
+
+            <div class="toernooi-block-body">
+              <p style="margin-top: 0">
+                Upload hier twee punt-komma CSV-bestanden met kolommen:
+                <b>Naam</b> ; <b>Caramboles</b> ; <b>Bron</b>. Caramboles moet
+                een <b>integer</b> zijn.
+              </p>
+
+              <div
+                class="form-grid"
+                style="
+                  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                  gap: 14px;
+                "
+              >
+                <!-- Meest recente lijst -->
+                <div
+                  style="
+                    border: 1px solid #ddd;
+                    border-radius: 10px;
+                    padding: 10px;
+                    background: #fafafa;
+                  "
+                >
+                  <div style="font-weight: 700; margin-bottom: 6px">
+                    Meest recente editie
+                  </div>
+                  <input type="file" id="carListRecentFile" accept=".csv" />
+                  <div class="button-row" style="margin-top: 8px">
+                    <button
+                      type="button"
+                      id="uploadCarListRecentBtn"
+                      class="btn btn-secondary"
+                    >
+                      Upload
+                    </button>
+                    <button
+                      type="button"
+                      id="clearCarListRecentBtn"
+                      class="btn btn-secondary"
+                    >
+                      Wissen
+                    </button>
+                  </div>
+                  <div
+                    id="carListRecentStatus"
+                    style="margin-top: 6px; font-size: 0.85em; color: #555"
+                  ></div>
+                </div>
+
+                <!-- Lijst daarvoor -->
+                <div
+                  style="
+                    border: 1px solid #ddd;
+                    border-radius: 10px;
+                    padding: 10px;
+                    background: #fafafa;
+                  "
+                >
+                  <div style="font-weight: 700; margin-bottom: 6px">
+                    Editie daarvoor
+                  </div>
+                  <input type="file" id="carListPrevFile" accept=".csv" />
+                  <div class="button-row" style="margin-top: 8px">
+                    <button
+                      type="button"
+                      id="uploadCarListPrevBtn"
+                      class="btn btn-secondary"
+                    >
+                      Upload
+                    </button>
+                    <button
+                      type="button"
+                      id="clearCarListPrevBtn"
+                      class="btn btn-secondary"
+                    >
+                      Wissen
+                    </button>
+                  </div>
+                  <div
+                    id="carListPrevStatus"
+                    style="margin-top: 6px; font-size: 0.85em; color: #555"
+                  ></div>
+                </div>
+              </div>
+
+              <div
+                id="carListGlobalStatus"
+                style="margin-top: 10px; font-size: 0.85em; color: #555"
+              ></div>
+            </div>
+          </div>
 
           <div class="toernooi-block punten-block" id="moyCarTableBlock">
             <!-- ONDERAAN: OPSLAAN / LADEN / VERWIJDEREN -->
@@ -1539,8 +1713,16 @@
             <form id="playerForm" class="form-grid">
               <div>
                 <label>Naam speler</label>
-                <input type="text" id="playerName" required />
+                <input
+                  type="text"
+                  id="playerName"
+                  required
+                  list="carHelpNameDatalist"
+                  autocomplete="off"
+                />
+                <datalist id="carHelpNameDatalist"></datalist>
               </div>
+
               <div>
                 <label>E-mailadres</label>
                 <input type="text" id="playerEmail" />
@@ -1558,6 +1740,23 @@
                   max="999"
                   class="small"
                 />
+                <div
+                  id="carambolesSuggestBox"
+                  style="display: none; margin-top: 6px"
+                >
+                  <span
+                    id="carambolesSuggestText"
+                    style="font-size: 0.85em; color: #555"
+                  ></span>
+                  <button
+                    type="button"
+                    id="applyCarambolesSuggestBtn"
+                    class="btn btn-secondary"
+                    style="padding: 4px 10px; margin-left: 10px"
+                  >
+                    Overnemen
+                  </button>
+                </div>
               </div>
               <div style="grid-column: 1/-1; text-align: right">
                 <!-- zelfde look als sorteerknoppen -->
@@ -2849,11 +3048,16 @@
             <h3>Gebruikersbeheer</h3>
           </div>
           <div class="toernooi-block-body">
-            <p class="muted" style="margin:0 0 10px 0;">
-              Gebruikers aanmaken, wachtwoorden wijzigen en rollen (custom claims) aanpassen doe je voorlopig lokaal (setup-users.js).
-              In deze app zie je de gebruikers en kun je toernooien koppelen.
+            <p class="muted" style="margin: 0 0 10px 0">
+              Gebruikers aanmaken, wachtwoorden wijzigen en rollen (custom
+              claims) aanpassen doe je voorlopig lokaal (setup-users.js). In
+              deze app zie je de gebruikers en kun je toernooien koppelen.
             </p>
-            <form id="userForm" class="form-grid" style="margin-bottom: 10px; display:none">
+            <form
+              id="userForm"
+              class="form-grid"
+              style="margin-bottom: 10px; display: none"
+            >
               <div>
                 <label>Gebruikersnaam (login) *</label>
                 <input type="text" id="uUsername" required />
@@ -2923,45 +3127,50 @@
           </div>
         </div>
 
-            <!-- BLOK 3: Export -->
-            <div class="toernooi-block" style="margin-top: 14px">
-              <div class="toernooi-block-header">
-                <h3>Export</h3>
-              </div>
-              <div class="toernooi-block-body">
-                <p style="margin-top: 0">
-                  Exporteer een complete snapshot van het actieve toernooi als
-                  <strong>ZIP</strong> met meerdere
-                  <strong>CSV</strong>-bestanden (incl. afgeleide tabellen zoals
-                  standen).
-                </p>
-                <div class="button-row">
-                  <button
-                    type="button"
-                    id="exportTournamentBtn"
-                    class="btn btn-secondary"
-                  >
-                    <span class="btn-icon" aria-hidden="true">📦</span>
-                    <span class="btn-label">Export toernooi (ZIP)</span>
-                  </button>
-                </div>
-                <div
-                  id="exportAdminMiniStatus"
-                  style="margin-top: 8px; font-size: 0.92em; opacity: 0.9"
-                ></div>
-                <div style="margin-top: 6px; font-size: 0.9em; opacity: 0.85">
-                  Tip: Windows kan dit ZIP-bestand blokkeren. Deblokkeer eerst
-                  het ZIP-bestand (Eigenschappen → “Blokkering opheffen”).
-                </div>
-              </div>
-            </div>
-
-            <div id="adminFeedback"></div>
+        <!-- BLOK 3: Export -->
+        <div class="toernooi-block" style="margin-top: 14px">
+          <div class="toernooi-block-header">
+            <h3>Export</h3>
           </div>
-        
+          <div class="toernooi-block-body">
+            <p style="margin-top: 0">
+              Exporteer een complete snapshot van het actieve toernooi als
+              <strong>ZIP</strong> met meerdere <strong>CSV</strong>-bestanden
+              (incl. afgeleide tabellen zoals standen).
+            </p>
+            <div class="button-row">
+              <button
+                type="button"
+                id="exportTournamentBtn"
+                class="btn btn-secondary"
+              >
+                <span class="btn-icon" aria-hidden="true">📦</span>
+                <span class="btn-label">Export toernooi (ZIP)</span>
+              </button>
+              <button
+                type="button"
+                id="exportCarambolesBtn"
+                class="btn btn-secondary"
+              >
+                <span class="btn-icon" aria-hidden="true">📤</span>
+                <span class="btn-label">Export caramboles</span>
+              </button>
+            </div>
+            <div
+              id="exportAdminMiniStatus"
+              style="margin-top: 8px; font-size: 0.92em; opacity: 0.9"
+            ></div>
+            <div style="margin-top: 6px; font-size: 0.9em; opacity: 0.85">
+              Tip: Windows kan dit ZIP-bestand blokkeren. Deblokkeer eerst het
+              ZIP-bestand (Eigenschappen → “Blokkering opheffen”).
+            </div>
+          </div>
+        </div>
+
+        <div id="adminFeedback"></div>
       </div>
-      <!-- ===== END TAB: ADMIN ===== -->
     </div>
+    <!-- ===== END TAB: ADMIN ===== -->
 
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
@@ -2987,7 +3196,6 @@
         signOut,
       } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-
       /* Firebase config */
       const firebaseConfig = {
         apiKey: "AIzaSyAsg63E-lGgECsCxIfRJTFcTWB7LEGWNGc",
@@ -3010,7 +3218,7 @@
       const loginOverlay = document.getElementById("loginOverlay");
       const loginForm = document.getElementById("loginForm");
       const loginMsg = document.getElementById("loginMsg");
-const logoutBtn = document.getElementById("logoutBtn");
+      const logoutBtn = document.getElementById("logoutBtn");
       const loginStatusEl = document.getElementById("loginStatus");
 
       if (logoutBtn) {
@@ -3023,9 +3231,7 @@ const logoutBtn = document.getElementById("logoutBtn");
         });
       }
 
-
-      
-loginForm.addEventListener("submit", async (e) => {
+      loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         loginMsg.textContent = "";
 
@@ -3046,7 +3252,8 @@ loginForm.addEventListener("submit", async (e) => {
           // verdere init verloopt via onAuthStateChanged
         } catch (err) {
           console.error("Login fout:", err);
-          loginMsg.textContent = "Inloggen mislukt (naam of wachtwoord onjuist).";
+          loginMsg.textContent =
+            "Inloggen mislukt (naam of wachtwoord onjuist).";
         }
       });
 
@@ -3073,7 +3280,9 @@ loginForm.addEventListener("submit", async (e) => {
           username: profile.username || "",
           displayName: profile.displayName || profile.username || "",
           role: profile.role || "user",
-          tournaments: Array.isArray(profile.tournaments) ? profile.tournaments : [],
+          tournaments: Array.isArray(profile.tournaments)
+            ? profile.tournaments
+            : [],
         };
         await setDoc(targetRef, data, { merge: true });
       }
@@ -3112,21 +3321,21 @@ loginForm.addEventListener("submit", async (e) => {
 
         // Status rechtsboven
         if (loginStatusEl) {
-          const fallbackName =
-            auth?.currentUser?.email?.split("@")?.[0] || "";
+          const fallbackName = auth?.currentUser?.email?.split("@")?.[0] || "";
           const name =
-            currentUser?.displayName ||
-            currentUser?.username ||
-            fallbackName;
+            currentUser?.displayName || currentUser?.username || fallbackName;
 
           if (name) {
-            const roleLabel = isAdmin ? "admin" : (isManager ? "manager" : "");
+            const roleLabel = isAdmin ? "admin" : isManager ? "manager" : "";
             const roleHtml = roleLabel
               ? `<span class="login-role role-${roleLabel}">${roleLabel}</span>`
               : "";
             loginStatusEl.style.display = "inline-flex";
-            loginStatusEl.innerHTML = `<span class="login-icon" aria-hidden="true">👤</span>` +
-              `<span class="login-name">Ingelogd als: <b>${escapeHtml(name)}</b></span>` +
+            loginStatusEl.innerHTML =
+              `<span class="login-icon" aria-hidden="true">👤</span>` +
+              `<span class="login-name">Ingelogd als: <b>${escapeHtml(
+                name
+              )}</b></span>` +
               roleHtml;
           } else {
             loginStatusEl.style.display = "none";
@@ -3134,7 +3343,6 @@ loginForm.addEventListener("submit", async (e) => {
           }
         }
       }
-
 
       function showLoggedOutUi(msg = "") {
         currentUser = null;
@@ -3150,7 +3358,6 @@ loginForm.addEventListener("submit", async (e) => {
         loginOverlay.style.display = "flex";
         if (msg) loginMsg.textContent = msg;
       }
-
 
       onAuthStateChanged(auth, async (user) => {
         if (!user) {
@@ -3326,7 +3533,7 @@ loginForm.addEventListener("submit", async (e) => {
 
         const statusDiv = document.createElement("div");
         statusDiv.className = "connection-status";
-        statusDiv.innerHTML = "✓"
+        statusDiv.innerHTML = "✓";
         right.insertBefore(statusDiv, right.firstChild);
       }
 
@@ -3615,50 +3822,113 @@ loginForm.addEventListener("submit", async (e) => {
           );
         }
       }
-      /*
-            // Hulp: welke moy→car-tabel is nu gekoppeld aan het actieve toernooi?
-            function getActiveMoyCarTable() {
-              const select = document.getElementById("moyCarTableSelect");
-              if (!select) return null;
-              const id = select.value;
-              if (!id) return null;
-              if (!Array.isArray(moyCarTablesCache)) return null;
-              const table = moyCarTablesCache.find((t) => t.id === id);
-              if (!table || !Array.isArray(table.rows)) return null;
-              return table;
+
+      function fillPrevLinksSelects() {
+        const s1 = document.getElementById("prevTournament1Select");
+        const s2 = document.getElementById("prevTournament2Select");
+        if (!s1 || !s2) return;
+
+        const base1 = `<option value="">Niet gekoppeld</option>`;
+        const base2 = `<option value="">Niet gekoppeld</option>`;
+        s1.innerHTML = base1;
+        s2.innerHTML = base2;
+
+        prevLinkTournamentsCache.forEach((t) => {
+          // Optioneel: voorkom dat je het huidige toernooi aan zichzelf koppelt
+          // (mag eventueel wél, maar is meestal onlogisch)
+          if (activeTournamentId && t.id === activeTournamentId) return;
+
+          const label = `${t.naam || t.id} (${t.jaar || "?"})`;
+          s1.innerHTML += `<option value="${t.id}">${label}</option>`;
+          s2.innerHTML += `<option value="${t.id}">${label}</option>`;
+        });
+      }
+
+      async function savePrevTournamentLinks() {
+        if (!activeTournamentId) {
+          alert("⚠️ Er is geen actief toernooi geselecteerd.");
+          return;
+        }
+
+        const s1 = document.getElementById("prevTournament1Select");
+        const s2 = document.getElementById("prevTournament2Select");
+        const statusEl = document.getElementById("prevLinksStatus");
+        if (!s1 || !s2) return;
+
+        const id1 = s1.value || null;
+        const id2 = s2.value || null;
+
+        // simpele validatie: niet hetzelfde in beide dropdowns
+        if (id1 && id2 && id1 === id2) {
+          alert("⚠️ Kies twee verschillende toernooien (of laat er één leeg).");
+          return;
+        }
+
+        const arr = [];
+        if (id1) arr.push(id1);
+        if (id2) arr.push(id2);
+
+        try {
+          await updateDoc(doc(db, "toernooien", activeTournamentId), {
+            linkedPrevTournamentIds: arr.length ? arr : null,
+          });
+
+          if (statusEl) {
+            if (!arr.length) {
+              statusEl.textContent = "Geen voorgaande edities gekoppeld.";
+            } else {
+              const labels = arr
+                .map((id) => {
+                  const t = prevLinkTournamentsCache.find((x) => x.id === id);
+                  return t ? `${t.naam} (${t.jaar})` : id;
+                })
+                .join(" / ");
+              statusEl.textContent = `Gekoppeld: ${labels}`;
             }
-      */
-      /*
-            // Hulp: zoek in de tabel het aantal caramboles bij een gegeven moyenne
-            function lookupCarambolesFromMoy(moy, table) {
-              if (!table || !Array.isArray(table.rows)) return null;
-              const val = Number(moy);
-              if (!Number.isFinite(val)) return null;
+            statusEl.style.color = "#0f5132";
+          }
 
-              const rows = table.rows;
+          alert("✅ Voorgaande edities zijn opgeslagen.");
+        } catch (err) {
+          console.error("Fout bij opslaan linkedPrevTournamentIds:", err);
+          alert("❌ Opslaan van de koppeling is mislukt.");
+        }
+      }
 
-              for (let i = 0; i < rows.length; i++) {
-                const r = rows[i];
-                if (
-                  typeof r.van !== "number" ||
-                  typeof r.tot !== "number" ||
-                  typeof r.car !== "number"
-                ) {
-                  continue;
-                }
+      async function clearPrevTournamentLinks() {
+        if (!activeTournamentId) {
+          alert("⚠️ Er is geen actief toernooi geselecteerd.");
+          return;
+        }
 
-                const isLast = i === rows.length - 1;
-                const lowerOk = val >= r.van;
-                const upperOk = isLast ? val <= r.tot : val < r.tot;
+        const ok = confirm(
+          "Weet je zeker dat je de gekoppelde voorgaande edities wilt weghalen?"
+        );
+        if (!ok) return;
 
-                if (lowerOk && upperOk) {
-                  return r.car;
-                }
-              }
-              // geen passende rij gevonden
-              return null;
-            }
-      */
+        const s1 = document.getElementById("prevTournament1Select");
+        const s2 = document.getElementById("prevTournament2Select");
+        const statusEl = document.getElementById("prevLinksStatus");
+
+        try {
+          await updateDoc(doc(db, "toernooien", activeTournamentId), {
+            linkedPrevTournamentIds: null,
+          });
+
+          if (s1) s1.value = "";
+          if (s2) s2.value = "";
+          if (statusEl) {
+            statusEl.textContent = "Koppeling verwijderd.";
+            statusEl.style.color = "#0f5132";
+          }
+
+          alert("✅ Koppeling verwijderd.");
+        } catch (err) {
+          console.error("Fout bij verwijderen linkedPrevTournamentIds:", err);
+          alert("❌ Verwijderen van de koppeling is mislukt.");
+        }
+      }
+
       // Hulp: haal de actieve moy→car-tabel op die aan het toernooi is gekoppeld
       function getActiveMoyCarTable() {
         const sel = document.getElementById("moyCarTableSelect");
@@ -3712,6 +3982,32 @@ loginForm.addEventListener("submit", async (e) => {
 
         // geen passende rij gevonden
         return null;
+      }
+
+      async function getLinkedMoyCarTableForActiveTournament() {
+        if (!activeTournamentId) return null;
+
+        // 1) haal toernooi op -> moyCarTableId
+        const tSnap = await getDoc(doc(db, "toernooien", activeTournamentId));
+        const tData = tSnap.exists() ? tSnap.data() : null;
+        const tableId = tData?.moyCarTableId;
+        if (!tableId) return null;
+
+        // 2) probeer uit cache (als die al geladen is)
+        let table =
+          Array.isArray(moyCarTablesCache) && moyCarTablesCache.length
+            ? moyCarTablesCache.find((x) => x.id === tableId)
+            : null;
+
+        // 3) anders direct uit Firestore
+        if (!table) {
+          const s = await getDoc(doc(db, "moyCarTables", tableId));
+          if (!s.exists()) return null;
+          table = { id: tableId, ...s.data() };
+        }
+
+        // verwacht: table.rows met velden van/tot/car
+        return table;
       }
 
       function updateActiveTournament(name, year) {
@@ -3782,7 +4078,6 @@ loginForm.addEventListener("submit", async (e) => {
         // Admin tab data laden indien admin
         if (isAdmin) {
           loadUsersAdminTab();
-          loadTournamentsForLinking();
         }
       }
 
@@ -3971,6 +4266,251 @@ loginForm.addEventListener("submit", async (e) => {
           }
         });
 
+      let carHelpRecentMap = new Map(); // key = genormaliseerde naam -> { naam, caramboles, bron }
+      let carHelpPrevMap = new Map();
+
+      let carHelpRecentMeta = null; // { fileName, uploadedAt, rowCount }
+      let carHelpPrevMeta = null;
+
+      function normalizePlayerName(name) {
+        return (name || "").trim().replace(/\s+/g, " ").toLowerCase();
+      }
+
+      // Simpele (maar prima) parser voor punt-komma CSV met evt quotes
+      function splitSemicolonCSVLine(line) {
+        const out = [];
+        let cur = "";
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+
+          if (ch === '"') {
+            // dubbele quotes binnen quotes => "
+            if (inQuotes && line[i + 1] === '"') {
+              cur += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (ch === ";" && !inQuotes) {
+            out.push(cur.trim());
+            cur = "";
+          } else {
+            cur += ch;
+          }
+        }
+        out.push(cur.trim());
+        return out;
+      }
+
+      function parseCarHelpCSV(text) {
+        const lines = (text || "")
+          .split(/\r?\n/)
+          .map((l) => l.trim())
+          .filter((l) => l.length > 0);
+
+        if (!lines.length) {
+          return { rows: [], map: new Map(), warnings: ["Bestand is leeg."] };
+        }
+
+        // Header overslaan als eerste kolom "naam" bevat
+        let startIdx = 0;
+        const firstCols = splitSemicolonCSVLine(lines[0]).map((x) =>
+          x.toLowerCase()
+        );
+        if (firstCols[0]?.includes("naam")) startIdx = 1;
+
+        const map = new Map();
+        const rows = [];
+        const warnings = [];
+
+        for (let idx = startIdx; idx < lines.length; idx++) {
+          const cols = splitSemicolonCSVLine(lines[idx]);
+          const naam = (cols[0] || "").trim();
+          const carStr = (cols[1] || "").trim();
+          const bron = (cols[2] || "").trim();
+
+          if (!naam) {
+            warnings.push(`Regel ${idx + 1}: naam is leeg (overgeslagen).`);
+            continue;
+          }
+
+          // Caramboles: verplicht integer
+          if (!/^-?\d+$/.test(carStr)) {
+            // harde fout: we stoppen met duidelijke melding
+            throw new Error(
+              `Regel ${
+                idx + 1
+              }: Caramboles is geen integer ("${carStr}") bij "${naam}".`
+            );
+          }
+
+          const caramboles = parseInt(carStr, 10);
+
+          const key = normalizePlayerName(naam);
+          const item = { naam, caramboles, bron };
+
+          // bij dubbele naam: meest recente regel overschrijft (mag)
+          map.set(key, item);
+          rows.push(item);
+        }
+
+        return { rows, map, warnings };
+      }
+
+      function carHelpDocRef(kind /* "recent"|"previous" */) {
+        return doc(
+          db,
+          "toernooien",
+          activeTournamentId,
+          "caramboleHelpLists",
+          kind
+        );
+      }
+
+      async function loadCarHelpListsForActiveTournament() {
+        carHelpRecentMap = new Map();
+        carHelpPrevMap = new Map();
+        carHelpRecentMeta = null;
+        carHelpPrevMeta = null;
+
+        // UI reset
+        const sR = document.getElementById("carListRecentStatus");
+        const sP = document.getElementById("carListPrevStatus");
+        const sG = document.getElementById("carListGlobalStatus");
+        if (sR) sR.textContent = "";
+        if (sP) sP.textContent = "";
+        if (sG) sG.textContent = "";
+
+        if (!activeTournamentId) return;
+
+        // recent
+        const rSnap = await getDoc(carHelpDocRef("recent"));
+        if (rSnap.exists()) {
+          const d = rSnap.data() || {};
+          carHelpRecentMeta = {
+            fileName: d.fileName || "",
+            uploadedAt: d.uploadedAt || "",
+            rowCount: Array.isArray(d.rows) ? d.rows.length : d.rowCount || 0,
+          };
+          const map = new Map();
+          (d.rows || []).forEach((x) => {
+            const key = normalizePlayerName(x.naam);
+            if (key)
+              map.set(key, {
+                naam: x.naam,
+                caramboles: Number(x.caramboles),
+                bron: x.bron || "",
+              });
+          });
+          carHelpRecentMap = map;
+        }
+
+        // previous
+        const pSnap = await getDoc(carHelpDocRef("previous"));
+        if (pSnap.exists()) {
+          const d = pSnap.data() || {};
+          carHelpPrevMeta = {
+            fileName: d.fileName || "",
+            uploadedAt: d.uploadedAt || "",
+            rowCount: Array.isArray(d.rows) ? d.rows.length : d.rowCount || 0,
+          };
+          const map = new Map();
+          (d.rows || []).forEach((x) => {
+            const key = normalizePlayerName(x.naam);
+            if (key)
+              map.set(key, {
+                naam: x.naam,
+                caramboles: Number(x.caramboles),
+                bron: x.bron || "",
+              });
+          });
+          carHelpPrevMap = map;
+        }
+
+        // Status UI
+        if (sR) {
+          sR.textContent = carHelpRecentMeta
+            ? `✅ ${carHelpRecentMeta.rowCount} regels geladen (${
+                carHelpRecentMeta.fileName || "csv"
+              })`
+            : "— Geen lijst geüpload.";
+        }
+        if (sP) {
+          sP.textContent = carHelpPrevMeta
+            ? `✅ ${carHelpPrevMeta.rowCount} regels geladen (${
+                carHelpPrevMeta.fileName || "csv"
+              })`
+            : "— Geen lijst geüpload.";
+        }
+        if (sG) {
+          const n1 = carHelpRecentMap.size;
+          const n2 = carHelpPrevMap.size;
+          const uniqueNames = new Set([
+            ...carHelpRecentMap.keys(),
+            ...carHelpPrevMap.keys(),
+          ]).size;
+          sG.textContent = `Totaal unieke namen beschikbaar: ${uniqueNames} (recent: ${n1}, daarvoor: ${n2})`;
+        }
+        refreshCarHelpNameDatalist();
+      }
+
+      async function uploadCarHelpCSV(kind /* "recent"|"previous" */) {
+        if (!activeTournamentId)
+          return alert("⚠️ Eerst een toernooi laden of opslaan.");
+        const inputId =
+          kind === "recent" ? "carListRecentFile" : "carListPrevFile";
+        const input = document.getElementById(inputId);
+        if (!input || !input.files || !input.files[0])
+          return alert("⚠️ Kies eerst een CSV-bestand.");
+
+        const file = input.files[0];
+        const text = await file.text();
+
+        let parsed;
+        try {
+          parsed = parseCarHelpCSV(text); // kan throwen bij non-integer
+        } catch (e) {
+          alert("❌ CSV fout:\n" + (e?.message || e));
+          return;
+        }
+
+        // optioneel: warnings tonen
+        if (parsed.warnings?.length) {
+          console.warn("CSV warnings:", parsed.warnings);
+        }
+
+        // Firestore opslaan
+        await setDoc(
+          carHelpDocRef(kind),
+          {
+            fileName: file.name,
+            uploadedAt: new Date().toISOString(),
+            rowCount: parsed.rows.length,
+            rows: parsed.rows,
+          },
+          { merge: true }
+        );
+
+        // herladen + UI bijwerken
+        await loadCarHelpListsForActiveTournament();
+        alert(
+          `✅ ${
+            kind === "recent" ? "Meest recente" : "Editie daarvoor"
+          } lijst geüpload (${parsed.rows.length} regels).`
+        );
+      }
+
+      async function clearCarHelpCSV(kind /* "recent"|"previous" */) {
+        if (!activeTournamentId) return alert("⚠️ Eerst een toernooi laden.");
+        const ok = confirm("Weet je zeker dat je deze lijst wilt wissen?");
+        if (!ok) return;
+
+        await deleteDoc(carHelpDocRef(kind));
+        await loadCarHelpListsForActiveTournament();
+      }
+
       // Opslaan / bijwerken van een toernooi
       async function saveTournament() {
         const naam = document.getElementById("tournamentName").value.trim();
@@ -4020,7 +4560,8 @@ loginForm.addEventListener("submit", async (e) => {
 
         try {
           const id = `${naam}_${jaar}`.replace(/\s+/g, "_");
-          await setDoc(doc(db, "toernooien", id), data);
+          await setDoc(doc(db, "toernooien", id), data, { merge: true });
+
           activeTournamentId = id;
           playersFinalized = data.playersFinalized;
           showFeedback(
@@ -4169,6 +4710,9 @@ loginForm.addEventListener("submit", async (e) => {
               }
 
               activeTournamentId = id;
+
+              await loadCarHelpListsForActiveTournament();
+
               playersFinalized = !!t.playersFinalized;
               updateActiveTournament(t.naam, t.jaar);
               showFeedback(
@@ -4569,6 +5113,107 @@ loginForm.addEventListener("submit", async (e) => {
         renderPlayersTable();
       }
 
+      let lastCarambolesSuggestion = null;
+
+      function hideCarambolesSuggestion() {
+        lastCarambolesSuggestion = null;
+        const box = document.getElementById("carambolesSuggestBox");
+        const txt = document.getElementById("carambolesSuggestText");
+        if (txt) txt.textContent = "";
+        if (box) box.style.display = "none";
+      }
+
+      function showCarambolesSuggestion(text, suggestedValue) {
+        const box = document.getElementById("carambolesSuggestBox");
+        const txt = document.getElementById("carambolesSuggestText");
+        if (!box || !txt) return;
+
+        lastCarambolesSuggestion = suggestedValue ?? null;
+        txt.textContent = text;
+        box.style.display = "block";
+      }
+
+      async function getLinkedPrevTournamentIdsForActiveTournament() {
+        if (!activeTournamentId) return [];
+        const tSnap = await getDoc(doc(db, "toernooien", activeTournamentId));
+        if (!tSnap.exists()) return [];
+        const linked = Array.isArray(tSnap.data().linkedPrevTournamentIds)
+          ? tSnap.data().linkedPrevTournamentIds
+          : [];
+        return linked;
+      }
+
+      function getNameFromMatchSide(match, side /* "X"|"Y" */) {
+        // match kan verschillende shapes hebben; we proberen robuust te lezen
+        if (side === "X") {
+          return (
+            match?.spelerX?.naam ||
+            match?.spelerX_naam ||
+            match?.spelerXNaam ||
+            match?.spelerXName ||
+            ""
+          );
+        } else {
+          return (
+            match?.spelerY?.naam ||
+            match?.spelerY_naam ||
+            match?.spelerYNaam ||
+            match?.spelerYName ||
+            ""
+          );
+        }
+      }
+
+      function getMadeFromMatchSide(match, side /* "X"|"Y" */) {
+        if (side === "X") {
+          return Number(match?.gemaakteX ?? match?.gemaaktX ?? 0);
+        } else {
+          return Number(match?.gemaakteY ?? match?.gemaaktY ?? 0);
+        }
+      }
+
+      async function computeHistoricalMoyenneFromR1(
+        prevTournamentId,
+        playerName
+      ) {
+        const snap = await getDocs(
+          collection(db, "toernooien", prevTournamentId, "r1_wedstrijden")
+        );
+        let totalMade = 0;
+        let totalBeurten = 0;
+        let matchCount = 0;
+
+        const target = (playerName || "").trim().toLowerCase();
+        if (!target) return null;
+
+        snap.docs.forEach((d) => {
+          const m = d.data() || {};
+          if (m.afgerond !== true) return;
+
+          const beurten = Number(m.beurten ?? 0);
+          if (!beurten || beurten <= 0) return;
+
+          if (nameX === target) {
+            const made = getMadeFromMatchSide(m, "X");
+            if (!Number.isFinite(made)) return;
+            totalMade += made;
+            totalBeurten += beurten;
+            matchCount++;
+          } else if (nameY === target) {
+            const made = getMadeFromMatchSide(m, "Y");
+            if (!Number.isFinite(made)) return;
+            totalMade += made;
+            totalBeurten += beurten;
+            matchCount++;
+          }
+        });
+
+        if (matchCount === 0 || totalBeurten === 0) return null;
+
+        const moy = totalMade / totalBeurten;
+        return { moy, matchCount, totalMade, totalBeurten };
+      }
+
       async function addPlayer(e) {
         e.preventDefault();
         if (!activeTournamentId) {
@@ -4600,7 +5245,14 @@ loginForm.addEventListener("submit", async (e) => {
           email,
           telefoon,
           caramboles: caramboles ? Number(caramboles) : null,
+          carBron:
+            currentCarHelpSuggestion &&
+            normalizePlayerName(currentCarHelpSuggestion.naam) ===
+              normalizePlayerName(naam)
+              ? currentCarHelpSuggestion.bron || null
+              : null,
         };
+
         await addDoc(
           collection(db, "toernooien", activeTournamentId, "spelers"),
           newPlayer
@@ -4612,6 +5264,8 @@ loginForm.addEventListener("submit", async (e) => {
         document.getElementById("playerEmail").value = "";
         document.getElementById("playerPhone").value = "";
         document.getElementById("playerCaramboles").value = "";
+
+        hideCarambolesSuggestion();
 
         await loadPlayersFromFirestore();
       }
@@ -4664,6 +5318,108 @@ loginForm.addEventListener("submit", async (e) => {
       });
 
       playerForm.addEventListener("submit", addPlayer);
+      const playerNameInput = document.getElementById("playerName");
+      if (playerNameInput) {
+        playerNameInput.addEventListener("focus", async () => {
+          await loadOldPlayersFromLinkedTournaments();
+          showOldPlayerSuggestions(playerNameInput.value);
+        });
+
+        playerNameInput.addEventListener("input", async () => {
+          // zodra iemand begint te typen, is “oud-deelnemer selectie” niet meer zeker
+          resetOldPlayerSelectionUI();
+          hideCarambolesSuggestion();
+
+          await loadOldPlayersFromLinkedTournaments();
+          showOldPlayerSuggestions(playerNameInput.value);
+        });
+
+        playerNameInput.addEventListener("blur", () => {
+          // kleine delay zodat klik op suggestie nog kan landen
+          setTimeout(() => hideOldPlayerSuggestions(), 150);
+        });
+      }
+
+      const playerNameInp = document.getElementById("playerName");
+      if (playerNameInp) {
+        playerNameInp.addEventListener("input", () => {
+          // alleen tonen als er iets getypt is
+          updateCarambolesSuggestUI();
+        });
+
+        playerNameInp.addEventListener("blur", () => {
+          // blur: ook even checken (handig als iemand een suggestie “afklikt”)
+          updateCarambolesSuggestUI();
+        });
+      }
+
+      const applyCarBtn = document.getElementById("applyCarambolesSuggestBtn");
+      if (applyCarBtn)
+        applyCarBtn.addEventListener("click", applyCarambolesSuggestion);
+
+      let currentCarHelpSuggestion = null;
+      // { caramboles: number, bron: string, naam: string, source: "recent"|"previous" }
+
+      function getCarHelpSuggestionByName(inputName) {
+        const key = normalizePlayerName(inputName);
+        if (!key) return null;
+
+        // 1) recent eerst
+        const r = carHelpRecentMap.get(key);
+        if (r && Number.isInteger(r.caramboles)) {
+          return {
+            naam: r.naam,
+            caramboles: r.caramboles,
+            bron: r.bron || "",
+            source: "recent",
+          };
+        }
+
+        // 2) anders previous
+        const p = carHelpPrevMap.get(key);
+        if (p && Number.isInteger(p.caramboles)) {
+          return {
+            naam: p.naam,
+            caramboles: p.caramboles,
+            bron: p.bron || "",
+            source: "previous",
+          };
+        }
+
+        return null;
+      }
+
+      function updateCarambolesSuggestUI() {
+        const nameInput = document.getElementById("playerName");
+        const box = document.getElementById("carambolesSuggestBox");
+        const text = document.getElementById("carambolesSuggestText");
+        const applyBtn = document.getElementById("applyCarambolesSuggestBtn");
+
+        if (!nameInput || !box || !text || !applyBtn) return;
+
+        currentCarHelpSuggestion = getCarHelpSuggestionByName(nameInput.value);
+
+        if (!currentCarHelpSuggestion) {
+          box.style.display = "none";
+          return;
+        }
+
+        const bronTxt = currentCarHelpSuggestion.bron
+          ? ` (bron: ${currentCarHelpSuggestion.bron})`
+          : "";
+        text.textContent = `Voorstel te maken caramboles: ${currentCarHelpSuggestion.caramboles}${bronTxt}`;
+        box.style.display = "block";
+      }
+
+      function applyCarambolesSuggestion() {
+        const carInp = document.getElementById("playerCaramboles");
+        const box = document.getElementById("carambolesSuggestBox");
+        if (!carInp || !box) return;
+
+        if (!currentCarHelpSuggestion) return;
+        carInp.value = String(currentCarHelpSuggestion.caramboles);
+        box.style.display = "none";
+      }
 
       // NIEUWE FUNCTIES VOOR DE KNOPPEN
 
@@ -4917,6 +5673,31 @@ loginForm.addEventListener("submit", async (e) => {
       }
 
       // ===== Basisindelingen – helpers =====
+
+      function refreshCarHelpNameDatalist() {
+        const dl = document.getElementById("carHelpNameDatalist");
+        if (!dl) return;
+
+        // unieke namen uit recent + previous
+        const unique = new Map(); // key=normalized, value=displayName (eerste die we zien)
+        for (const item of carHelpRecentMap.values()) {
+          const k = normalizePlayerName(item.naam);
+          if (k && !unique.has(k)) unique.set(k, item.naam);
+        }
+        for (const item of carHelpPrevMap.values()) {
+          const k = normalizePlayerName(item.naam);
+          if (k && !unique.has(k)) unique.set(k, item.naam);
+        }
+
+        // sorteer alfabetisch op display
+        const names = [...unique.values()].sort((a, b) =>
+          a.localeCompare(b, "nl")
+        );
+
+        dl.innerHTML = names
+          .map((n) => `<option value="${n.replace(/"/g, "&quot;")}"></option>`)
+          .join("");
+      }
 
       // hoe sterk is een speler? (caramboles 1e ronde, anders algemene caramboles, anders teMaken)
       function getPlayerStrength(speler) {
@@ -10820,7 +11601,6 @@ loginForm.addEventListener("submit", async (e) => {
           keys.map((k) => csvEscape(r?.[k], sep)).join(sep)
         );
         return "\uFEFF" + [header, ...lines].join("\n");
-
       }
 
       function downloadBlob(blob, filename) {
@@ -10896,136 +11676,139 @@ loginForm.addEventListener("submit", async (e) => {
         return lines.join("\r\n");
       }
 
-      function computePouleStandRows(pouleNaam, matches, pouleDoc, rondeHint = "") {
-  // rondeHint: "r1" of "r2" (anders fallback op beschikbare velden)
-  const pickTeMaken = (s) => {
-    if (rondeHint === "r1") return s?.carambolesR1 ?? s?.caramboles ?? 0;
-    if (rondeHint === "r2") return s?.carambolesR2 ?? s?.carambolesR1 ?? s?.caramboles ?? 0;
-    return s?.carambolesR2 ?? s?.carambolesR1 ?? s?.caramboles ?? 0;
-  };
+      function computePouleStandRows(
+        pouleNaam,
+        matches,
+        pouleDoc,
+        rondeHint = ""
+      ) {
+        // rondeHint: "r1" of "r2" (anders fallback op beschikbare velden)
+        const pickTeMaken = (s) => {
+          if (rondeHint === "r1") return s?.carambolesR1 ?? s?.caramboles ?? 0;
+          if (rondeHint === "r2")
+            return s?.carambolesR2 ?? s?.carambolesR1 ?? s?.caramboles ?? 0;
+          return s?.carambolesR2 ?? s?.carambolesR1 ?? s?.caramboles ?? 0;
+        };
 
-  const spelers = (pouleDoc?.spelers || []).map((s) => ({
-    id: s.id,
-    naam: s.naam,
-    teMaken: pickTeMaken(s),
-  }));
+        const spelers = (pouleDoc?.spelers || []).map((s) => ({
+          id: s.id,
+          naam: s.naam,
+          teMaken: pickTeMaken(s),
+        }));
 
-  const stats = new Map();
-  spelers.forEach((s) =>
-    stats.set(s.id, {
-      poule: pouleNaam || pouleDoc?.naam || "",
-      spelerId: s.id,
-      spelerNaam: s.naam || "",
-      teMaken: Number(s.teMaken) || 0,
-      punten: 0,
-      car: 0,
-      beurten: 0,
-      gespeeld: 0,
-    })
-  );
+        const stats = new Map();
+        spelers.forEach((s) =>
+          stats.set(s.id, {
+            poule: pouleNaam || pouleDoc?.naam || "",
+            spelerId: s.id,
+            spelerNaam: s.naam || "",
+            teMaken: Number(s.teMaken) || 0,
+            punten: 0,
+            car: 0,
+            beurten: 0,
+            gespeeld: 0,
+          })
+        );
 
-  (matches || []).forEach((m) => {
-    if (!m) return;
+        (matches || []).forEach((m) => {
+          if (!m) return;
 
-    if (m.gemaakteX != null) {
-      const sX = stats.get(m.spelerX?.id);
-      if (sX) {
-        sX.car += Number(m.gemaakteX) || 0;
-        sX.beurten += Number(m.beurten) || 0;
-        if (m.puntenX != null) sX.punten += Number(m.puntenX) || 0;
-        if (m.afgerond) sX.gespeeld += 1;
+          if (m.gemaakteX != null) {
+            const sX = stats.get(m.spelerX?.id);
+            if (sX) {
+              sX.car += Number(m.gemaakteX) || 0;
+              sX.beurten += Number(m.beurten) || 0;
+              if (m.puntenX != null) sX.punten += Number(m.puntenX) || 0;
+              if (m.afgerond) sX.gespeeld += 1;
+            }
+          }
+
+          if (m.gemaakteY != null) {
+            const sY = stats.get(m.spelerY?.id);
+            if (sY) {
+              sY.car += Number(m.gemaakteY) || 0;
+              sY.beurten += Number(m.beurten) || 0;
+              if (m.puntenY != null) sY.punten += Number(m.puntenY) || 0;
+              if (m.afgerond) sY.gespeeld += 1;
+            }
+          }
+        });
+
+        // eerst "ruwe" rows
+        let rows = Array.from(stats.values()).map((s) => {
+          const moy = s.beurten > 0 ? s.car / s.beurten : 0;
+
+          // ✅ %Car zoals in totaaloverzicht:
+          // gemaakte car / (gespeelde wedstrijden * teMaken) * 100
+          const denom = (Number(s.gespeeld) || 0) * (Number(s.teMaken) || 0);
+          const perc = denom > 0 ? (s.car / denom) * 100 : 0;
+
+          return {
+            poule: s.poule,
+            spelerId: s.spelerId, // (tijdelijk, halen we erna weg)
+            spelerNaam: s.spelerNaam,
+            teMaken: s.teMaken,
+            gespeeld: s.gespeeld,
+            punten: s.punten,
+            caramboles: s.car,
+            beurten: s.beurten,
+            moyenne: Number.isFinite(moy) ? moy.toFixed(3) : "",
+            perc: Number.isFinite(perc) ? perc.toFixed(1) : "",
+          };
+        });
+
+        rows.sort((a, b) => {
+          // punten desc, percentage desc, moyenne desc, caramboles desc
+          const p = (b.punten || 0) - (a.punten || 0);
+          if (p) return p;
+          const pe = (parseFloat(b.perc) || 0) - (parseFloat(a.perc) || 0);
+          if (pe) return pe;
+          const mo =
+            (parseFloat(b.moyenne) || 0) - (parseFloat(a.moyenne) || 0);
+          if (mo) return mo;
+          return (b.caramboles || 0) - (a.caramboles || 0);
+        });
+
+        // pos bepalen
+        rows.forEach((r, i) => (r.pos = i + 1));
+
+        // ✅ definitieve kolomvolgorde + spelerId weg
+        rows = rows.map((r) => ({
+          poule: r.poule,
+          pos: r.pos,
+          spelerNaam: r.spelerNaam,
+          teMaken: r.teMaken,
+          gespeeld: r.gespeeld,
+          punten: r.punten,
+          caramboles: r.caramboles,
+          beurten: r.beurten,
+          moyenne: r.moyenne,
+          perc: r.perc,
+        }));
+
+        return rows;
       }
-    }
-
-    if (m.gemaakteY != null) {
-      const sY = stats.get(m.spelerY?.id);
-      if (sY) {
-        sY.car += Number(m.gemaakteY) || 0;
-        sY.beurten += Number(m.beurten) || 0;
-        if (m.puntenY != null) sY.punten += Number(m.puntenY) || 0;
-        if (m.afgerond) sY.gespeeld += 1;
-      }
-    }
-  });
-
-  // eerst "ruwe" rows
-  let rows = Array.from(stats.values()).map((s) => {
-    const moy = s.beurten > 0 ? s.car / s.beurten : 0;
-
-    // ✅ %Car zoals in totaaloverzicht:
-    // gemaakte car / (gespeelde wedstrijden * teMaken) * 100
-    const denom = (Number(s.gespeeld) || 0) * (Number(s.teMaken) || 0);
-    const perc = denom > 0 ? (s.car / denom) * 100 : 0;
-
-    return {
-      poule: s.poule,
-      spelerId: s.spelerId, // (tijdelijk, halen we erna weg)
-      spelerNaam: s.spelerNaam,
-      teMaken: s.teMaken,
-      gespeeld: s.gespeeld,
-      punten: s.punten,
-      caramboles: s.car,
-      beurten: s.beurten,
-      moyenne: Number.isFinite(moy) ? moy.toFixed(3) : "",
-      perc: Number.isFinite(perc) ? perc.toFixed(1) : "",
-    };
-  });
-
-  rows.sort((a, b) => {
-    // punten desc, percentage desc, moyenne desc, caramboles desc
-    const p = (b.punten || 0) - (a.punten || 0);
-    if (p) return p;
-    const pe = (parseFloat(b.perc) || 0) - (parseFloat(a.perc) || 0);
-    if (pe) return pe;
-    const mo = (parseFloat(b.moyenne) || 0) - (parseFloat(a.moyenne) || 0);
-    if (mo) return mo;
-    return (b.caramboles || 0) - (a.caramboles || 0);
-  });
-
-  // pos bepalen
-  rows.forEach((r, i) => (r.pos = i + 1));
-
-  // ✅ definitieve kolomvolgorde + spelerId weg
-  rows = rows.map((r) => ({
-    poule: r.poule,
-    pos: r.pos,
-    spelerNaam: r.spelerNaam,
-    teMaken: r.teMaken,
-    gespeeld: r.gespeeld,
-    punten: r.punten,
-    caramboles: r.caramboles,
-    beurten: r.beurten,
-    moyenne: r.moyenne,
-    perc: r.perc,
-  }));
-
-  return rows;
-}
-
 
       function flattenMatch(m) {
-return {
-  // id en pouleId -> weg
-  pouleNaam: m?.pouleNaam || "",
+        return {
+          // id en pouleId -> weg
+          pouleNaam: m?.pouleNaam || "",
 
-  // spelerXid/spelerYid -> weg (alleen namen exporteren)
-  spelerX_naam: m?.spelerX?.naam || "",
-  spelerY_naam: m?.spelerY?.naam || "",
+          // spelerXid/spelerYid -> weg (alleen namen exporteren)
+          spelerX_naam: m?.spelerX?.naam || "",
+          spelerY_naam: m?.spelerY?.naam || "",
 
-  // teMakenX/teMakenY vullen: in jouw app zit dit doorgaans op spelerX.teMaken / spelerY.teMaken
-  teMakenX: m?.teMakenX ?? m?.spelerX?.teMaken ?? m?.carambolesX ?? "",
-  teMakenY: m?.teMakenY ?? m?.spelerY?.teMaken ?? m?.carambolesY ?? "",
+          // teMakenX/teMakenY vullen: in jouw app zit dit doorgaans op spelerX.teMaken / spelerY.teMaken
+          teMakenX: m?.teMakenX ?? m?.spelerX?.teMaken ?? m?.carambolesX ?? "",
+          teMakenY: m?.teMakenY ?? m?.spelerY?.teMaken ?? m?.carambolesY ?? "",
 
-  gemaakteX: m?.gemaakteX ?? "",
-  gemaakteY: m?.gemaakteY ?? "",
-  beurten: m?.beurten ?? "",
-  puntenX: m?.puntenX ?? "",
-  puntenY: m?.puntenY ?? "",
-  afgerond: m?.afgerond ?? false,
-
-
-};
-
+          gemaakteX: m?.gemaakteX ?? "",
+          gemaakteY: m?.gemaakteY ?? "",
+          beurten: m?.beurten ?? "",
+          puntenX: m?.puntenX ?? "",
+          puntenY: m?.puntenY ?? "",
+          afgerond: m?.afgerond ?? false,
+        };
       }
 
       function flattenPoule(p) {
@@ -11045,7 +11828,6 @@ return {
             : "",
         };
       }
-
 
       function flattenPlayer(p) {
         // We nemen bewust veel velden mee (ook als niet altijd gebruikt), zodat de export zo compleet mogelijk is.
@@ -11091,7 +11873,9 @@ return {
 
         // maxBeurten moet "nvt" zijn als leeg/null/undefined
         const maxBeurten =
-          tourn?.maxBeurten === "" || tourn?.maxBeurten == null ? "nvt" : tourn.maxBeurten;
+          tourn?.maxBeurten === "" || tourn?.maxBeurten == null
+            ? "nvt"
+            : tourn.maxBeurten;
 
         return {
           id: activeTournamentId,
@@ -11103,7 +11887,6 @@ return {
           publiceerPubliek: tourn?.publiceerPubliek ?? false,
           playersFinalized: tourn?.playersFinalized ?? false,
           moyCarTabel: moyTable?.name || moyTable?.naam || "",
-
 
           aangemaaktOp: tourn?.aangemaaktOp || "",
 
@@ -11120,12 +11903,11 @@ return {
           pointsWinLess: punten?.winLess ?? "",
           pointsDrawLess: punten?.drawLess ?? "",
           pointsLoseLess: punten?.loseLess ?? "",
-          pointsWinMax: maxBeurten === "nvt" ? "nvt" : (punten?.winMax ?? ""),
-          pointsDrawMax: maxBeurten === "nvt" ? "nvt" : (punten?.drawMax ?? ""),
-          pointsLoseMax: maxBeurten === "nvt" ? "nvt" : (punten?.loseMax ?? ""),
+          pointsWinMax: maxBeurten === "nvt" ? "nvt" : punten?.winMax ?? "",
+          pointsDrawMax: maxBeurten === "nvt" ? "nvt" : punten?.drawMax ?? "",
+          pointsLoseMax: maxBeurten === "nvt" ? "nvt" : punten?.loseMax ?? "",
         };
       }
-
 
       async function startExportTournamentZip() {
         const opts = getExportOptions();
@@ -11177,23 +11959,22 @@ return {
           // We halen alleen op wat nodig is (maar standings hebben poules+wedstrijden nodig)
           const spelers =
             opts.spelers || opts.finale ? await fetchSub("spelers") : [];
-const poulesR1 =
-  opts.r1Poules || opts.r1Stand || opts.r1Wed
-    ? await fetchSub("poules_r1")
-    : [];
+          const poulesR1 =
+            opts.r1Poules || opts.r1Stand || opts.r1Wed
+              ? await fetchSub("poules_r1")
+              : [];
           const wedR1 =
             opts.r1Wed || opts.r1Stand ? await fetchSub("r1_wedstrijden") : [];
-const poulesR2 =
-  opts.r2Poules || opts.r2Stand || opts.r2Wed
-    ? await fetchSub("poules_r2")
-    : [];
+          const poulesR2 =
+            opts.r2Poules || opts.r2Stand || opts.r2Wed
+              ? await fetchSub("poules_r2")
+              : [];
           const wedR2 =
             opts.r2Wed || opts.r2Stand ? await fetchSub("r2_wedstrijden") : [];
 
           // Moy table
           let moyTable = null;
           if (opts.moy || opts.toernooi) {
-
             const tableId = tourn?.moyCarTableId;
             if (tableId) {
               const tRef = doc(db, "moyCarTables", tableId);
@@ -11212,13 +11993,14 @@ const poulesR2 =
             zip.file("readme.txt", buildReadmeTxt(meta));
             bump("readme.txt toegevoegd...");
           }
-if (opts.toernooi) {
-  const toernooiRow = flattenTournamentForExport(tourn || {}, moyTable);
-  zip.file("toernooi.csv", objectsToCsv([toernooiRow], ";"));
-  bump("toernooi.csv toegevoegd...");
-}
-
-
+          if (opts.toernooi) {
+            const toernooiRow = flattenTournamentForExport(
+              tourn || {},
+              moyTable
+            );
+            zip.file("toernooi.csv", objectsToCsv([toernooiRow], ";"));
+            bump("toernooi.csv toegevoegd...");
+          }
 
           if (opts.spelers) {
             zip.file(
@@ -11228,83 +12010,89 @@ if (opts.toernooi) {
             bump("spelers.csv toegevoegd...");
           }
 
-if (opts.r1Poules) {
-  zip.file(
-    "poules_r1.csv",
-    objectsToCsv(poulesR1.map((p) => flattenPoule({ ...p, _ronde: "r1" })), ";")
-  );
-  bump("poules_r1.csv toegevoegd...");
-}
+          if (opts.r1Poules) {
+            zip.file(
+              "poules_r1.csv",
+              objectsToCsv(
+                poulesR1.map((p) => flattenPoule({ ...p, _ronde: "r1" })),
+                ";"
+              )
+            );
+            bump("poules_r1.csv toegevoegd...");
+          }
 
-if (opts.r1Wed) {
-  // pouleId -> pouleNaam
-  const pouleNaamMap = Object.fromEntries(
-    (poulesR1 || []).map((p) => [p.id, p?.naam || ""])
-  );
+          if (opts.r1Wed) {
+            // pouleId -> pouleNaam
+            const pouleNaamMap = Object.fromEntries(
+              (poulesR1 || []).map((p) => [p.id, p?.naam || ""])
+            );
 
-  // verrijk wedstrijden met pouleNaam op basis van pouleId
-  const wedR1Export = (wedR1 || []).map((m) => ({
-    ...m,
-    pouleNaam: pouleNaamMap[m?.poule || m?.pouleId] || "",
-  }));
+            // verrijk wedstrijden met pouleNaam op basis van pouleId
+            const wedR1Export = (wedR1 || []).map((m) => ({
+              ...m,
+              pouleNaam: pouleNaamMap[m?.poule || m?.pouleId] || "",
+            }));
 
-  zip.file(
-    "r1_wedstrijden.csv",
-    objectsToCsv(wedR1Export.map(flattenMatch), ";")
-  );
-  bump("r1_wedstrijden.csv toegevoegd...");
-}
-
-
+            zip.file(
+              "r1_wedstrijden.csv",
+              objectsToCsv(wedR1Export.map(flattenMatch), ";")
+            );
+            bump("r1_wedstrijden.csv toegevoegd...");
+          }
 
           if (opts.r1Stand) {
             const allRows = [];
             poulesR1.forEach((p) => {
-              const matches = wedR1.filter((m) => (m?.pouleId || m?.poule) === p.id);
+              const matches = wedR1.filter(
+                (m) => (m?.pouleId || m?.poule) === p.id
+              );
 
-              allRows.push(...computePouleStandRows(p?.naam || "", matches, p, "r1"));
-
+              allRows.push(
+                ...computePouleStandRows(p?.naam || "", matches, p, "r1")
+              );
             });
             zip.file("standen_r1.csv", objectsToCsv(allRows, ";"));
             bump("standen_r1.csv toegevoegd...");
           }
 
-if (opts.r2Poules) {
-  zip.file(
-    "poules_r2.csv",
-    objectsToCsv(poulesR2.map((p) => flattenPoule({ ...p, _ronde: "r2" })), ";")
-  );
-  bump("poules_r2.csv toegevoegd...");
-}
+          if (opts.r2Poules) {
+            zip.file(
+              "poules_r2.csv",
+              objectsToCsv(
+                poulesR2.map((p) => flattenPoule({ ...p, _ronde: "r2" })),
+                ";"
+              )
+            );
+            bump("poules_r2.csv toegevoegd...");
+          }
 
+          if (opts.r2Wed) {
+            const pouleNaamMap = Object.fromEntries(
+              (poulesR2 || []).map((p) => [p.id, p?.naam || ""])
+            );
 
-if (opts.r2Wed) {
-  const pouleNaamMap = Object.fromEntries(
-    (poulesR2 || []).map((p) => [p.id, p?.naam || ""])
-  );
+            const wedR2Export = (wedR2 || []).map((m) => ({
+              ...m,
+              pouleNaam: pouleNaamMap[m?.poule || m?.pouleId] || "",
+            }));
 
-  const wedR2Export = (wedR2 || []).map((m) => ({
-    ...m,
-    pouleNaam: pouleNaamMap[m?.poule || m?.pouleId] || "",
-  }));
-
-  zip.file(
-    "r2_wedstrijden.csv",
-    objectsToCsv(wedR2Export.map(flattenMatch), ";")
-  );
-  bump("r2_wedstrijden.csv toegevoegd...");
-}
-
-
+            zip.file(
+              "r2_wedstrijden.csv",
+              objectsToCsv(wedR2Export.map(flattenMatch), ";")
+            );
+            bump("r2_wedstrijden.csv toegevoegd...");
+          }
 
           if (opts.r2Stand) {
             const allRows = [];
             poulesR2.forEach((p) => {
-              const matches = wedR2.filter((m) => (m?.pouleId || m?.poule) === p.id);
+              const matches = wedR2.filter(
+                (m) => (m?.pouleId || m?.poule) === p.id
+              );
 
-              allRows.push(...computePouleStandRows(p?.naam || "", matches, p, "r2"));
-
-
+              allRows.push(
+                ...computePouleStandRows(p?.naam || "", matches, p, "r2")
+              );
             });
             zip.file("standen_r2.csv", objectsToCsv(allRows, ";"));
             bump("standen_r2.csv toegevoegd...");
@@ -11314,40 +12102,40 @@ if (opts.r2Wed) {
             const finaleRows = (spelers || [])
               .filter((p) => typeof p.finalPos === "number" && p.finalPos > 0)
               .map((p) => ({
-  // 1) GEEN id meer
+                // 1) GEEN id meer
 
-  // 2) finalPos als 1e kolom
-  finalPos: p?.finalPos ?? "",
+                // 2) finalPos als 1e kolom
+                finalPos: p?.finalPos ?? "",
 
-  // 3) naam
-  naam: p?.naam || "",
+                // 3) naam
+                naam: p?.naam || "",
 
-  // 4) te maken caramboles in de finale (opgeslagen via knop Finale)
-  teMakenFinale: p?.carambolesFinale ?? "",
+                // 4) te maken caramboles in de finale (opgeslagen via knop Finale)
+                teMakenFinale: p?.carambolesFinale ?? "",
 
-  // 5) wél vullen vanuit de velden die saveFinaleResults() opslaat
-  finalGames: p?.finalGames ?? "",
-  finalPoints: p?.finalPts ?? "",               // <-- was finalPoints
-  finalCar: p?.finalCaramboles ?? "",           // <-- was finalCar
-  finalBrt: p?.finalBeurten ?? "",              // <-- was finalBrt
+                // 5) wél vullen vanuit de velden die saveFinaleResults() opslaat
+                finalGames: p?.finalGames ?? "",
+                finalPoints: p?.finalPts ?? "", // <-- was finalPoints
+                finalCar: p?.finalCaramboles ?? "", // <-- was finalCar
+                finalBrt: p?.finalBeurten ?? "", // <-- was finalBrt
 
-  // overige (zoals je al had)
-  finalMoy:
-    typeof p?.finalMoy === "number"
-      ? p.finalMoy.toFixed(3)
-      : p?.finalMoy ?? "",
-  finalHS: p?.finalHS ?? "",
+                // overige (zoals je al had)
+                finalMoy:
+                  typeof p?.finalMoy === "number"
+                    ? p.finalMoy.toFixed(3)
+                    : p?.finalMoy ?? "",
+                finalHS: p?.finalHS ?? "",
 
-  // 6) Moy% en Car% toevoegen (zoals opgeslagen)
-  "moy%":
-    typeof p?.finalMoyPerc === "number"
-      ? p.finalMoyPerc.toFixed(1)
-      : p?.finalMoyPerc ?? "",
-  "car%":
-    typeof p?.finalCarPerc === "number"
-      ? p.finalCarPerc.toFixed(1)
-      : p?.finalCarPerc ?? "",
-}))
+                // 6) Moy% en Car% toevoegen (zoals opgeslagen)
+                "moy%":
+                  typeof p?.finalMoyPerc === "number"
+                    ? p.finalMoyPerc.toFixed(1)
+                    : p?.finalMoyPerc ?? "",
+                "car%":
+                  typeof p?.finalCarPerc === "number"
+                    ? p.finalCarPerc.toFixed(1)
+                    : p?.finalCarPerc ?? "",
+              }))
 
               .sort((a, b) => (a.finalPos || 999) - (b.finalPos || 999));
             zip.file("finale_eindstand.csv", objectsToCsv(finaleRows, ";"));
@@ -11403,6 +12191,307 @@ if (opts.r2Wed) {
           exportStartBtn.disabled = false;
         }
       }
+
+      // ==============================
+      // Export caramboles (Admin)
+      // ==============================
+
+      function downloadTextFile(
+        filename,
+        content,
+        mime = "text/csv;charset=utf-8"
+      ) {
+        const blob = new Blob([content], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      async function safeGetDocs(pathSegments) {
+        // helper: lees subcollection; als deze niet bestaat of je hebt geen rechten -> leeg i.p.v. crash
+        try {
+          const snap = await getDocs(collection(db, ...pathSegments));
+          return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        } catch (e) {
+          console.warn("Export: kon niet lezen:", pathSegments.join("/"), e);
+          return [];
+        }
+      }
+
+      function toCommaNumber(n, digits = 3) {
+        if (
+          n === null ||
+          n === undefined ||
+          n === "" ||
+          Number.isNaN(Number(n))
+        )
+          return "";
+        return Number(n).toFixed(digits).replace(".", ",");
+      }
+
+      /**
+       * Probeer CarNieuw te bepalen o.b.v. een gekoppelde moyennelijst.
+       *
+       * Verwachting (flexibel):
+       * - toernooi heeft veld: `moyCarTableId` of `moyCarTable` (optioneel)
+       * - Firestore collection: `moyCarTables/{tableId}` met veld `rows`:
+       *   rows: [{ min: 0.500, max: 0.699, car: 20 }, ...]
+       *
+       * Als dit bij jou anders is: pas alleen loadMoyTable()/computeCarNieuw() aan.
+       */
+      async function loadMoyTableForTournament() {
+        try {
+          const tournSnap = await getDoc(
+            doc(db, "toernooien", activeTournamentId)
+          );
+          const t = tournSnap.data() || {};
+          const tableId = t.moyCarTableId || t.moyCarTable || null;
+          if (!tableId) return null;
+
+          const tableSnap = await getDoc(doc(db, "moyCarTables", tableId));
+          if (!tableSnap.exists()) return null;
+
+          const table = tableSnap.data() || {};
+          const rows = Array.isArray(table.rows) ? table.rows : null;
+          if (!rows) return null;
+
+          // normaliseer types
+          return rows
+            .map((r) => ({
+              min: Number(r.min),
+              max: Number(r.max),
+              car: Number(r.car ?? r.caramboles ?? r.teMaken),
+            }))
+            .filter(
+              (r) =>
+                Number.isFinite(r.min) &&
+                Number.isFinite(r.max) &&
+                Number.isFinite(r.car)
+            );
+        } catch (e) {
+          console.warn("Export: moy-table laden mislukt", e);
+          return null;
+        }
+      }
+
+      function computeCarNieuw(moyTot, tableRows) {
+        if (!tableRows || !Number.isFinite(moyTot)) return "";
+        // Zoek rij waar moyTot binnen [min,max] valt
+        const hit = tableRows.find((r) => moyTot >= r.min && moyTot <= r.max);
+        return hit ? String(hit.car) : "";
+      }
+
+      async function exportCarambolesCsv() {
+        if (!activeTournamentId) {
+          alert("⚠️ Geen toernooi geselecteerd.");
+          return;
+        }
+
+        // helper: parse getallen die als "0,750" of "0.750" kunnen staan
+        function parseNum(v) {
+          if (v === null || v === undefined || v === "") return NaN;
+          if (typeof v === "number") return v;
+          const s = String(v).trim().replace(",", ".");
+          const n = Number(s);
+          return Number.isFinite(n) ? n : NaN;
+        }
+
+        // ✅ CarNieuw lookup op basis van rows {van, tot, car}
+        function computeCarNieuwFromVanTot(moyTot, rows) {
+          if (!rows || !rows.length || !Number.isFinite(moyTot)) return "";
+          // sorteer voor zekerheid
+          const sorted = rows.slice().sort((a, b) => a.van - b.van);
+          const hit = sorted.find((r) => moyTot >= r.van && moyTot <= r.tot);
+          return hit ? String(hit.car) : "";
+        }
+
+        // 0) Moyennetabel gekoppeld aan toernooi (moyCarTableId)
+        let moyRows = [];
+        try {
+          const tSnap = await getDoc(doc(db, "toernooien", activeTournamentId));
+          const t = tSnap.exists() ? tSnap.data() : null;
+          const tableId = t?.moyCarTableId || null;
+
+          if (tableId) {
+            const tabSnap = await getDoc(doc(db, "moyCarTables", tableId));
+            if (tabSnap.exists()) {
+              const table = tabSnap.data() || {};
+              const rows = Array.isArray(table.rows) ? table.rows : [];
+
+              // normaliseer: {van, tot, car}
+              moyRows = rows
+                .map((r) => ({
+                  van: parseNum(r?.van),
+                  tot: parseNum(r?.tot),
+                  car: parseNum(r?.car),
+                }))
+                .filter(
+                  (r) =>
+                    Number.isFinite(r.van) &&
+                    Number.isFinite(r.tot) &&
+                    Number.isFinite(r.car)
+                );
+            }
+          }
+        } catch (e) {
+          console.warn("Export caramboles: moyennetabel laden mislukt", e);
+          moyRows = [];
+        }
+
+        // 1) spelers (incl. finale-statistiek uit speler-doc)
+        const spelers = await safeGetDocs([
+          "toernooien",
+          activeTournamentId,
+          "spelers",
+        ]);
+        const stats = {};
+        spelers.forEach((sp) => {
+          const id = sp.id;
+          stats[id] = {
+            naam: sp.naam || "",
+            car1: 0,
+            brt1: 0,
+            car2: 0,
+            brt2: 0,
+
+            // ✅ Finale komt uit speler-document (zoals in tab Finale opgeslagen)
+            carFin: Number(sp.finalCaramboles) || 0,
+            brtFin: Number(sp.finalBeurten) || 0,
+          };
+        });
+
+        // helper om wedstrijden te verwerken (R1/R2)
+        function addMatchTotals(match, roundKey /* "r1"|"r2" */) {
+          if (!match || !match.afgerond) return;
+
+          const bx = match.spelerX?.id;
+          const by = match.spelerY?.id;
+          if (!bx || !by) return;
+
+          const gemaakteX = Number(match.gemaakteX) || 0;
+          const gemaakteY = Number(match.gemaakteY) || 0;
+          const beurten = Number(match.beurten) || 0;
+
+          if (!stats[bx]) {
+            stats[bx] = {
+              naam: match.spelerX?.naam || "",
+              car1: 0,
+              brt1: 0,
+              car2: 0,
+              brt2: 0,
+              carFin: 0,
+              brtFin: 0,
+            };
+          }
+          if (!stats[by]) {
+            stats[by] = {
+              naam: match.spelerY?.naam || "",
+              car1: 0,
+              brt1: 0,
+              car2: 0,
+              brt2: 0,
+              carFin: 0,
+              brtFin: 0,
+            };
+          }
+
+          if (roundKey === "r1") {
+            stats[bx].car1 += gemaakteX;
+            stats[bx].brt1 += beurten;
+            stats[by].car1 += gemaakteY;
+            stats[by].brt1 += beurten;
+          } else if (roundKey === "r2") {
+            stats[bx].car2 += gemaakteX;
+            stats[bx].brt2 += beurten;
+            stats[by].car2 += gemaakteY;
+            stats[by].brt2 += beurten;
+          }
+        }
+
+        // 2) wedstrijden per ronde
+        const r1 = await safeGetDocs([
+          "toernooien",
+          activeTournamentId,
+          "r1_wedstrijden",
+        ]);
+        r1.forEach((m) => addMatchTotals(m, "r1"));
+
+        const r2 = await safeGetDocs([
+          "toernooien",
+          activeTournamentId,
+          "r2_wedstrijden",
+        ]);
+        r2.forEach((m) => addMatchTotals(m, "r2"));
+
+        // 3) CSV bouwen
+        const header = [
+          "Naam",
+          "Car1",
+          "Brt1",
+          "Car2",
+          "Brt2",
+          "CarFin",
+          "BrtFin",
+          "CarTot",
+          "BrtTot",
+          "MoyTot",
+          "CarNieuw",
+        ].join(";");
+
+        const rows = Object.values(stats)
+          .sort((a, b) =>
+            (a.naam || "").localeCompare(b.naam || "", "nl", {
+              sensitivity: "base",
+            })
+          )
+          .map((s) => {
+            const carTot = (s.car1 || 0) + (s.car2 || 0) + (s.carFin || 0);
+            const brtTot = (s.brt1 || 0) + (s.brt2 || 0) + (s.brtFin || 0);
+            const moyTot = brtTot > 0 ? carTot / brtTot : 0;
+
+            // ✅ Hier altijd de juiste van/tot lookup gebruiken
+            const carNieuw = computeCarNieuwFromVanTot(moyTot, moyRows);
+
+            return [
+              csvEscape(s.naam),
+              s.car1 || "",
+              s.brt1 || "",
+              s.car2 || "",
+              s.brt2 || "",
+              s.carFin || "",
+              s.brtFin || "",
+              carTot || "",
+              brtTot || "",
+              toCommaNumber(moyTot, 3),
+              carNieuw,
+            ]
+              .map(csvEscape)
+              .join(";");
+          });
+
+        const csv = [header, ...rows].join("\r\n");
+
+        // 4) bestandsnaam: toernooiId + datum
+        const today = new Date();
+        const stamp = `${today.getFullYear()}-${String(
+          today.getMonth() + 1
+        ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+        const filename = `caramboles_${activeTournamentId}_${stamp}.csv`;
+
+        downloadTextFile(filename, csv);
+      }
+
+      // Event listener (zet dit bij je andere listeners)
+      (function hookExportCarambolesButton() {
+        const btn = document.getElementById("exportCarambolesBtn");
+        if (!btn) return; // Admin-tab/knop bestaat nog niet
+        btn.addEventListener("click", exportCarambolesCsv);
+      })();
 
       // Events
       if (exportTournamentBtn)
@@ -11463,6 +12552,7 @@ if (opts.r2Wed) {
 
       let adminUsersCache = [];
       let adminTournamentsCache = [];
+      let prevLinkTournamentsCache = []; // alle toernooien voor dropdowns "voorgaande edities"
 
       function showAdminFeedback(msg, type = "info") {
         const color =
@@ -11544,7 +12634,9 @@ if (opts.r2Wed) {
         <td>${u.displayName || ""}</td>
         <td>${u.role || "user"}</td>
         <td>${renderTournamentBadges(u.tournaments || [])}</td>
-        <td style="font-size:12px;word-break:break-all;"><code>${u.id}</code></td>
+        <td style="font-size:12px;word-break:break-all;"><code>${
+          u.id
+        }</code></td>
       </tr>`;
         });
 
@@ -11563,17 +12655,6 @@ if (opts.r2Wed) {
       /* =========================================================
          ADMIN TAB: TOERNOOI KOPPELINGEN
       ========================================================= */
-      async function loadTournamentsForLinking() {
-        const snap = await getDocs(collection(db, "toernooien"));
-        adminTournamentsCache = snap.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-        }));
-        renderTournamentsChecklist();
-
-        // ✅ extra: nu cache gevuld is, usertabel opnieuw tekenen met namen
-        renderUsersTable();
-      }
 
       function buildLinkUserSelect() {
         if (!linkUserSelect) return;
@@ -11685,6 +12766,30 @@ if (opts.r2Wed) {
         .getElementById("deleteBtn")
         .addEventListener("click", deleteTournament);
 
+      const uploadRecentBtn = document.getElementById("uploadCarListRecentBtn");
+      if (uploadRecentBtn)
+        uploadRecentBtn.addEventListener("click", () =>
+          uploadCarHelpCSV("recent")
+        );
+
+      const uploadPrevBtn = document.getElementById("uploadCarListPrevBtn");
+      if (uploadPrevBtn)
+        uploadPrevBtn.addEventListener("click", () =>
+          uploadCarHelpCSV("previous")
+        );
+
+      const clearRecentBtn = document.getElementById("clearCarListRecentBtn");
+      if (clearRecentBtn)
+        clearRecentBtn.addEventListener("click", () =>
+          clearCarHelpCSV("recent")
+        );
+
+      const clearPrevBtn = document.getElementById("clearCarListPrevBtn");
+      if (clearPrevBtn)
+        clearPrevBtn.addEventListener("click", () =>
+          clearCarHelpCSV("previous")
+        );
+
       // ✅ TOEVOEGEN: Event listeners voor de spelerslijst status knoppen
       if (finalizeBtn)
         finalizeBtn.addEventListener("click", finalizePlayersAction);
@@ -11714,6 +12819,16 @@ if (opts.r2Wed) {
         moyCarShowBtn.addEventListener("click", () => {
           showLinkedMoyCarTable();
         });
+      }
+
+      const savePrevLinksBtn = document.getElementById("savePrevLinksBtn");
+      if (savePrevLinksBtn) {
+        savePrevLinksBtn.addEventListener("click", savePrevTournamentLinks);
+      }
+
+      const clearPrevLinksBtn = document.getElementById("clearPrevLinksBtn");
+      if (clearPrevLinksBtn) {
+        clearPrevLinksBtn.addEventListener("click", clearPrevTournamentLinks);
       }
 
       /* =========================================================
