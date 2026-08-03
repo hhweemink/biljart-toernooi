@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
   <head>
     <meta charset="UTF-8" />
@@ -185,7 +185,9 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
-        transition: background 0.3s, color 0.3s;
+        transition:
+          background 0.3s,
+          color 0.3s;
         font-weight: 500;
         color: #333;
       }
@@ -560,7 +562,11 @@
         --kleur-tekst: #222222;
         --radius: 8px;
 
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
           sans-serif;
         font-size: 0.92rem;
         color: var(--kleur-tekst);
@@ -681,7 +687,9 @@
         text-overflow: ellipsis;
         overflow: hidden;
         color: #555555;
-        transition: background 0.2s ease, color 0.2s ease,
+        transition:
+          background 0.2s ease,
+          color 0.2s ease,
           border-bottom-color 0.2s;
       }
 
@@ -773,8 +781,12 @@
         color: #ffffff;
         text-decoration: none;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        transition: background 0.2s ease, box-shadow 0.2s ease,
-          transform 0.1s ease, color 0.2s ease, border-color 0.2s ease;
+        transition:
+          background 0.2s ease,
+          box-shadow 0.2s ease,
+          transform 0.1s ease,
+          color 0.2s ease,
+          border-color 0.2s ease;
         min-width: 120px;
       }
 
@@ -1891,6 +1903,25 @@
         <div id="editPlayerModal" class="modal">
           <div class="modal-content">
             <h3>Speler bewerken</h3>
+
+            <div
+              id="editPlayerFeedback"
+              style="
+                display: none;
+                width: 100%;
+                box-sizing: border-box;
+                margin-bottom: 12px;
+                padding: 9px 11px;
+                border: 1px solid #f5c2c7;
+                border-radius: 6px;
+                background: #f8d7da;
+                color: #842029;
+                font-size: 0.9rem;
+                font-weight: 600;
+                line-height: 1.4;
+              "
+            ></div>
+
             <form id="editPlayerForm" class="form-grid">
               <div>
                 <label>Naam</label>
@@ -3334,7 +3365,7 @@
             loginStatusEl.innerHTML =
               `<span class="login-icon" aria-hidden="true">👤</span>` +
               `<span class="login-name">Ingelogd als: <b>${escapeHtml(
-                name
+                name,
               )}</b></span>` +
               roleHtml;
           } else {
@@ -3543,14 +3574,14 @@
           type === "error"
             ? "#f8d7da"
             : type === "success"
-            ? "#d1e7dd"
-            : "#e2e3e5";
+              ? "#d1e7dd"
+              : "#e2e3e5";
         const textColor =
           type === "error"
             ? "#842029"
             : type === "success"
-            ? "#0f5132"
-            : "#41464b";
+              ? "#0f5132"
+              : "#41464b";
         fb.innerHTML = `
                                                         <div class="message" style="background:${color};color:${textColor};">
                                                           ${msg}
@@ -3566,14 +3597,14 @@
           type === "error"
             ? "#f8d7da"
             : type === "success"
-            ? "#d1e7dd"
-            : "#e2e3e5";
+              ? "#d1e7dd"
+              : "#e2e3e5";
         const textColor =
           type === "error"
             ? "#842029"
             : type === "success"
-            ? "#0f5132"
-            : "#41464b";
+              ? "#0f5132"
+              : "#41464b";
         pf.innerHTML = `
                                                         <div class="message" style="background:${color};color:${textColor};">
                                                           ${msg}
@@ -3643,7 +3674,7 @@
 
         if (idxVan === -1 || idxTot === -1 || idxCar === -1) {
           throw new Error(
-            "Kopregel moet kolommen 'van', 'tot' en 'car' bevatten (CSV)."
+            "Kopregel moet kolommen 'van', 'tot' en 'car' bevatten (CSV).",
           );
         }
 
@@ -3744,7 +3775,7 @@
         ) {
           alert(
             "Er zijn (nog) geen moyennetabellen geladen.\n" +
-              "Log opnieuw in of ververs de pagina."
+              "Log opnieuw in of ververs de pagina.",
           );
           return;
         }
@@ -3753,7 +3784,7 @@
         if (!table) {
           alert(
             "De gekoppelde moyennetabel kon niet worden gevonden.\n" +
-              "Mogelijk is deze verwijderd."
+              "Mogelijk is deze verwijderd.",
           );
           return;
         }
@@ -3818,7 +3849,7 @@
         } catch (err) {
           console.error("Fout bij koppelen moyCarTableId:", err);
           alert(
-            "❌ Koppelen van de moyennetabel is mislukt. Probeer het opnieuw."
+            "❌ Koppelen van de moyennetabel is mislukt. Probeer het opnieuw.",
           );
         }
       }
@@ -3902,7 +3933,7 @@
         }
 
         const ok = confirm(
-          "Weet je zeker dat je de gekoppelde voorgaande edities wilt weghalen?"
+          "Weet je zeker dat je de gekoppelde voorgaande edities wilt weghalen?",
         );
         if (!ok) return;
 
@@ -4197,7 +4228,7 @@
       /* Publicatie-status helper */
       const publishedCheckbox = document.getElementById("tournamentPublished");
       const publishedBadge = document.getElementById(
-        "tournamentPublishedBadge"
+        "tournamentPublishedBadge",
       );
 
       function updatePublishedBadge(checked) {
@@ -4317,7 +4348,7 @@
         // Header overslaan als eerste kolom "naam" bevat
         let startIdx = 0;
         const firstCols = splitSemicolonCSVLine(lines[0]).map((x) =>
-          x.toLowerCase()
+          x.toLowerCase(),
         );
         if (firstCols[0]?.includes("naam")) startIdx = 1;
 
@@ -4342,7 +4373,7 @@
             throw new Error(
               `Regel ${
                 idx + 1
-              }: Caramboles is geen integer ("${carStr}") bij "${naam}".`
+              }: Caramboles is geen integer ("${carStr}") bij "${naam}".`,
             );
           }
 
@@ -4365,7 +4396,7 @@
           "toernooien",
           activeTournamentId,
           "caramboleHelpLists",
-          kind
+          kind,
         );
       }
 
@@ -4490,7 +4521,7 @@
             rowCount: parsed.rows.length,
             rows: parsed.rows,
           },
-          { merge: true }
+          { merge: true },
         );
 
         // herladen + UI bijwerken
@@ -4498,7 +4529,7 @@
         alert(
           `✅ ${
             kind === "recent" ? "Meest recente" : "Editie daarvoor"
-          } lijst geüpload (${parsed.rows.length} regels).`
+          } lijst geüpload (${parsed.rows.length} regels).`,
         );
       }
 
@@ -4566,7 +4597,7 @@
           playersFinalized = data.playersFinalized;
           showFeedback(
             `✅ Toernooi "${naam}" (${jaar}) is opgeslagen.`,
-            "success"
+            "success",
           );
           updateActiveTournament(naam, jaar);
           guardSpelersTabAvailability();
@@ -4574,7 +4605,7 @@
           console.error("❌ Fout bij opslaan:", err);
           showFeedback(
             "⚠️ Er ging iets mis bij het opslaan in Firestore.",
-            "error"
+            "error",
           );
         }
       }
@@ -4692,7 +4723,7 @@
 
               // Publicatie-status instellen
               const pubCheckbox = document.getElementById(
-                "tournamentPublished"
+                "tournamentPublished",
               );
               if (pubCheckbox) {
                 pubCheckbox.checked = !!t.publiceerPubliek;
@@ -4717,7 +4748,7 @@
               updateActiveTournament(t.naam, t.jaar);
               showFeedback(
                 `✅ Toernooi "${t.naam}" (${t.jaar}) geladen.`,
-                "success"
+                "success",
               );
               guardSpelersTabAvailability();
 
@@ -4769,7 +4800,7 @@
             const t = snap.data();
 
             const zeker = confirm(
-              `Weet je zeker dat je het toernooi "${t.naam}" wilt verwijderen?`
+              `Weet je zeker dat je het toernooi "${t.naam}" wilt verwijderen?`,
             );
             if (!zeker) {
               showFeedback("Verwijderen geannuleerd.", "error");
@@ -4777,19 +4808,19 @@
             }
 
             const invoer = prompt(
-              `Typ de naam van het toernooi exact in ter bevestiging:\n${t.naam}`
+              `Typ de naam van het toernooi exact in ter bevestiging:\n${t.naam}`,
             );
             if (invoer !== t.naam) {
               showFeedback(
                 "❌ Naam komt niet overeen. Verwijderen geannuleerd.",
-                "error"
+                "error",
               );
               return;
             }
 
             // BELANGRIJK: spelers-subcollectie eerst verwijderen
             const playersSnap = await getDocs(
-              collection(db, "toernooien", id, "spelers")
+              collection(db, "toernooien", id, "spelers"),
             );
             for (const pDoc of playersSnap.docs) {
               await deleteDoc(doc(db, "toernooien", id, "spelers", pDoc.id));
@@ -4827,10 +4858,11 @@
       const addPlayerBtn = document.getElementById("addPlayerBtn");
       const playerCount = document.getElementById("playerCount");
       const playersFinalizedNotice = document.getElementById(
-        "playersFinalizedNotice"
+        "playersFinalizedNotice",
       );
       const editPlayerModal = document.getElementById("editPlayerModal");
       const editPlayerForm = document.getElementById("editPlayerForm");
+      const editPlayerFeedback = document.getElementById("editPlayerFeedback");
       const cancelEdit = document.getElementById("cancelEdit");
       const noTournamentNotice = document.getElementById("noTournamentNotice");
       const playersLockOverlay = document.getElementById("playersLockOverlay");
@@ -4844,7 +4876,23 @@
         playerCount.textContent = `Aantal deelnemers: ${currentPlayers.length}`;
       }
 
+      function showEditPlayerFeedback(message) {
+        if (!editPlayerFeedback) return;
+
+        editPlayerFeedback.textContent = message;
+        editPlayerFeedback.style.display = "block";
+      }
+
+      function clearEditPlayerFeedback() {
+        if (!editPlayerFeedback) return;
+
+        editPlayerFeedback.textContent = "";
+        editPlayerFeedback.style.display = "none";
+      }
+
       function openEditModal(player) {
+        clearEditPlayerFeedback();
+
         editPlayerId = player.id;
 
         const nameInput = document.getElementById("editName");
@@ -4871,6 +4919,7 @@
       }
 
       function closeEditModal() {
+        clearEditPlayerFeedback();
         editPlayerId = null;
         editPlayerModal.style.display = "none";
       }
@@ -4880,6 +4929,8 @@
       editPlayerForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         if (!editPlayerId || !activeTournamentId) return;
+
+        clearEditPlayerFeedback();
 
         const newData = {
           naam: document.getElementById("editName").value.trim(),
@@ -4898,6 +4949,29 @@
         const newName = newData.naam;
         const newCar = newData.caramboles;
 
+        if (!newName) {
+          showEditPlayerFeedback("Naam speler is verplicht.");
+          document.getElementById("editName").focus();
+          return;
+        }
+
+        const normalizedNewName = normalizePlayerName(newName);
+
+        const duplicatePlayer = currentPlayers.find(
+          (player) =>
+            player.id !== editPlayerId &&
+            normalizePlayerName(player.naam) === normalizedNewName,
+        );
+
+        if (duplicatePlayer) {
+          showEditPlayerFeedback(
+            `De speler "${duplicatePlayer.naam}" staat al in de deelnemerslijst. Kies een andere naam.`,
+          );
+
+          document.getElementById("editName").focus();
+          return;
+        }
+
         // Check: zitten we midden in het toernooi?
         // (= spelerslijst definitief én er zijn al poules/wedstrijden)
         let midTournament = false;
@@ -4914,7 +4988,7 @@
             showPlayerFeedback(
               "❌ Tijdens het toernooi mogen alleen e-mailadres en telefoonnummer worden gewijzigd. " +
                 "Naam en te maken caramboles blijven ongewijzigd.",
-              "error"
+              "error",
             );
             return;
           }
@@ -4924,11 +4998,11 @@
         await setDoc(
           doc(db, "toernooien", activeTournamentId, "spelers", editPlayerId),
           newData,
-          { merge: true }
+          { merge: true },
         );
         showPlayerFeedback(
           `✏️ Speler "${newData.naam}" bijgewerkt.`,
-          "success"
+          "success",
         );
         closeEditModal();
         await loadPlayersFromFirestore();
@@ -5025,11 +5099,11 @@
         let rows = [...currentPlayers];
         if (currentSort === "name")
           rows.sort((a, b) =>
-            a.naam.localeCompare(b.naam, "nl", { sensitivity: "base" })
+            a.naam.localeCompare(b.naam, "nl", { sensitivity: "base" }),
           );
         else if (currentSort === "caramboles")
           rows.sort(
-            (a, b) => Number(a.caramboles || 0) - Number(b.caramboles || 0)
+            (a, b) => Number(a.caramboles || 0) - Number(b.caramboles || 0),
           );
         rows.forEach((player) => {
           const tr = document.createElement("tr");
@@ -5075,11 +5149,11 @@
             if (!confirm(`Verwijder speler "${player.naam}"?`)) return;
 
             await deleteDoc(
-              doc(db, "toernooien", activeTournamentId, "spelers", player.id)
+              doc(db, "toernooien", activeTournamentId, "spelers", player.id),
             );
             showPlayerFeedback(
               `🗑️ Speler "${player.naam}" verwijderd.`,
-              "success"
+              "success",
             );
             await loadPlayersFromFirestore();
           });
@@ -5099,7 +5173,7 @@
         }
 
         const playersSnap = await getDocs(
-          collection(db, "toernooien", activeTournamentId, "spelers")
+          collection(db, "toernooien", activeTournamentId, "spelers"),
         );
         currentPlayers = playersSnap.docs.map((d) => ({
           id: d.id,
@@ -5174,10 +5248,10 @@
 
       async function computeHistoricalMoyenneFromR1(
         prevTournamentId,
-        playerName
+        playerName,
       ) {
         const snap = await getDocs(
-          collection(db, "toernooien", prevTournamentId, "r1_wedstrijden")
+          collection(db, "toernooien", prevTournamentId, "r1_wedstrijden"),
         );
         let totalMade = 0;
         let totalBeurten = 0;
@@ -5223,7 +5297,7 @@
         if (playersFinalized) {
           showPlayerFeedback(
             "❌ Lijst is definitief. Bewerken niet toegestaan.",
-            "error"
+            "error",
           );
           return;
         }
@@ -5237,6 +5311,43 @@
 
         if (!naam) {
           showPlayerFeedback("❌ Naam speler is verplicht.", "error");
+          return;
+        }
+
+        // Controleer rechtstreeks in Firestore of deze speler al
+        // in het actieve toernooi voorkomt.
+        // Hoofdletters en extra spaties worden bij de vergelijking genegeerd.
+        const normalizedName = normalizePlayerName(naam);
+
+        try {
+          const playersSnapshot = await getDocs(
+            collection(db, "toernooien", activeTournamentId, "spelers"),
+          );
+
+          const existingPlayerDoc = playersSnapshot.docs.find((playerDoc) => {
+            const playerData = playerDoc.data() || {};
+
+            return normalizePlayerName(playerData.naam) === normalizedName;
+          });
+
+          if (existingPlayerDoc) {
+            const existingPlayer = existingPlayerDoc.data() || {};
+
+            alert(
+              `De speler "${existingPlayer.naam || naam}" staat al in de deelnemerslijst.`,
+            );
+
+            document.getElementById("playerName").focus();
+            return;
+          }
+        } catch (error) {
+          console.error("Fout bij controle op dubbele speler:", error);
+
+          showPlayerFeedback(
+            "❌ Er kon niet worden gecontroleerd of deze speler al bestaat. De speler is niet toegevoegd.",
+            "error",
+          );
+
           return;
         }
 
@@ -5255,7 +5366,7 @@
 
         await addDoc(
           collection(db, "toernooien", activeTournamentId, "spelers"),
-          newPlayer
+          newPlayer,
         );
 
         showPlayerFeedback(`✅ Speler "${naam}" toegevoegd.`, "success");
@@ -5280,23 +5391,7 @@
         renderPlayersTable();
       });
 
-      finalizeBtn.addEventListener("click", async () => {
-        if (!activeTournamentId) return;
-        const confirmFinal = confirm(
-          "Weet je zeker dat je de spelerslijst definitief wilt maken?"
-        );
-        if (!confirmFinal) return;
-
-        await setDoc(
-          doc(db, "toernooien", activeTournamentId),
-          { playersFinalized: true },
-          { merge: true }
-        );
-        playersFinalized = true;
-        showPlayerFeedback("🔒 Spelerslijst is definitief gemaakt.", "success");
-        guardSpelersTabAvailability();
-        updateR1PoulesButtons();
-      });
+      /* Mag waarschijnlijk verwijderd worden vanwege dubbele eventListener 
 
       editBtn.addEventListener("click", async () => {
         if (!activeTournamentId) return;
@@ -5306,7 +5401,7 @@
         await setDoc(
           doc(db, "toernooien", activeTournamentId),
           { playersFinalized: false },
-          { merge: true }
+          { merge: true },
         );
         playersFinalized = false;
         showPlayerFeedback("✏️ Spelerslijst is weer bewerkbaar.", "success");
@@ -5316,7 +5411,7 @@
           updateR1PoulesButtons();
         }
       });
-
+*/
       playerForm.addEventListener("submit", addPlayer);
       const playerNameInput = document.getElementById("playerName");
       if (playerNameInput) {
@@ -5425,21 +5520,38 @@
 
       async function finalizePlayersAction() {
         if (!activeTournamentId) return;
+
         if (playersFinalized) {
           showPlayerFeedback("❌ Lijst is al definitief.", "error");
           return;
         }
-        // ✅ Controle: mag niet definitief worden als er al poules zijn
+
+        // De spelerslijst kan pas definitief worden gemaakt
+        // wanneer minimaal 12 spelers zijn ingevoerd.
+        const aantalSpelers = Array.isArray(currentPlayers)
+          ? currentPlayers.length
+          : 0;
+
+        if (aantalSpelers < 12) {
+          alert(
+            `De spelerslijst kan nog niet definitief worden gemaakt.\n\n` +
+              `Er zijn nu ${aantalSpelers} spelers ingevoerd. ` +
+              `Er zijn minimaal 12 spelers nodig om poules te kunnen aanmaken.`,
+          );
+          return;
+        }
+
+        // Mag niet definitief worden als er al poules zijn
         if (r1PoulesExist) {
           showPlayerFeedback(
             "❌ Kan niet definitief maken: er zijn al poules aangemaakt. Wis eerst de poules als je de lijst nog wilt wijzigen.",
-            "error"
+            "error",
           );
           return;
         }
 
         const confirmFinalize = confirm(
-          "Weet je zeker dat je de spelerslijst definitief wilt maken? Hierna zijn aanpassingen aan namen en caramboles niet meer mogelijk, tenzij je de lijst weer bewerkt (en er nog geen poules zijn)."
+          "Weet je zeker dat je de spelerslijst definitief wilt maken? Hierna zijn aanpassingen aan namen en caramboles niet meer mogelijk, tenzij je de lijst weer bewerkt (en er nog geen poules zijn).",
         );
         if (!confirmFinalize) return;
 
@@ -5465,12 +5577,12 @@
         // ✅ Controle: mag niet bewerkbaar worden als er al poules zijn
         if (r1PoulesExist) {
           showPlayerFeedback(
-            "❌ Kan lijst niet bewerken: er zijn al 1e ronde poules aangemaakt. Wis eerst de poules."
+            "❌ Kan lijst niet bewerken: er zijn al 1e ronde poules aangemaakt. Wis eerst de poules.",
           );
           return;
         }
         const confirmEdit = confirm(
-          "Weet je zeker dat je de spelerslijst weer wilt bewerken? De definitieve status wordt ongedaan gemaakt, en je kunt namen/caramboles weer wijzigen."
+          "Weet je zeker dat je de spelerslijst weer wilt bewerken? De definitieve status wordt ongedaan gemaakt, en je kunt namen/caramboles weer wijzigen.",
         );
         if (!confirmEdit) return;
 
@@ -5501,22 +5613,22 @@
       const clearPoulesBtn = document.getElementById("clearPoulesBtn");
       const baseLayoutBtn = document.getElementById("baseLayoutBtn"); // NIEUW
       const exportPoulesWordBtn = document.getElementById(
-        "exportPoulesWordBtn"
+        "exportPoulesWordBtn",
       ); // NIEUW
       const availablePlayersDiv = document.getElementById("availablePlayers");
       const poulesContainer = document.getElementById("poulesContainer");
       const poulesFeedback = document.getElementById("poulesFeedback");
       const noTournamentPoulesNotice = document.getElementById(
-        "noTournamentPoulesNotice"
+        "noTournamentPoulesNotice",
       );
 
       const exportR2PoulesWordBtn = document.getElementById(
-        "exportR2PoulesWordBtn"
+        "exportR2PoulesWordBtn",
       );
       if (exportR2PoulesWordBtn) {
         exportR2PoulesWordBtn.addEventListener(
           "click",
-          openExportR2PoulesWordDialog
+          openExportR2PoulesWordDialog,
         );
       }
 
@@ -5533,22 +5645,22 @@
                                                       type === "error"
                                                         ? "#f8d7da"
                                                         : type === "success"
-                                                        ? "#d1e7dd"
-                                                        : "#e2e3e5"
+                                                          ? "#d1e7dd"
+                                                          : "#e2e3e5"
                                                     };
                                                     color:${
                                                       type === "error"
                                                         ? "#842029"
                                                         : type === "success"
-                                                        ? "#0f5132"
-                                                        : "#41464b"
+                                                          ? "#0f5132"
+                                                          : "#41464b"
                                                     };
                                                     border:1px solid ${
                                                       type === "error"
                                                         ? "#f5c2c7"
                                                         : type === "success"
-                                                        ? "#badbcc"
-                                                        : "#d3d6d8"
+                                                          ? "#badbcc"
+                                                          : "#d3d6d8"
                                                     };
                                                     margin-top:10px;">${msg}</div>`;
       }
@@ -5592,7 +5704,7 @@
         const totalPlayers = allPlayers.length;
         const assignedPlayers = currentPoules.reduce(
           (sum, p) => sum + p.spelers.length,
-          0
+          0,
         );
         const allAssigned =
           totalPlayers > 0 && assignedPlayers === totalPlayers;
@@ -5691,7 +5803,7 @@
 
         // sorteer alfabetisch op display
         const names = [...unique.values()].sort((a, b) =>
-          a.localeCompare(b, "nl")
+          a.localeCompare(b, "nl"),
         );
 
         dl.innerHTML = names
@@ -5710,7 +5822,7 @@
       // sorteer spelers op sterkte (sterkste eerst)
       function sortByStrength(players) {
         return [...players].sort(
-          (a, b) => getPlayerStrength(b) - getPlayerStrength(a)
+          (a, b) => getPlayerStrength(b) - getPlayerStrength(a),
         );
       }
 
@@ -5720,7 +5832,7 @@
       function buildPouleIndexSequence(poules, snake = false) {
         const totalSlots = poules.reduce(
           (sum, p) => sum + (p.maxSpelers || 0),
-          0
+          0,
         );
         const seq = [];
         const n = poules.length;
@@ -5810,7 +5922,7 @@
         // aantal spelers in sterke helft = som maxSpelers van sterke poules
         const strongSlots = strongPoules.reduce(
           (sum, p) => sum + (p.maxSpelers || 0),
-          0
+          0,
         );
         const strongPlayers = sorted.slice(0, strongSlots);
         const weakPlayers = sorted.slice(strongSlots);
@@ -5892,12 +6004,12 @@
             const strongAssign = assignBySequence(
               strongPlayers,
               strongPoules,
-              seqStrong
+              seqStrong,
             );
             const weakAssign = assignBySequence(
               weakPlayers,
               weakPoules,
-              seqWeak
+              seqWeak,
             );
             return mergeAssignments(poules, strongAssign, weakAssign);
           },
@@ -5915,12 +6027,12 @@
             const strongAssign = assignBySequence(
               strongPlayers,
               strongPoules,
-              seqStrong
+              seqStrong,
             );
             const weakAssign = assignBySequence(
               weakPlayers,
               weakPoules,
-              seqWeak
+              seqWeak,
             );
             return mergeAssignments(poules, strongAssign, weakAssign);
           },
@@ -5937,7 +6049,7 @@
         if (!currentPoules.length) {
           showPoulesFeedback(
             "⚠️ Er zijn nog geen poules aangemaakt. Maak eerst poules aan.",
-            "error"
+            "error",
           );
           return;
         }
@@ -5946,18 +6058,18 @@
         if (hasSchedule) {
           showPoulesFeedback(
             "❌ Je kunt geen basisindeling kiezen als er al een wedstrijdschema is aangemaakt.",
-            "error"
+            "error",
           );
           return;
         }
 
         const alreadyAssigned = currentPoules.reduce(
           (sum, p) => sum + p.spelers.length,
-          0
+          0,
         );
         if (alreadyAssigned > 0) {
           const ok = confirm(
-            "Er zijn al spelers in de poules ingedeeld. De gekozen basisindeling zal de huidige indeling overschrijven. Doorgaan?"
+            "Er zijn al spelers in de poules ingedeeld. De gekozen basisindeling zal de huidige indeling overschrijven. Doorgaan?",
           );
           if (!ok) return;
         }
@@ -6026,7 +6138,7 @@
           .querySelector("#applyBaseLayoutBtn")
           .addEventListener("click", () => {
             const checked = overlay.querySelector(
-              'input[name="baseLayoutOption"]:checked'
+              'input[name="baseLayoutOption"]:checked',
             );
             if (!checked) {
               alert("Kies eerst een basisindeling.");
@@ -6053,7 +6165,7 @@
         if (!playersSource.length) {
           showPoulesFeedback(
             "⚠️ Er zijn nog geen spelers geladen. Laad eerst de spelerslijst.",
-            "error"
+            "error",
           );
           return;
         }
@@ -6062,7 +6174,7 @@
         if (hasSchedule) {
           showPoulesFeedback(
             "❌ Er is al een wedstrijdschema. De basisindeling kan niet meer worden gewijzigd.",
-            "error"
+            "error",
           );
           return;
         }
@@ -6081,7 +6193,7 @@
 
         // beschikbare spelers = spelers die niet zijn ingedeeld
         availablePlayers = playersSource.filter(
-          (pl) => !assignedIds.has(pl.id)
+          (pl) => !assignedIds.has(pl.id),
         );
         selectedPlayer = null;
 
@@ -6091,7 +6203,7 @@
 
         showPoulesFeedback(
           `✅ Basisindeling "${layout.title}" toegepast. Je kunt de poules nog aanpassen en daarna de indeling opslaan.`,
-          "success"
+          "success",
         );
       }
 
@@ -6231,7 +6343,7 @@
 
           // klik op poule = probeer geselecteerde speler toe te voegen
           card.addEventListener("click", () =>
-            addSelectedPlayerToPoule(poule.naam)
+            addSelectedPlayerToPoule(poule.naam),
           );
           poulesContainer.appendChild(card);
         });
@@ -6246,19 +6358,11 @@
         }
 
         const playersSnap = await getDocs(
-          collection(db, "toernooien", activeTournamentId, "spelers")
+          collection(db, "toernooien", activeTournamentId, "spelers"),
         );
         allPlayers = playersSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
         const numPlayers = allPlayers.length;
-
-        if (numPlayers < 12) {
-          showPoulesFeedback(
-            "❌ Er zijn minimaal 12 spelers nodig om poules te kunnen aanmaken.",
-            "error"
-          );
-          return;
-        }
 
         const basePoules = Math.floor(numPlayers / 4);
         const remainder = numPlayers % 4;
@@ -6295,7 +6399,7 @@
 
         showPoulesFeedback(
           `✅ ${numPoules} poules aangemaakt. Klik op een speler links en daarna op een poule om toe te voegen.`,
-          "success"
+          "success",
         );
 
         renderPoules();
@@ -6323,7 +6427,7 @@
 
         // zit speler al ergens in?
         const alreadyInSomePoule = currentPoules.some((p) =>
-          p.spelers.find((sp) => sp.id === selectedPlayer.id)
+          p.spelers.find((sp) => sp.id === selectedPlayer.id),
         );
         if (alreadyInSomePoule) {
           showPoulesFeedback("⚠️ Deze speler zit al in een poule.", "error");
@@ -6335,7 +6439,7 @@
 
         // haal speler uit availablePlayers
         availablePlayers = availablePlayers.filter(
-          (p) => p.id !== selectedPlayer.id
+          (p) => p.id !== selectedPlayer.id,
         );
         selectedPlayer = null;
 
@@ -6362,7 +6466,7 @@
         // alleen deze speler terug naar availablePlayers
         // maar niet dubbel toevoegen als hij toevallig nog vrij stond
         const alreadyFree = availablePlayers.find(
-          (p) => p.id === removedPlayer.id
+          (p) => p.id === removedPlayer.id,
         );
         if (!alreadyFree) {
           availablePlayers.push(removedPlayer);
@@ -6375,7 +6479,7 @@
 
         showPoulesFeedback(
           `🗑️ ${removedPlayer.naam} is weer beschikbaar.`,
-          "info"
+          "info",
         );
       }
 
@@ -6396,7 +6500,7 @@
           db,
           "toernooien",
           activeTournamentId,
-          "poules_r1"
+          "poules_r1",
         );
 
         // eerst de oude wissen
@@ -6416,7 +6520,7 @@
 
         showPoulesFeedback(
           "💾 Poule-indeling opgeslagen in Firestore.",
-          "success"
+          "success",
         );
 
         // ✅ knop uitschakelen na succesvol opslaan
@@ -6442,7 +6546,7 @@
             db,
             "toernooien",
             activeTournamentId,
-            "poules_r1"
+            "poules_r1",
           );
           const existing = await getDocs(poulesRef);
           for (const d of existing.docs) {
@@ -6471,7 +6575,7 @@
         try {
           // Zorg dat allPlayers altijd de spelers van het huidige toernooi bevat
           const playersSnap = await getDocs(
-            collection(db, "toernooien", activeTournamentId, "spelers")
+            collection(db, "toernooien", activeTournamentId, "spelers"),
           );
           allPlayers = playersSnap.docs.map((d) => ({
             id: d.id,
@@ -6479,7 +6583,7 @@
           }));
 
           const poulesSnap = await getDocs(
-            collection(db, "toernooien", activeTournamentId, "poules_r1")
+            collection(db, "toernooien", activeTournamentId, "poules_r1"),
           );
 
           // ✅ 1. Stel r1PoulesExist in op basis van het resultaat
@@ -6498,7 +6602,7 @@
             poule.spelers = poule.spelers
               .map((pouleSpeler) => {
                 const fullPlayer = allPlayers.find(
-                  (ap) => ap.id === pouleSpeler.id
+                  (ap) => ap.id === pouleSpeler.id,
                 );
                 // Als de speler nog bestaat, geef dan de volledige (up-to-date) speler terug
                 return fullPlayer || pouleSpeler;
@@ -6680,7 +6784,7 @@
             ],
             alignment: AlignmentType.CENTER,
             spacing: { after: 40 },
-          })
+          }),
         );
 
         // 2) Logo links, tekstvak met border rechts (naast elkaar, onder de kop)
@@ -6759,7 +6863,7 @@
           new Paragraph({
             text: "",
             spacing: { after: 0 }, // of 40, 60… naar smaak
-          })
+          }),
         );
 
         // 3) Poules: twee naast elkaar, vaste breedte, kleine tussenruimte
@@ -6894,7 +6998,7 @@
               new TableCell({
                 width: { size: 50, type: WidthType.PERCENTAGE },
                 children: [new Paragraph("")],
-              })
+              }),
             );
           }
 
@@ -6909,7 +7013,7 @@
                     new TableCell({
                       ...cell.options, // behoud originele inhoud
                       borders: noTableBorders, // ← forceer borderless op cel
-                    })
+                    }),
                 ),
               }),
             ],
@@ -7026,7 +7130,7 @@
         } catch (e) {
           console.warn(
             "Logo kon niet worden geladen voor Word-export (R2):",
-            e
+            e,
           );
         }
 
@@ -7055,7 +7159,7 @@
             ],
             alignment: AlignmentType.CENTER,
             spacing: { after: 40 },
-          })
+          }),
         );
 
         // 2) Logo links, tekstvak met border rechts
@@ -7123,7 +7227,7 @@
           new Paragraph({
             text: "",
             spacing: { after: 0 },
-          })
+          }),
         );
 
         // 3) Poules: twee naast elkaar, vaste breedte, kleine tussenruimte
@@ -7258,7 +7362,7 @@
               new TableCell({
                 width: { size: 50, type: WidthType.PERCENTAGE },
                 children: [new Paragraph("")],
-              })
+              }),
             );
           }
 
@@ -7273,7 +7377,7 @@
                     new TableCell({
                       ...cell.options, // behoud originele inhoud
                       borders: noTableBorders, // ← forceer borderless op cel
-                    })
+                    }),
                 ),
               }),
             ],
@@ -7335,7 +7439,7 @@
 
         if (!window.docx) {
           alert(
-            "De Word-export (docx) is niet beschikbaar omdat de docx-library niet geladen kon worden."
+            "De Word-export (docx) is niet beschikbaar omdat de docx-library niet geladen kon worden.",
           );
           return;
         }
@@ -7347,7 +7451,7 @@
           } catch (err) {
             console.error("Fout bij genereren of opslaan Word-document:", err);
             alert(
-              "Er ging iets mis bij het maken of opslaan van het Word-bestand. Zie de console voor details."
+              "Er ging iets mis bij het maken of opslaan van het Word-bestand. Zie de console voor details.",
             );
           }
         })();
@@ -7363,7 +7467,7 @@
           const hasPoules =
             Array.isArray(r2CurrentPoules) &&
             r2CurrentPoules.some(
-              (p) => Array.isArray(p.spelers) && p.spelers.length > 0
+              (p) => Array.isArray(p.spelers) && p.spelers.length > 0,
             );
 
           if (!hasPoules) {
@@ -7397,15 +7501,15 @@
           await saveFileWithDialog(
             blob,
             defaultFileName,
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
           );
         } catch (err) {
           console.error(
             "Fout bij genereren of opslaan Word-document (2e ronde):",
-            err
+            err,
           );
           alert(
-            "Er ging iets mis bij het genereren of opslaan van het Word-document (2e ronde). Zie de console voor details."
+            "Er ging iets mis bij het genereren of opslaan van het Word-document (2e ronde). Zie de console voor details.",
           );
         }
       }
@@ -7425,7 +7529,7 @@
       if (exportPoulesWordBtn) {
         exportPoulesWordBtn.addEventListener(
           "click",
-          openExportPoulesWordDialog
+          openExportPoulesWordDialog,
         );
       }
 
@@ -7435,7 +7539,7 @@
 
       // --- Elementen ophalen ---
       const noTournamentR1ResNotice = document.getElementById(
-        "noTournamentR1ResNotice"
+        "noTournamentR1ResNotice",
       );
       const r1matchesWrapper = document.getElementById("r1matchesWrapper");
       const r1GlobalStandTable = document.getElementById("r1GlobalStandTable");
@@ -7579,7 +7683,7 @@
 
         // 3. ranking voor punten (op basis van aangepaste punten)
         const byPoints = [...allStats].sort(
-          (a, b) => b.puntenAdj - a.puntenAdj
+          (a, b) => b.puntenAdj - a.puntenAdj,
         );
         // ✅ gebruik helper: gelijke punten → gemiddelde rang
         assignRankPoints(byPoints, "puntenAdj", "rankPoints_punten");
@@ -7619,7 +7723,7 @@
         // We verwachten dat r2Matches en r2PoulesCache gevuld zijn
         const stats = buildGlobalRankingFromStats(
           r2Matches || [],
-          r2PoulesCache || []
+          r2PoulesCache || [],
         );
         if (!stats || !stats.length) return [];
 
@@ -7650,7 +7754,7 @@
         } catch (err) {
           console.warn(
             "⚠️ Kon gecombineerde moyenne 1e+2e ronde niet berekenen:",
-            err
+            err,
           );
         }
 
@@ -7664,10 +7768,10 @@
             typeof pDoc.carambolesR2 === "number"
               ? pDoc.carambolesR2
               : typeof s.teMaken === "number"
-              ? s.teMaken
-              : typeof pDoc.caramboles === "number"
-              ? pDoc.caramboles
-              : 0;
+                ? s.teMaken
+                : typeof pDoc.caramboles === "number"
+                  ? pDoc.caramboles
+                  : 0;
 
           // Waarde uit gecombineerde moyenne (1e + 2e ronde) via de tabel
           const combMoy = combinedMoyMap.get(s.spelerId);
@@ -7805,7 +7909,7 @@
           console.error("Fout bij laden 2e ronde voor finale:", err);
           showFinaleFeedback(
             "❌ Kan de totaalstand van de 2e ronde niet laden. Controleer het tabblad 2e ronde resultaten.",
-            "error"
+            "error",
           );
           return;
         }
@@ -7816,12 +7920,12 @@
         if (!finaleCandidates.length) {
           showFinaleFeedback(
             "Er is nog geen (volledige) totaalstand van de 2e ronde. De finale kan pas worden samengesteld als alle uitslagen van de 2e ronde bekend zijn.",
-            "info"
+            "info",
           );
         } else {
           showFinaleFeedback(
             `De totaalstand van de 2e ronde is geladen. De eerste ${finaleAantalDeelnemers} spelers (boven de streep) zijn de finalisten. Bij afmelding schuift de volgende speler automatisch door.`,
-            "success"
+            "success",
           );
         }
 
@@ -7833,7 +7937,7 @@
               c.carFinaleFromSaved === true ||
               (typeof c.carFinaleFromSaved === "undefined" &&
                 typeof c.carFinale === "number" &&
-                !isNaN(c.carFinale))
+                !isNaN(c.carFinale)),
           );
 
           // eindstand ingevuld? (een van de eindstandvelden bevat een waarde)
@@ -7847,7 +7951,7 @@
               c.finalBeurten !== "" ||
               c.finalMoy !== "" ||
               c.finalMoyPerc !== "" ||
-              c.finalCarPerc !== ""
+              c.finalCarPerc !== "",
           );
         }
 
@@ -8144,7 +8248,7 @@
                 updateFromRow(
                   tr,
                   "finalCaramboles",
-                  ".finale-caramboles-input"
+                  ".finale-caramboles-input",
                 );
               } else if (inp.classList.contains("finale-hs-input")) {
                 updateFromRow(tr, "finalHS", ".finale-hs-input");
@@ -8166,14 +8270,14 @@
         if (!activeTournamentId) {
           showFinaleFeedback(
             "❌ Geen toernooi geselecteerd. Kies eerst een toernooi.",
-            "error"
+            "error",
           );
           return;
         }
         if (!finaleCandidates.length) {
           showFinaleFeedback(
             "Geen finalisten om op te slaan. Controleer de totaalstand van de 2e ronde.",
-            "error"
+            "error",
           );
           return;
         }
@@ -8186,7 +8290,7 @@
               "toernooien",
               activeTournamentId,
               "spelers",
-              c.spelerId
+              c.spelerId,
             );
             const car =
               typeof c.carFinale === "number" && !isNaN(c.carFinale)
@@ -8202,13 +8306,13 @@
           finaleCarambolesSaved = true;
           showFinaleFeedback(
             "✅ Caramboles finale en afmeldingen opgeslagen.",
-            "success"
+            "success",
           );
         } catch (err) {
           console.error("Fout bij opslaan finale caramboles:", err);
           showFinaleFeedback(
             "❌ Fout bij opslaan van de caramboles voor de finale.",
-            "error"
+            "error",
           );
         }
       }
@@ -8217,14 +8321,14 @@
         if (!activeTournamentId) {
           showFinaleFeedback(
             "❌ Geen toernooi geselecteerd. Kies eerst een toernooi.",
-            "error"
+            "error",
           );
           return;
         }
         if (!finaleCandidates.length) {
           showFinaleFeedback(
             "Geen finalisten om op te slaan. Controleer de totaalstand van de 2e ronde.",
-            "error"
+            "error",
           );
           return;
         }
@@ -8244,7 +8348,7 @@
               "toernooien",
               activeTournamentId,
               "spelers",
-              c.spelerId
+              c.spelerId,
             );
             batch.update(ref, {
               finalPos: toNumberOrNull(c.finalPos),
@@ -8282,7 +8386,7 @@
           console.error("Fout bij opslaan eindstand finale:", err);
           showFinaleFeedback(
             "❌ Fout bij opslaan van de eindstand van de finale.",
-            "error"
+            "error",
           );
         }
       }
@@ -8291,7 +8395,7 @@
         if (!activeTournamentId) {
           showFinaleFeedback(
             "Er is geen actief toernooi geselecteerd.",
-            "error"
+            "error",
           );
           return;
         }
@@ -8301,7 +8405,7 @@
             "- alle ingevoerde eindstand (posities, moyennes, etc.)\n" +
             "- alle caramboles voor de finale\n" +
             "- alle markeringen 'afgemeld voor finale'\n" +
-            "- en het aantal finalisten wordt teruggezet naar 8."
+            "- en het aantal finalisten wordt teruggezet naar 8.",
         );
         if (!ok) return;
 
@@ -8319,7 +8423,7 @@
               "toernooien",
               activeTournamentId,
               "spelers",
-              c.spelerId
+              c.spelerId,
             );
             batch.update(sRef, {
               carambolesFinale: null,
@@ -8369,13 +8473,13 @@
 
           showFinaleFeedback(
             "Alle finalegegevens zijn gewist en teruggezet naar de beginsituatie (8 finalisten).",
-            "success"
+            "success",
           );
         } catch (err) {
           console.error("Fout bij wissen finale:", err);
           showFinaleFeedback(
             "❌ Fout bij het wissen van de finalegegevens.",
-            "error"
+            "error",
           );
         }
       }
@@ -8465,7 +8569,7 @@
         if (!activeTournamentId) {
           showFinaleFeedback(
             "Er is geen actief toernooi geselecteerd.",
-            "error"
+            "error",
           );
           return;
         }
@@ -8476,7 +8580,7 @@
         if (!Number.isFinite(val) || val <= 0 || val > 32) {
           showFinaleFeedback(
             "Geef een geldig aantal finalisten (1–32).",
-            "error"
+            "error",
           );
           return;
         }
@@ -8488,7 +8592,7 @@
           finaleCountSaved = true;
           showFinaleFeedback(
             `Aantal finalisten is vastgelegd op ${val}.`,
-            "success"
+            "success",
           );
 
           // Opnieuw tekenen met nieuwe streep
@@ -8498,7 +8602,7 @@
           console.error("Fout bij opslaan finaleAantalDeelnemers:", err);
           showFinaleFeedback(
             "❌ Opslaan van het aantal finalisten is mislukt.",
-            "error"
+            "error",
           );
         } finally {
           updateFinaleButtons();
@@ -8527,7 +8631,7 @@
 
       // Opslaan car. finale (caramboles + afmeldingen)
       const finaleSaveCarambolesBtn = document.getElementById(
-        "finaleSaveCarambolesBtn"
+        "finaleSaveCarambolesBtn",
       );
       if (finaleSaveCarambolesBtn) {
         finaleSaveCarambolesBtn.addEventListener("click", async () => {
@@ -8538,7 +8642,7 @@
 
       // Opslaan eindstand finale
       const finaleSaveResultsBtn = document.getElementById(
-        "finaleSaveResultsBtn"
+        "finaleSaveResultsBtn",
       );
       if (finaleSaveResultsBtn) {
         finaleSaveResultsBtn.addEventListener("click", async () => {
@@ -8629,7 +8733,7 @@
             m.spelerX.teMaken,
             m.spelerY.teMaken,
             toernooiSettings.punten,
-            pouleDoc
+            pouleDoc,
           );
 
           // Opslaan in Firestore
@@ -8752,7 +8856,7 @@
           db,
           "toernooien",
           activeTournamentId,
-          "r1_wedstrijden"
+          "r1_wedstrijden",
         );
         const snap = await getDocs(matchesRef);
         r1Matches = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -8761,7 +8865,7 @@
           db,
           "toernooien",
           activeTournamentId,
-          "poules_r1"
+          "poules_r1",
         );
         const poulesSnap = await getDocs(poulesRef);
         r1PoulesCache = poulesSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -8974,7 +9078,7 @@
             html += `<div style="margin-top:12px;border-top:1px dashed #ddd;padding-top:10px">${renderPouleStandHTML(
               pouleNaam,
               matches,
-              pouleDoc
+              pouleDoc,
             )}</div>`;
 
             html += `</div></div>`;
@@ -8982,7 +9086,7 @@
 
             // factor-knop koppelen (niet het inklappen laten triggeren)
             const factorBtn = document.querySelector(
-              `.poule-factor-btn[data-poule="${pouleNaam}"]`
+              `.poule-factor-btn[data-poule="${pouleNaam}"]`,
             );
             if (factorBtn) {
               factorBtn.addEventListener("click", (e) => {
@@ -9005,7 +9109,7 @@
         // globale stand
         const globalStats = buildGlobalRankingFromStats(
           r1Matches,
-          r1PoulesCache
+          r1PoulesCache,
         );
         let gHtml = `
                 <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-top:10px">
@@ -9030,17 +9134,17 @@
                     <td style="padding:4px">${idx + 1}</td>
                     <td style="padding:4px">${row.naam}</td>
                     <td style="padding:4px;text-align:right">${Number(
-                      row.puntenAdj ?? row.puntenTotaal
+                      row.puntenAdj ?? row.puntenTotaal,
                     )}</td>
                     <td style="padding:4px;text-align:right;color:#f00">${row.rankPoints_punten.toFixed(
-                      1
+                      1,
                     )}</td>
                     <td style="padding:4px;text-align:right">${percCarText}</td>
                     <td style="padding:4px;text-align:right;color:#f00">${row.rankPoints_percCar.toFixed(
-                      1
+                      1,
                     )}</td>
                     <td style="padding:4px;text-align:right;font-weight:600;color:#f00">${row.rankTotaal.toFixed(
-                      1
+                      1,
                     )}</td>
                   </tr>`;
         });
@@ -9069,7 +9173,7 @@
 
         const input = prompt(
           `Werkelijk aantal spelers voor puntentelling in ${pouleId} (leeg = factor uitzetten):`,
-          huidigeActual ? String(huidigeActual) : ""
+          huidigeActual ? String(huidigeActual) : "",
         );
         if (input === null) return; // gebruiker annuleert
 
@@ -9080,7 +9184,7 @@
           "toernooien",
           activeTournamentId,
           "poules_r1",
-          pouleId
+          pouleId,
         );
 
         // Leeg = factor uitzetten, terug naar "normale" logica
@@ -9102,7 +9206,7 @@
 
         const note = prompt(
           "Korte toelichting (wordt als mouse-over getoond, bijv. welke speler is uitgevallen):",
-          huidigeNote
+          huidigeNote,
         );
 
         // Factor berekenen op basis van 'normaal' 4 spelers vs werkelijk aantal
@@ -9146,7 +9250,7 @@
           db,
           "toernooien",
           activeTournamentId,
-          "poules_r1"
+          "poules_r1",
         );
         const snap = await getDocs(poulesRef);
         return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -9169,7 +9273,7 @@
         if (!poules.length) {
           showPopupMessage(
             "⚠️ Geen poules gevonden. Maak eerst een poule-indeling.",
-            true
+            true,
           );
           return;
         }
@@ -9179,7 +9283,7 @@
           db,
           "toernooien",
           activeTournamentId,
-          "r1_wedstrijden"
+          "r1_wedstrijden",
         );
         const existingSnap = await getDocs(matchesRef);
         const batchDelete = writeBatch(db);
@@ -9191,7 +9295,7 @@
 
         if (deleteCount > 0) {
           const confirmOverwrite = confirm(
-            `Er bestaan al ${deleteCount} wedstrijden.\n\nWil je deze overschrijven? Alle bestaande uitslagen gaan verloren.`
+            `Er bestaan al ${deleteCount} wedstrijden.\n\nWil je deze overschrijven? Alle bestaande uitslagen gaan verloren.`,
           );
           if (!confirmOverwrite) return;
           await batchDelete.commit();
@@ -9214,7 +9318,7 @@
                 "toernooien",
                 activeTournamentId,
                 "r1_wedstrijden",
-                matchId
+                matchId,
               );
               batch.set(matchRef, {
                 poule: poule.id,
@@ -9245,12 +9349,12 @@
         console.log("Aanmaken wedstrijden:", totalMatches);
         await batch.commit();
         console.log(
-          "Batch commit voltooid — wedstrijden zouden nu in Firestore moeten staan"
+          "Batch commit voltooid — wedstrijden zouden nu in Firestore moeten staan",
         );
 
         showPopupMessage(
           `✅ Wedstrijdschema aangemaakt: ${totalMatches} wedstrijden.`,
-          false
+          false,
         );
         await loadR1MatchesFromFirestore();
 
@@ -9266,7 +9370,7 @@
         }
 
         const confirmDelete = confirm(
-          "Weet je zeker dat je ALLE wedstrijden van de 1e ronde wilt verwijderen?\n\n⚠️ Alle ingevoerde uitslagen gaan verloren!"
+          "Weet je zeker dat je ALLE wedstrijden van de 1e ronde wilt verwijderen?\n\n⚠️ Alle ingevoerde uitslagen gaan verloren!",
         );
         if (!confirmDelete) return;
 
@@ -9274,7 +9378,7 @@
           db,
           "toernooien",
           activeTournamentId,
-          "r1_wedstrijden"
+          "r1_wedstrijden",
         );
         const snap = await getDocs(matchesRef);
         if (snap.empty) {
@@ -9315,7 +9419,7 @@
             car: 0,
             beurten: 0,
             gespeeld: 0,
-          })
+          }),
         );
 
         // ruwe stats opbouwen
@@ -9430,7 +9534,7 @@
             values.beurten,
             toernooiSettings.maxBeurten || 0,
             m.spelerX.teMaken,
-            m.spelerY.teMaken
+            m.spelerY.teMaken,
           );
           if (err) {
             showPopupMessage(err, true);
@@ -9446,7 +9550,7 @@
             m.spelerX.teMaken,
             m.spelerY.teMaken,
             toernooiSettings.punten,
-            pouleDoc
+            pouleDoc,
           );
 
           await saveMatchResultFields(id, {
@@ -9512,7 +9616,7 @@
         tX,
         tY,
         pCfg = {},
-        pouleDoc = null
+        pouleDoc = null,
       ) {
         maxB = Number(maxB) || 0;
 
@@ -9570,16 +9674,15 @@
           "toernooien",
           activeTournamentId,
           "r1_wedstrijden",
-          matchId
+          matchId,
         );
         await updateDoc(ref, update);
-        showPopupMessage("✅ Wedstrijd opgeslagen", false);
         await loadR1MatchesFromFirestore();
       }
 
       async function resetMatchResult(matchId) {
         const ok = confirm(
-          "Alleen de ingevoerde resultaten van deze wedstrijd verwijderen?"
+          "Alleen de ingevoerde resultaten van deze wedstrijd verwijderen?",
         );
         if (!ok) return;
         const ref = doc(
@@ -9587,7 +9690,7 @@
           "toernooien",
           activeTournamentId,
           "r1_wedstrijden",
-          matchId
+          matchId,
         );
         await updateDoc(ref, {
           gemaakteX: null,
@@ -9633,20 +9736,20 @@
           type === "error"
             ? "#f8d7da"
             : type === "success"
-            ? "#d1e7dd"
-            : "#e2e3e5";
+              ? "#d1e7dd"
+              : "#e2e3e5";
         const textColor =
           type === "error"
             ? "#842029"
             : type === "success"
-            ? "#0f5132"
-            : "#41464b";
+              ? "#0f5132"
+              : "#41464b";
         fb.innerHTML = `<div style="padding:6px 10px;border-radius:6px;background:${color};color:${textColor};border:1px solid ${
           type === "error"
             ? "#f5c2c7"
             : type === "success"
-            ? "#badbcc"
-            : "#d3d6d8"
+              ? "#badbcc"
+              : "#d3d6d8"
         }">${msg}</div>`;
       }
 
@@ -9665,12 +9768,12 @@
         // 1. Bouw globale ranglijst op basis van 1e ronde-wedstrijden
         const globalStats = buildGlobalRankingFromStats(
           r1Matches,
-          r1PoulesCache
+          r1PoulesCache,
         );
 
         // 2. Sorteer op totaalrang (laagste = beste)
         const sortedStats = [...globalStats].sort(
-          (a, b) => a.rankTotaal - b.rankTotaal
+          (a, b) => a.rankTotaal - b.rankTotaal,
         );
 
         // 2b. Actieve moy→car-tabel ophalen (kan ook null zijn)
@@ -9701,8 +9804,8 @@
             spelerDoc.carambolesR2 != null
               ? spelerDoc.carambolesR2
               : autoCarR2 != null
-              ? autoCarR2
-              : undefined;
+                ? autoCarR2
+                : undefined;
 
           return {
             id: p.spelerId,
@@ -9748,7 +9851,7 @@
 
         // Altijd sorteren op vaste startRank uit de 1e ronde
         const sorted = [...r2AvailablePlayers].sort(
-          (a, b) => (a.startRank || 9999) - (b.startRank || 9999)
+          (a, b) => (a.startRank || 9999) - (b.startRank || 9999),
         );
 
         const active = sorted.filter((p) => !p.withdrawR2);
@@ -9766,8 +9869,8 @@
 
           tr.innerHTML = `
                   <td style="padding:6px 4px;${dimColor}">${
-            p.startRank ?? ""
-          }</td>
+                    p.startRank ?? ""
+                  }</td>
                   <td style="padding:6px 4px;text-align:center;">
                     <input
                       type="checkbox"
@@ -9777,11 +9880,11 @@
                     >
                   </td>
                   <td style="padding:6px 4px;${dimColor}">${
-            p.naam
-          }${nameExtra}</td>
+                    p.naam
+                  }${nameExtra}</td>
                   <td style="padding:6px 4px;text-align:right;${dimColor}">${
-            p.caramboles ?? 0
-          }</td>
+                    p.caramboles ?? 0
+                  }</td>
                   <td style="padding:6px 4px;text-align:right;">
                     <input
                       type="number"
@@ -9839,7 +9942,7 @@
         if (player.withdrawR2) {
           showR2PoulesFeedback(
             "⚠️ Deze speler is afgemeld voor de 2e ronde en kan niet meer in een poule worden ingedeeld.",
-            "error"
+            "error",
           );
           return;
         }
@@ -9869,7 +9972,7 @@
         }
         const aantal = prompt(
           "Hoeveel poules moeten er worden aangemaakt?",
-          "4"
+          "4",
         );
         const n = parseInt(aantal);
         if (!n || n < 1) {
@@ -9908,7 +10011,7 @@
         if (!hasR2Poules) {
           showR2PoulesFeedback(
             "⚠️ Maak eerst 2e ronde poules aan voordat je een basisindeling kiest.",
-            "error"
+            "error",
           );
           return;
         }
@@ -9916,7 +10019,7 @@
         if (!Array.isArray(r2AllPlayers) || r2AllPlayers.length === 0) {
           showR2PoulesFeedback(
             "⚠️ Geen spelerslijst gevonden. Zorg dat de ranglijst van de 1e ronde beschikbaar is.",
-            "error"
+            "error",
           );
           return;
         }
@@ -9940,7 +10043,7 @@
         const assignments = assignBySequence(
           orderedPlayers,
           pouleSkeleton,
-          seq
+          seq,
         );
 
         // Schrijf assignments terug naar r2CurrentPoules
@@ -9951,10 +10054,10 @@
 
         // Bepaal welke spelers nog beschikbaar zijn
         const idsInPoules = new Set(
-          r2CurrentPoules.flatMap((p) => (p.spelers || []).map((sp) => sp.id))
+          r2CurrentPoules.flatMap((p) => (p.spelers || []).map((sp) => sp.id)),
         );
         r2AvailablePlayers = r2AllPlayers.filter(
-          (sp) => !idsInPoules.has(sp.id)
+          (sp) => !idsInPoules.has(sp.id),
         );
         // basisindeling = indeling gewijzigd t.o.v. vorige opslag
         r2PoulesDirty = true;
@@ -9963,7 +10066,7 @@
         updateR2PoulesButtons();
         showR2PoulesFeedback(
           "✅ Basisindeling voor de 2e ronde is toegepast (gelijkmatig, slingerend op basis van ranglijst).",
-          "success"
+          "success",
         );
       }
 
@@ -9973,7 +10076,7 @@
         if (hasR2Schedule) {
           showR2PoulesFeedback(
             "❌ Je kunt de basisindeling niet meer wijzigen omdat er al een wedstrijdschema voor de 2e ronde is aangemaakt.",
-            "error"
+            "error",
           );
           return;
         }
@@ -9983,7 +10086,7 @@
         if (!hasR2Poules) {
           showR2PoulesFeedback(
             "⚠️ Maak eerst 2e ronde poules aan voordat je een basisindeling kiest.",
-            "error"
+            "error",
           );
           return;
         }
@@ -9992,14 +10095,14 @@
         const alreadyAssigned =
           hasR2Poules &&
           r2CurrentPoules.some(
-            (p) => Array.isArray(p.spelers) && p.spelers.length > 0
+            (p) => Array.isArray(p.spelers) && p.spelers.length > 0,
           );
 
         if (alreadyAssigned) {
           const ok = confirm(
             "Er zijn al spelers over de poules verdeeld.\n\n" +
               "Als je de basisindeling toepast, wordt de huidige indeling overschreven.\n\n" +
-              "Wil je doorgaan?"
+              "Wil je doorgaan?",
           );
           if (!ok) return;
         }
@@ -10109,7 +10212,7 @@
                         >
                           🗑️
                         </button>
-                      </li>`
+                      </li>`,
                       )
                       .join("")}
                   </ul>
@@ -10127,7 +10230,7 @@
 
           // Klik op de kaart zelf = geselecteerde speler toevoegen aan deze poule
           card.addEventListener("click", () =>
-            addSelectedR2PlayerToPoule(poule.naam)
+            addSelectedR2PlayerToPoule(poule.naam),
           );
 
           container.appendChild(card);
@@ -10150,7 +10253,7 @@
 
         // alleen deze speler terug naar r2AvailablePlayers
         const alreadyFree = r2AvailablePlayers.find(
-          (p) => p.id === removedPlayer.id
+          (p) => p.id === removedPlayer.id,
         );
         if (!alreadyFree) {
           r2AvailablePlayers.push(removedPlayer);
@@ -10172,7 +10275,7 @@
         renderR2AvailablePlayers();
         showR2PoulesFeedback(
           "♻️ Speler is uit de poule gehaald en staat weer bij de beschikbare spelers.",
-          "success"
+          "success",
         );
         updateR2PoulesButtons();
       }
@@ -10192,7 +10295,7 @@
           return;
         }
         const alreadyInSomePoule = r2CurrentPoules.some((p) =>
-          p.spelers.find((sp) => sp.id === r2SelectedPlayer.id)
+          p.spelers.find((sp) => sp.id === r2SelectedPlayer.id),
         );
         if (alreadyInSomePoule) {
           showR2PoulesFeedback("⚠️ Deze speler zit al in een poule.", "error");
@@ -10200,7 +10303,7 @@
         }
         poule.spelers.push(r2SelectedPlayer);
         r2AvailablePlayers = r2AvailablePlayers.filter(
-          (p) => p.id !== r2SelectedPlayer.id
+          (p) => p.id !== r2SelectedPlayer.id,
         );
         r2SelectedPlayer = null;
         // indeling gewijzigd (speler toegevoegd)
@@ -10223,7 +10326,7 @@
           "toernooien",
           activeTournamentId,
           "spelers",
-          spelerId
+          spelerId,
         );
 
         // 1. Schrijf naar Firestore
@@ -10258,7 +10361,7 @@
           "toernooien",
           activeTournamentId,
           "spelers",
-          spelerId
+          spelerId,
         );
 
         // 1. Schrijf naar Firestore
@@ -10291,7 +10394,7 @@
           db,
           "toernooien",
           activeTournamentId,
-          "poules_r2"
+          "poules_r2",
         );
         const existing = await getDocs(poulesRef);
         for (const d of existing.docs) await deleteDoc(d.ref);
@@ -10335,7 +10438,7 @@
             db,
             "toernooien",
             activeTournamentId,
-            "poules_r2"
+            "poules_r2",
           );
           const existing = await getDocs(poulesRef);
           for (const d of existing.docs) await deleteDoc(d.ref);
@@ -10352,7 +10455,7 @@
         if (!table) {
           alert(
             "Er is geen moyennetabel gekoppeld aan dit toernooi.\n" +
-              "Koppel eerst een tabel onder 'Moyenne → caramboles'."
+              "Koppel eerst een tabel onder 'Moyenne → caramboles'.",
           );
           return;
         }
@@ -10360,13 +10463,13 @@
         if (!Array.isArray(r1Matches) || r1Matches.length === 0) {
           alert(
             "Er zijn nog geen (volledige) resultaten in de 1e ronde.\n" +
-              "De gemiddelden kunnen nog niet worden berekend."
+              "De gemiddelden kunnen nog niet worden berekend.",
           );
           return;
         }
 
         const ok = confirm(
-          "Weet je zeker dat je alle 2e ronde caramboles wilt bijwerken op basis van de gespeelde moyenne in de 1e ronde en de gekoppelde moyennetabel?"
+          "Weet je zeker dat je alle 2e ronde caramboles wilt bijwerken op basis van de gespeelde moyenne in de 1e ronde en de gekoppelde moyennetabel?",
         );
         if (!ok) return;
 
@@ -10377,7 +10480,7 @@
           console.error("Fout bij berekenen globale stats 1e ronde:", err);
           alert(
             "Het is niet gelukt om de moyennes van de 1e ronde te berekenen.\n" +
-              "Controleer de console voor meer details."
+              "Controleer de console voor meer details.",
           );
           return;
         }
@@ -10443,7 +10546,7 @@
 
         showR2PoulesFeedback(
           msg + " Vergeet niet om ze op te slaan met 'Opslaan car. 2e ronde'.",
-          "success"
+          "success",
         );
         updateR2PoulesButtons();
       }
@@ -10452,7 +10555,7 @@
         if (!activeTournamentId) return;
 
         const ok = confirm(
-          "Wil je alle huidige waarden voor 2e ronde caramboles opslaan?"
+          "Wil je alle huidige waarden voor 2e ronde caramboles opslaan?",
         );
         if (!ok) return;
 
@@ -10467,7 +10570,7 @@
 
         showR2PoulesFeedback(
           "💾 Alle 2e ronde caramboles zijn opgeslagen.",
-          "success"
+          "success",
         );
         updateR2PoulesButtons();
       }
@@ -10512,7 +10615,7 @@
             await saveCarambolesR2(spelerId, nieuweWaarde);
             showR2PoulesFeedback(
               "✅ Aantal caramboles 2e ronde aangepast.",
-              "success"
+              "success",
             );
             return;
           }
@@ -10530,7 +10633,7 @@
                 withdrawn
                   ? "❌ Speler is afgemeld voor de 2e ronde en wordt niet meer automatisch ingedeeld."
                   : "✅ Speler is weer aangemeld voor de 2e ronde.",
-                "success"
+                "success",
               );
             } catch (err) {
               console.error(err);
@@ -10538,7 +10641,7 @@
               target.checked = !target.checked;
               showR2PoulesFeedback(
                 "⚠️ Opslaan van de afmelding is mislukt.",
-                "error"
+                "error",
               );
             }
           }
@@ -10573,7 +10676,7 @@
           Array.isArray(r2CurrentPoules) && r2CurrentPoules.length > 0;
 
         const exportR2WordBtn = document.getElementById(
-          "exportR2PoulesWordBtn"
+          "exportR2PoulesWordBtn",
         );
 
         // Export naar Word 2e ronde: actief als er een toernooi is en er poules met spelers zijn
@@ -10582,7 +10685,7 @@
             hasTournament &&
             hasR2Poules &&
             r2CurrentPoules.some(
-              (p) => Array.isArray(p.spelers) && p.spelers.length > 0
+              (p) => Array.isArray(p.spelers) && p.spelers.length > 0,
             );
 
           exportR2WordBtn.disabled = !canExportWord;
@@ -10604,7 +10707,8 @@
         let allFilled = false;
         if (hasR2Poules) {
           allFilled = r2CurrentPoules.every(
-            (p) => Array.isArray(p.spelers) && p.spelers.length === p.maxSpelers
+            (p) =>
+              Array.isArray(p.spelers) && p.spelers.length === p.maxSpelers,
           );
         }
 
@@ -10689,7 +10793,7 @@
           db,
           "toernooien",
           activeTournamentId,
-          "poules_r2"
+          "poules_r2",
         );
         const snap = await getDocs(poulesRef);
 
@@ -10709,8 +10813,8 @@
         // 3) Ongeacht bron: haal alle spelers die al in een poule zitten uit available
         const idsInPoules = new Set(
           (r2CurrentPoules || []).flatMap((p) =>
-            (p.spelers || []).map((sp) => sp.id)
-          )
+            (p.spelers || []).map((sp) => sp.id),
+          ),
         );
 
         r2AvailablePlayers = r2AllPlayers.filter((p) => !idsInPoules.has(p.id));
@@ -10811,7 +10915,7 @@
           db,
           "toernooien",
           activeTournamentId,
-          "r2_wedstrijden"
+          "r2_wedstrijden",
         );
         const snap = await getDocs(matchesRef);
         r2Matches = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -10820,7 +10924,7 @@
           db,
           "toernooien",
           activeTournamentId,
-          "poules_r2"
+          "poules_r2",
         );
         const poulesSnap = await getDocs(poulesRef);
         r2PoulesCache = poulesSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -10856,7 +10960,7 @@
             m.spelerX.teMaken,
             m.spelerY.teMaken,
             toernooiSettings.punten,
-            pouleDoc
+            pouleDoc,
           );
 
           // Opslaan in Firestore
@@ -11054,7 +11158,7 @@
             html += `<div style="margin-top:12px;border-top:1px dashed #ddd;padding-top:10px">${renderPouleStandHTML(
               pouleNaam,
               matches,
-              pouleDoc
+              pouleDoc,
             )}</div>`;
             html += `</div></div>`;
             wrapper.insertAdjacentHTML("beforeend", html);
@@ -11081,7 +11185,7 @@
 
             // factor-knop koppelen (voorkom dat de header inklapt)
             const factorBtn = document.querySelector(
-              `.r2-poule-factor-btn[data-poule="${pouleNaam}"]`
+              `.r2-poule-factor-btn[data-poule="${pouleNaam}"]`,
             );
             if (factorBtn) {
               factorBtn.addEventListener("click", (e) => {
@@ -11094,7 +11198,7 @@
         // globale stand
         const globalStats = buildGlobalRankingFromStats(
           r2Matches,
-          r2PoulesCache
+          r2PoulesCache,
         );
         let gHtml = `
                 <table style="width:100%;border-collapse:collapse;font-size:0.9em;margin-top:10px">
@@ -11119,17 +11223,17 @@
                     <td style="padding:4px">${idx + 1}</td>
                     <td style="padding:4px">${row.naam}</td>
                     <td style="padding:4px;text-align:right">${Number(
-                      row.puntenTotaal
+                      row.puntenTotaal,
                     )}</td>
                     <td style="padding:4px;text-align:right">${row.rankPoints_punten.toFixed(
-                      1
+                      1,
                     )}</td>
                     <td style="padding:4px;text-align:right">${percCarText}</td>
                     <td style="padding:4px;text-align:right">${row.rankPoints_percCar.toFixed(
-                      1
+                      1,
                     )}</td>
                     <td style="padding:4px;text-align:right;font-weight:600">${row.rankTotaal.toFixed(
-                      1
+                      1,
                     )}</td>
                   </tr>`;
         });
@@ -11158,7 +11262,7 @@
 
         const input = prompt(
           `Werkelijk aantal spelers voor puntentelling in ${pouleId} (leeg = factor uitzetten):`,
-          huidigeActual ? String(huidigeActual) : ""
+          huidigeActual ? String(huidigeActual) : "",
         );
         if (input === null) return; // gebruiker annuleert
 
@@ -11169,7 +11273,7 @@
           "toernooien",
           activeTournamentId,
           "poules_r2",
-          pouleId
+          pouleId,
         );
 
         // Leeg = factor uitzetten, terug naar normale logica
@@ -11190,7 +11294,7 @@
 
         const note = prompt(
           "Korte toelichting (wordt als mouse-over getoond, bijv. welke speler is uitgevallen):",
-          huidigeNote
+          huidigeNote,
         );
 
         // Factor berekenen op basis van 'normaal' aantal spelers vs werkelijk aantal
@@ -11250,7 +11354,7 @@
               values.beurten,
               r2ToernooiSettings.maxBeurten || 0,
               m.spelerX.teMaken,
-              m.spelerY.teMaken
+              m.spelerY.teMaken,
             );
             if (err) {
               showR2PopupMessage(err, true);
@@ -11266,7 +11370,7 @@
               m.spelerX.teMaken,
               m.spelerY.teMaken,
               r2ToernooiSettings.punten,
-              pouleDoc
+              pouleDoc,
             );
 
             await saveR2MatchResultFields(id, {
@@ -11292,7 +11396,7 @@
           "toernooien",
           activeTournamentId,
           "r2_wedstrijden",
-          matchId
+          matchId,
         );
 
         // 1) Updaten in Firestore
@@ -11307,14 +11411,13 @@
         }
 
         // 3) UI verversen, maar open/dicht-status van poules behouden
-        showR2PopupMessage("✅ Wedstrijd opgeslagen", false);
         renderR2Matches();
         updateR2ResultsButtons();
       }
 
       async function resetR2MatchResult(matchId) {
         const ok = confirm(
-          "Alleen de ingevoerde resultaten van deze wedstrijd verwijderen?"
+          "Alleen de ingevoerde resultaten van deze wedstrijd verwijderen?",
         );
         if (!ok) return;
 
@@ -11323,7 +11426,7 @@
           "toernooien",
           activeTournamentId,
           "r2_wedstrijden",
-          matchId
+          matchId,
         );
 
         // 1) Firestore resetten
@@ -11372,7 +11475,7 @@
         if (!poules.length) {
           showR2PopupMessage(
             "⚠️ Geen poules gevonden. Maak eerst een poule-indeling.",
-            true
+            true,
           );
           return;
         }
@@ -11381,12 +11484,12 @@
           db,
           "toernooien",
           activeTournamentId,
-          "r2_wedstrijden"
+          "r2_wedstrijden",
         );
         const existingSnap = await getDocs(matchesRef);
         if (!existingSnap.empty) {
           const confirmOverwrite = confirm(
-            `Er bestaan al ${existingSnap.size} wedstrijden in 2e ronde.\n\nWil je deze overschrijven? Alle bestaande uitslagen gaan verloren.`
+            `Er bestaan al ${existingSnap.size} wedstrijden in 2e ronde.\n\nWil je deze overschrijven? Alle bestaande uitslagen gaan verloren.`,
           );
           if (!confirmOverwrite) return;
           const batch = writeBatch(db);
@@ -11408,7 +11511,7 @@
                 "toernooien",
                 activeTournamentId,
                 "r2_wedstrijden",
-                matchId
+                matchId,
               );
               batch.set(matchRef, {
                 poule: poule.id,
@@ -11439,7 +11542,7 @@
         await batch.commit();
         showR2PopupMessage(
           `✅ Wedstrijdschema 2e ronde aangemaakt: ${totalMatches} wedstrijden.`,
-          false
+          false,
         );
         await loadR2MatchesFromFirestore();
       }
@@ -11453,20 +11556,20 @@
           return;
         }
         const confirmDelete = confirm(
-          "Weet je zeker dat je ALLE wedstrijden van de 2e ronde wilt verwijderen?\n\n⚠️ Alle ingevoerde uitslagen gaan verloren!"
+          "Weet je zeker dat je ALLE wedstrijden van de 2e ronde wilt verwijderen?\n\n⚠️ Alle ingevoerde uitslagen gaan verloren!",
         );
         if (!confirmDelete) return;
         const matchesRef = collection(
           db,
           "toernooien",
           activeTournamentId,
-          "r2_wedstrijden"
+          "r2_wedstrijden",
         );
         const snap = await getDocs(matchesRef);
         if (snap.empty) {
           showR2PopupMessage(
             "Er zijn geen wedstrijden om te verwijderen.",
-            true
+            true,
           );
           return;
         }
@@ -11479,7 +11582,7 @@
         await batch.commit();
         showR2PopupMessage(
           `🗑️ ${count} wedstrijden 2e ronde verwijderd.`,
-          false
+          false,
         );
         await loadR2MatchesFromFirestore();
       }
@@ -11492,7 +11595,7 @@
           db,
           "toernooien",
           activeTournamentId,
-          "poules_r2"
+          "poules_r2",
         );
         const snap = await getDocs(poulesRef);
         return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -11506,26 +11609,26 @@
       const adminFeedback = document.getElementById("adminFeedback");
       const linkUserSelect = document.getElementById("linkUserSelect");
       const linkTournamentsList = document.getElementById(
-        "linkTournamentsList"
+        "linkTournamentsList",
       );
       const saveLinksBtn = document.getElementById("saveLinksBtn");
 
       // ===== Export (ZIP met CSV's) =====
       const exportTournamentBtn = document.getElementById(
-        "exportTournamentBtn"
+        "exportTournamentBtn",
       );
       const exportAdminMiniStatus = document.getElementById(
-        "exportAdminMiniStatus"
+        "exportAdminMiniStatus",
       );
 
       const exportTournamentModal = document.getElementById(
-        "exportTournamentModal"
+        "exportTournamentModal",
       );
       const exportStartBtn = document.getElementById("exportStartBtn");
       const exportCancelBtn = document.getElementById("exportCancelBtn");
       const exportSelectAllBtn = document.getElementById("exportSelectAllBtn");
       const exportSelectNoneBtn = document.getElementById(
-        "exportSelectNoneBtn"
+        "exportSelectNoneBtn",
       );
       const exportProgressWrap = document.getElementById("exportProgressWrap");
       const exportProgressText = document.getElementById("exportProgressText");
@@ -11594,11 +11697,11 @@
           arr.reduce((set, r) => {
             Object.keys(r || {}).forEach((k) => set.add(k));
             return set;
-          }, new Set())
+          }, new Set()),
         );
         const header = keys.map((k) => csvEscape(k, sep)).join(sep);
         const lines = arr.map((r) =>
-          keys.map((k) => csvEscape(r?.[k], sep)).join(sep)
+          keys.map((k) => csvEscape(r?.[k], sep)).join(sep),
         );
         return "\uFEFF" + [header, ...lines].join("\n");
       }
@@ -11680,7 +11783,7 @@
         pouleNaam,
         matches,
         pouleDoc,
-        rondeHint = ""
+        rondeHint = "",
       ) {
         // rondeHint: "r1" of "r2" (anders fallback op beschikbare velden)
         const pickTeMaken = (s) => {
@@ -11707,7 +11810,7 @@
             car: 0,
             beurten: 0,
             gespeeld: 0,
-          })
+          }),
         );
 
         (matches || []).forEach((m) => {
@@ -11903,9 +12006,9 @@
           pointsWinLess: punten?.winLess ?? "",
           pointsDrawLess: punten?.drawLess ?? "",
           pointsLoseLess: punten?.loseLess ?? "",
-          pointsWinMax: maxBeurten === "nvt" ? "nvt" : punten?.winMax ?? "",
-          pointsDrawMax: maxBeurten === "nvt" ? "nvt" : punten?.drawMax ?? "",
-          pointsLoseMax: maxBeurten === "nvt" ? "nvt" : punten?.loseMax ?? "",
+          pointsWinMax: maxBeurten === "nvt" ? "nvt" : (punten?.winMax ?? ""),
+          pointsDrawMax: maxBeurten === "nvt" ? "nvt" : (punten?.drawMax ?? ""),
+          pointsLoseMax: maxBeurten === "nvt" ? "nvt" : (punten?.loseMax ?? ""),
         };
       }
 
@@ -11921,7 +12024,7 @@
         if (typeof JSZip === "undefined") {
           showAdminFeedback(
             "JSZip library ontbreekt (kan niet exporteren).",
-            "error"
+            "error",
           );
           return;
         }
@@ -11996,7 +12099,7 @@
           if (opts.toernooi) {
             const toernooiRow = flattenTournamentForExport(
               tourn || {},
-              moyTable
+              moyTable,
             );
             zip.file("toernooi.csv", objectsToCsv([toernooiRow], ";"));
             bump("toernooi.csv toegevoegd...");
@@ -12005,7 +12108,7 @@
           if (opts.spelers) {
             zip.file(
               "spelers.csv",
-              objectsToCsv(spelers.map(flattenPlayer), ";")
+              objectsToCsv(spelers.map(flattenPlayer), ";"),
             );
             bump("spelers.csv toegevoegd...");
           }
@@ -12015,8 +12118,8 @@
               "poules_r1.csv",
               objectsToCsv(
                 poulesR1.map((p) => flattenPoule({ ...p, _ronde: "r1" })),
-                ";"
-              )
+                ";",
+              ),
             );
             bump("poules_r1.csv toegevoegd...");
           }
@@ -12024,7 +12127,7 @@
           if (opts.r1Wed) {
             // pouleId -> pouleNaam
             const pouleNaamMap = Object.fromEntries(
-              (poulesR1 || []).map((p) => [p.id, p?.naam || ""])
+              (poulesR1 || []).map((p) => [p.id, p?.naam || ""]),
             );
 
             // verrijk wedstrijden met pouleNaam op basis van pouleId
@@ -12035,7 +12138,7 @@
 
             zip.file(
               "r1_wedstrijden.csv",
-              objectsToCsv(wedR1Export.map(flattenMatch), ";")
+              objectsToCsv(wedR1Export.map(flattenMatch), ";"),
             );
             bump("r1_wedstrijden.csv toegevoegd...");
           }
@@ -12044,11 +12147,11 @@
             const allRows = [];
             poulesR1.forEach((p) => {
               const matches = wedR1.filter(
-                (m) => (m?.pouleId || m?.poule) === p.id
+                (m) => (m?.pouleId || m?.poule) === p.id,
               );
 
               allRows.push(
-                ...computePouleStandRows(p?.naam || "", matches, p, "r1")
+                ...computePouleStandRows(p?.naam || "", matches, p, "r1"),
               );
             });
             zip.file("standen_r1.csv", objectsToCsv(allRows, ";"));
@@ -12060,15 +12163,15 @@
               "poules_r2.csv",
               objectsToCsv(
                 poulesR2.map((p) => flattenPoule({ ...p, _ronde: "r2" })),
-                ";"
-              )
+                ";",
+              ),
             );
             bump("poules_r2.csv toegevoegd...");
           }
 
           if (opts.r2Wed) {
             const pouleNaamMap = Object.fromEntries(
-              (poulesR2 || []).map((p) => [p.id, p?.naam || ""])
+              (poulesR2 || []).map((p) => [p.id, p?.naam || ""]),
             );
 
             const wedR2Export = (wedR2 || []).map((m) => ({
@@ -12078,7 +12181,7 @@
 
             zip.file(
               "r2_wedstrijden.csv",
-              objectsToCsv(wedR2Export.map(flattenMatch), ";")
+              objectsToCsv(wedR2Export.map(flattenMatch), ";"),
             );
             bump("r2_wedstrijden.csv toegevoegd...");
           }
@@ -12087,11 +12190,11 @@
             const allRows = [];
             poulesR2.forEach((p) => {
               const matches = wedR2.filter(
-                (m) => (m?.pouleId || m?.poule) === p.id
+                (m) => (m?.pouleId || m?.poule) === p.id,
               );
 
               allRows.push(
-                ...computePouleStandRows(p?.naam || "", matches, p, "r2")
+                ...computePouleStandRows(p?.naam || "", matches, p, "r2"),
               );
             });
             zip.file("standen_r2.csv", objectsToCsv(allRows, ";"));
@@ -12123,18 +12226,18 @@
                 finalMoy:
                   typeof p?.finalMoy === "number"
                     ? p.finalMoy.toFixed(3)
-                    : p?.finalMoy ?? "",
+                    : (p?.finalMoy ?? ""),
                 finalHS: p?.finalHS ?? "",
 
                 // 6) Moy% en Car% toevoegen (zoals opgeslagen)
                 "moy%":
                   typeof p?.finalMoyPerc === "number"
                     ? p.finalMoyPerc.toFixed(1)
-                    : p?.finalMoyPerc ?? "",
+                    : (p?.finalMoyPerc ?? ""),
                 "car%":
                   typeof p?.finalCarPerc === "number"
                     ? p.finalCarPerc.toFixed(1)
-                    : p?.finalCarPerc ?? "",
+                    : (p?.finalCarPerc ?? ""),
               }))
 
               .sort((a, b) => (a.finalPos || 999) - (b.finalPos || 999));
@@ -12165,12 +12268,12 @@
             const base = Math.round((step / totalSteps) * 100);
             setExportProgress(
               Math.max(base, pct),
-              `ZIP comprimeren... (${pct}%)`
+              `ZIP comprimeren... (${pct}%)`,
             );
           });
 
           const fileName = `Toernooi_${safeFilenamePart(
-            meta.naam
+            meta.naam,
           )}_${safeFilenamePart(meta.jaar)}_${new Date()
             .toISOString()
             .slice(0, 10)}.zip`;
@@ -12184,7 +12287,7 @@
           console.error("Export fout:", err);
           showAdminFeedback(
             "⚠️ Export mislukt: " + (err?.message || err),
-            "error"
+            "error",
           );
           setExportProgress(0, "⚠️ Export mislukt (zie console).");
         } finally {
@@ -12199,7 +12302,7 @@
       function downloadTextFile(
         filename,
         content,
-        mime = "text/csv;charset=utf-8"
+        mime = "text/csv;charset=utf-8",
       ) {
         const blob = new Blob([content], { type: mime });
         const url = URL.createObjectURL(blob);
@@ -12247,7 +12350,7 @@
       async function loadMoyTableForTournament() {
         try {
           const tournSnap = await getDoc(
-            doc(db, "toernooien", activeTournamentId)
+            doc(db, "toernooien", activeTournamentId),
           );
           const t = tournSnap.data() || {};
           const tableId = t.moyCarTableId || t.moyCarTable || null;
@@ -12271,7 +12374,7 @@
               (r) =>
                 Number.isFinite(r.min) &&
                 Number.isFinite(r.max) &&
-                Number.isFinite(r.car)
+                Number.isFinite(r.car),
             );
         } catch (e) {
           console.warn("Export: moy-table laden mislukt", e);
@@ -12334,7 +12437,7 @@
                   (r) =>
                     Number.isFinite(r.van) &&
                     Number.isFinite(r.tot) &&
-                    Number.isFinite(r.car)
+                    Number.isFinite(r.car),
                 );
             }
           }
@@ -12447,7 +12550,7 @@
           .sort((a, b) =>
             (a.naam || "").localeCompare(b.naam || "", "nl", {
               sensitivity: "base",
-            })
+            }),
           )
           .map((s) => {
             const carTot = (s.car1 || 0) + (s.car2 || 0) + (s.carFin || 0);
@@ -12479,7 +12582,7 @@
         // 4) bestandsnaam: toernooiId + datum
         const today = new Date();
         const stamp = `${today.getFullYear()}-${String(
-          today.getMonth() + 1
+          today.getMonth() + 1,
         ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
         const filename = `caramboles_${activeTournamentId}_${stamp}.csv`;
 
@@ -12497,7 +12600,7 @@
       if (exportTournamentBtn)
         exportTournamentBtn.addEventListener(
           "click",
-          openExportTournamentModal
+          openExportTournamentModal,
         );
       if (exportCancelBtn)
         exportCancelBtn.addEventListener("click", closeExportTournamentModal);
@@ -12559,14 +12662,14 @@
           type === "error"
             ? "#f8d7da"
             : type === "success"
-            ? "#d1e7dd"
-            : "#e2e3e5";
+              ? "#d1e7dd"
+              : "#e2e3e5";
         const textColor =
           type === "error"
             ? "#842029"
             : type === "success"
-            ? "#0f5132"
-            : "#41464b";
+              ? "#0f5132"
+              : "#41464b";
         adminFeedback.innerHTML = `
           <div class="message" style="background:${color};color:${textColor};">
             ${msg}
@@ -12648,7 +12751,7 @@
         e.preventDefault();
         showAdminFeedback(
           "Gebruikers aanmaken/wachtwoorden wijzigen/rollen aanpassen gebeurt voorlopig lokaal (setup-users.js).",
-          "info"
+          "info",
         );
       });
 
@@ -12677,7 +12780,7 @@
           .sort(
             (a, b) =>
               (a.jaar || 0) - (b.jaar || 0) ||
-              (a.naam || "").localeCompare(b.naam || "")
+              (a.naam || "").localeCompare(b.naam || ""),
           )
           .forEach((t) => {
             const checked = user?.tournaments?.includes(t.id) ? "checked" : "";
@@ -12707,7 +12810,7 @@
         await setDoc(
           doc(db, "users", uid),
           { tournaments: selected },
-          { merge: true }
+          { merge: true },
         );
         showAdminFeedback("Koppelingen opgeslagen.", "success");
         await loadUsersAdminTab();
@@ -12720,7 +12823,7 @@
         .querySelector('button[data-tab="r1resultaten"]')
         .addEventListener("click", () => {
           Object.keys(pouleOpenState).forEach(
-            (k) => (pouleOpenState[k] = false)
+            (k) => (pouleOpenState[k] = false),
           );
           loadR1MatchesFromFirestore(); // vult r1Matches
           updateR1ResultsButtons(); // zet knoppen direct goed
@@ -12733,7 +12836,7 @@
         .querySelector('button[data-tab="r2resultaten"]')
         .addEventListener("click", async () => {
           Object.keys(pouleOpenStateR2).forEach(
-            (k) => (pouleOpenStateR2[k] = false)
+            (k) => (pouleOpenStateR2[k] = false),
           );
           await loadR2MatchesFromFirestore(); // vult r2Matches + r2PoulesCache
           updateR2ResultsButtons(); // zet knoppen direct goed
@@ -12769,25 +12872,25 @@
       const uploadRecentBtn = document.getElementById("uploadCarListRecentBtn");
       if (uploadRecentBtn)
         uploadRecentBtn.addEventListener("click", () =>
-          uploadCarHelpCSV("recent")
+          uploadCarHelpCSV("recent"),
         );
 
       const uploadPrevBtn = document.getElementById("uploadCarListPrevBtn");
       if (uploadPrevBtn)
         uploadPrevBtn.addEventListener("click", () =>
-          uploadCarHelpCSV("previous")
+          uploadCarHelpCSV("previous"),
         );
 
       const clearRecentBtn = document.getElementById("clearCarListRecentBtn");
       if (clearRecentBtn)
         clearRecentBtn.addEventListener("click", () =>
-          clearCarHelpCSV("recent")
+          clearCarHelpCSV("recent"),
         );
 
       const clearPrevBtn = document.getElementById("clearCarListPrevBtn");
       if (clearPrevBtn)
         clearPrevBtn.addEventListener("click", () =>
-          clearCarHelpCSV("previous")
+          clearCarHelpCSV("previous"),
         );
 
       // ✅ TOEVOEGEN: Event listeners voor de spelerslijst status knoppen
