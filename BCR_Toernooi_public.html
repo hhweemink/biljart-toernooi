@@ -372,7 +372,12 @@
     <!-- TAB 3: 1e RONDE stand -->
     <div id="tab-r1s" class="tab-panel">
       <div class="card global-stand-card">
-        <div class="round-section-title">Totaalstand 1e ronde</div>
+
+        <div class="round-section-title">
+          Totaalstand 1e ronde -
+          <span id="r1StandProgress" class="poule-progress"></span>
+        </div>
+
         <div class="round-section-sub">
           Ranglijst op basis van wedstrijdpunten (incl. factor) en
           carambolepercentage. Gelijke scores krijgen gemiddelde rangpunten.
@@ -380,6 +385,7 @@
         <div id="r1GlobalStandContainer"></div>
       </div>
     </div>
+
 
     <!-- TAB 4: 2e RONDE poules-->
     <div id="tab-r2p" class="tab-panel">
@@ -409,7 +415,12 @@
     <!-- TAB 5: 2e RONDE stand-->
     <div id="tab-r2s" class="tab-panel">
       <div class="card global-stand-card">
-        <div class="round-section-title">Totaalstand 2e ronde</div>
+
+        <div class="round-section-title">
+          Totaalstand 2e ronde -
+          <span id="r2StandProgress" class="poule-progress"></span>
+        </div>
+
         <div class="round-section-sub">
           Ranglijst op basis van wedstrijdpunten (incl. factor) en
           carambolepercentage. De eerste 8 plaatsen worden gemarkeerd.
@@ -748,6 +759,15 @@
       const pouleBlocks = $("r1PouleBlocks");
       const globalStandContainer = $("r1GlobalStandContainer");
 
+      const r1Played = r1Matches.filter((m) => m.afgerond).length;
+      const r1Total = r1Matches.length;
+      const r1Percentage = r1Total
+        ? Math.round((r1Played / r1Total) * 100)
+        : 0;
+
+      $("r1StandProgress").textContent =
+        `Gespeeld: ${r1Played} / ${r1Total} (${r1Percentage}%)`;
+
       indelingContainer.innerHTML = "";
       pouleBlocks.innerHTML = "";
       globalStandContainer.innerHTML = "";
@@ -904,6 +924,7 @@
                 <tr>
                   <th>Nr</th>
                   <th>Speler</th>
+                  <th>Gespeeld</th>
                   <th>Ptn</th>
                   <th>Rang Ptn</th>
                   <th>%Car</th>
@@ -921,6 +942,7 @@
               <tr>
                 <td>${idx + 1}</td>
                 <td>${row.naam}</td>
+                <td>${row.wedstrijdenGespeeld}</td>
                 <td>${Number(row.puntenAdj)}</td>
                 <td class="rang-cell">${row.rankPoints_punten}</td>
                 <td>${perc}</td>
@@ -940,6 +962,15 @@
       const indelingContainer = $("r2IndelingContainer");
       const pouleBlocks = $("r2PouleBlocks");
       const globalStandContainer = $("r2GlobalStandContainer");
+
+      const r2Played = r2Matches.filter((m) => m.afgerond).length;
+      const r2Total = r2Matches.length;
+      const r2Percentage = r2Total
+        ? Math.round((r2Played / r2Total) * 100)
+        : 0;
+
+      $("r2StandProgress").textContent =
+        `Gespeeld: ${r2Played} / ${r2Total} (${r2Percentage}%)`;
 
       indelingContainer.innerHTML = "";
       pouleBlocks.innerHTML = "";
@@ -1100,6 +1131,7 @@
                 <tr>
                   <th>Nr</th>
                   <th>Speler</th>
+                  <th>Gespeeld</th>
                   <th>Ptn</th>
                   <th>Rang Ptn</th>
                   <th>%Car</th>
@@ -1121,6 +1153,7 @@
               <tr${rowStyle}>
                 <td>${idx + 1}</td>
                 <td>${row.naam}</td>
+                <td>${row.wedstrijdenGespeeld}</td>
                 <td>${Number(row.puntenAdj)}</td>
                 <td class="rang-cell">${row.rankPoints_punten}</td>
                 <td>${perc}</td>
