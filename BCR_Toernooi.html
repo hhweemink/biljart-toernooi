@@ -338,7 +338,7 @@
 
     /* Help-knop in header: bij klikken wél schalen, maar gecentreerd blijven */
     #bcr-toernooi-app .help-btn:active {
-      scale(0.97);
+      transform: scale(0.97);
     }
 
     /* Opslaan */
@@ -861,7 +861,7 @@
 
     /* Help-knop: ingedrukt effect, maar gecentreerd blijven */
     #bcr-toernooi-app .help-btn:active {
-      scale(0.97);
+      transform: scale(0.97);
     }
 
     /* Primair: opslaan / hoofdacties */
@@ -1632,9 +1632,17 @@
             <button type="button" id="sortByName" class="btn btn-secondary">
               Sorteer op naam
             </button>
+
             <button type="button" id="sortByCaramboles" class="btn btn-secondary">
               Sorteer op caramboles
             </button>
+
+            <button type="button" id="importPlayerDataBtn" class="btn btn-secondary">
+              <span class="btn-icon" aria-hidden="true">📥</span>
+              <span class="btn-label">Spelersgegevens importeren</span>
+            </button>
+
+            <input type="file" id="importPlayerDataFile" accept=".csv,text/csv" style="display:none" />
           </div>
 
           <div id="playerCount" class="player-count">
@@ -1656,7 +1664,7 @@
             <div>
               <strong>De spelerslijst is definitief.</strong>
               <div style="font-size: 0.85rem">
-                Alleen contactgegevens (e-mail en telefoon) en de opmerking zijn nog
+                Alleen contactgegevens (e-mail en telefoon), lidnummer en de opmerking zijn nog
                 aanpasbaar.
               </div>
             </div>
@@ -1666,11 +1674,12 @@
             <table id="playersTable" class="player-table">
               <thead>
                 <tr>
+                  <th style="width: 40px;">Lidnr.</th>
                   <th>Naam</th>
-                  <th>E-mail</th>
-                  <th>Telefoon</th>
-                  <th>Caramboles</th>
-                  <th style="width: 120px; text-align: center">Acties</th>
+                  <th style="width: 180px;">E-mail</th>
+                  <th style="width: 120px;">Telefoon</th>
+                  <th style="text-align: center">Caramboles</th>
+                  <th style="text-align: center">Acties</th>
                 </tr>
               </thead>
               <tbody id="playerTableBody">
@@ -1739,6 +1748,10 @@
             <div>
               <label>Naam</label>
               <input type="text" id="editName" required />
+            </div>
+            <div>
+              <label>Lidnummer</label>
+              <input type="text" id="editLidnummer" maxlength="3" inputmode="numeric" placeholder="bijv. 037" />
             </div>
             <div>
               <label>E-mail</label>
@@ -2760,8 +2773,8 @@
       deleteDoc,
       collection,
       addDoc,
-      writeBatch,
-      updateDoc,
+      writeBatch, updateDoc,
+      serverTimestamp,
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import {
       getAuth,
@@ -4405,6 +4418,8 @@
     const cancelEdit = document.getElementById("cancelEdit");
     const noTournamentNotice = document.getElementById("noTournamentNotice");
     const playersLockOverlay = document.getElementById("playersLockOverlay");
+    const importPlayerDataBtn = document.getElementById("importPlayerDataBtn");
+    const importPlayerDataFile = document.getElementById("importPlayerDataFile");
 
     let currentPlayers = [];
     let currentSort = null;
@@ -4431,15 +4446,17 @@
 
     function openEditModal(player) {
       clearEditPlayerFeedback();
-
       editPlayerId = player.id;
+
       const nameInput = document.getElementById("editName");
+      const lidnummerInput = document.getElementById("editLidnummer");
       const emailInput = document.getElementById("editEmail");
       const phoneInput = document.getElementById("editPhone");
       const carInput = document.getElementById("editCaramboles");
       const opmerkingInput = document.getElementById("editOpmerking");
 
       nameInput.value = player.naam || "";
+      lidnummerInput.value = player.lidnummer || "";
       emailInput.value = player.email || "";
       phoneInput.value = player.telefoon || "";
       carInput.value = player.caramboles ?? "";
@@ -4468,21 +4485,44 @@
 
     editPlayerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+
       if (!editPlayerId || !activeTournamentId) return;
 
       clearEditPlayerFeedback();
 
+      // Lidnummer ophalen en controleren
+      let lidnummer = document
+        .getElementById("editLidnummer")
+        .value
+        .trim();
+
+      if (lidnummer) {
+        if (!/^\d{1,3}$/.test(lidnummer)) {
+          showEditPlayerFeedback(
+            "Lidnummer moet uit maximaal 3 cijfers bestaan."
+          );
+          document.getElementById("editLidnummer").focus();
+          return;
+        }
+
+        // Bijvoorbeeld 37 -> 037
+        lidnummer = lidnummer.padStart(3, "0");
+      }
+
       const newData = {
         naam: document.getElementById("editName").value.trim(),
+        lidnummer: lidnummer,
         email: document.getElementById("editEmail").value.trim(),
         telefoon: document.getElementById("editPhone").value.trim(),
         caramboles:
           Number(document.getElementById("editCaramboles").value) || 0,
         opmerking: document.getElementById("editOpmerking").value.trim(),
       };
+
       // Bestaande speler opzoeken om te kunnen vergelijken
       const oldPlayer =
         currentPlayers.find((p) => p.id === editPlayerId) || {};
+
       const oldName = oldPlayer.naam || "";
       const oldCar = oldPlayer.caramboles ?? 0;
 
@@ -4495,17 +4535,18 @@
         return;
       }
 
+      // Controleren of dezelfde naam al voorkomt
       const normalizedNewName = normalizePlayerName(newName);
 
       const duplicatePlayer = currentPlayers.find(
         (player) =>
           player.id !== editPlayerId &&
-          normalizePlayerName(player.naam) === normalizedNewName,
+          normalizePlayerName(player.naam) === normalizedNewName
       );
 
       if (duplicatePlayer) {
         showEditPlayerFeedback(
-          `De speler "${duplicatePlayer.naam}" staat al in de deelnemerslijst. Kies een andere naam.`,
+          `De speler "${duplicatePlayer.naam}" staat al in de deelnemerslijst. Kies een andere naam.`
         );
 
         document.getElementById("editName").focus();
@@ -4515,8 +4556,11 @@
       // Check: zitten we midden in het toernooi?
       // (= spelerslijst definitief én er zijn al poules/wedstrijden)
       let midTournament = false;
+
       if (playersFinalized) {
-        const hasStructure = await hasAnyPoulesOrMatchesForActiveTournament();
+        const hasStructure =
+          await hasAnyPoulesOrMatchesForActiveTournament();
+
         midTournament = hasStructure;
       }
 
@@ -4525,27 +4569,42 @@
         const carChanged = oldCar !== newCar;
 
         if (nameChanged || carChanged) {
-          showPlayerFeedback(
-            "❌ Tijdens het toernooi mogen alleen e-mailadres, telefoonnummer en opmerking worden gewijzigd. " +
-            "Naam en te maken caramboles blijven ongewijzigd.",
-            "error",
+          showEditPlayerFeedback(
+            "Tijdens het toernooi mogen alleen e-mailadres, telefoonnummer, lidnummer en opmerking worden gewijzigd. Naam en te maken caramboles blijven ongewijzigd."
           );
           return;
         }
       }
 
-      // Als we hier zijn: wijziging is toegestaan
-      await setDoc(
-        doc(db, "toernooien", activeTournamentId, "spelers", editPlayerId),
-        newData,
-        { merge: true },
-      );
-      showPlayerFeedback(
-        `✏️ Speler "${newData.naam}" bijgewerkt.`,
-        "success",
-      );
-      closeEditModal();
-      await loadPlayersFromFirestore();
+      try {
+        // Wijziging opslaan
+        await setDoc(
+          doc(
+            db,
+            "toernooien",
+            activeTournamentId,
+            "spelers",
+            editPlayerId
+          ),
+          newData,
+          { merge: true }
+        );
+
+        showPlayerFeedback(
+          `✏️ Speler "${newData.naam}" bijgewerkt.`,
+          "success"
+        );
+
+        closeEditModal();
+        await loadPlayersFromFirestore();
+
+      } catch (error) {
+        console.error("Fout bij wijzigen speler:", error);
+
+        showEditPlayerFeedback(
+          "De wijzigingen konden niet worden opgeslagen."
+        );
+      }
     });
 
     function clearPlayersTable() {
@@ -4628,10 +4687,303 @@
       document.querySelectorAll(".edit-player-btn").forEach((btn) => {
         const isStructuralLock = hasPoules; // Edit van naam/caramboles is geblokkeerd zodra poules bestaan
         btn.title = isStructuralLock
-          ? "Alleen e-mail, telefoon en opmerking zijn te wijzigen (Poules bestaan)"
+          ? "Alleen e-mail, telefoon, lidnummer en opmerking zijn te wijzigen (Poules bestaan)"
           : "Speler wijzigen";
       });
     }
+
+    /* =========================================================
+   CSV IMPORT SPELERSGEGEVENS
+   Verrijkt bestaande spelers met:
+   - e-mail
+   - telefoon
+   - lidnummer
+
+   Naam en caramboles worden NIET gewijzigd.
+   ========================================================= */
+
+    function parsePlayerCsvLine(line, delimiter) {
+      const result = [];
+      let current = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+
+        if (char === '"') {
+          if (inQuotes && line[i + 1] === '"') {
+            current += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === delimiter && !inQuotes) {
+          result.push(current.trim());
+          current = "";
+        } else {
+          current += char;
+        }
+      }
+
+      result.push(current.trim());
+      return result;
+    }
+
+    function normalizeCsvHeader(value) {
+      return String(value || "")
+        .replace(/^\uFEFF/, "")
+        .trim()
+        .toLowerCase()
+        .replace(/[\s_-]/g, "");
+    }
+
+    async function importPlayerDataFromCsv(file) {
+      if (!activeTournamentId) {
+        showPlayerFeedback(
+          "⚠️ Selecteer eerst een toernooi.",
+          "error"
+        );
+        return;
+      }
+
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+
+        const lines = text
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter((line) => line !== "");
+
+        if (lines.length < 2) {
+          showPlayerFeedback(
+            "❌ Het CSV-bestand bevat geen spelersgegevens.",
+            "error"
+          );
+          return;
+        }
+
+        // Nederlands Excel gebruikt meestal puntkomma.
+        // Komma wordt ook ondersteund.
+        const delimiter =
+          (lines[0].match(/;/g) || []).length >=
+            (lines[0].match(/,/g) || []).length
+            ? ";"
+            : ",";
+
+        const headers = parsePlayerCsvLine(lines[0], delimiter)
+          .map(normalizeCsvHeader);
+
+        const naamIndex = headers.findIndex(
+          (h) => h === "naam" || h === "speler" || h === "spelersnaam"
+        );
+
+        const emailIndex = headers.findIndex(
+          (h) => h === "email" || h === "emailadres"
+        );
+
+        const telefoonIndex = headers.findIndex(
+          (h) => h === "telefoon" || h === "telefoonnummer"
+        );
+
+        const lidnummerIndex = headers.findIndex(
+          (h) => h === "lidnummer" || h === "lidnr" || h === "lid"
+        );
+
+        if (
+          naamIndex === -1 ||
+          emailIndex === -1 ||
+          telefoonIndex === -1 ||
+          lidnummerIndex === -1
+        ) {
+          showPlayerFeedback(
+            "❌ CSV moet de kolommen Naam, E-mail, Telefoon en Lidnummer bevatten.",
+            "error"
+          );
+          return;
+        }
+
+        const csvPlayers = [];
+
+        for (let i = 1; i < lines.length; i++) {
+          const cols = parsePlayerCsvLine(lines[i], delimiter);
+
+          const naam = (cols[naamIndex] || "").trim();
+          const email = (cols[emailIndex] || "").trim();
+          const telefoon = (cols[telefoonIndex] || "").trim();
+          let lidnummer = (cols[lidnummerIndex] || "").trim();
+
+          if (!naam) continue;
+
+          // Excel kan van 037 bijvoorbeeld 37 gemaakt hebben.
+          // Dat herstellen we hier automatisch.
+          if (/^\d{1,3}$/.test(lidnummer)) {
+            lidnummer = lidnummer.padStart(3, "0");
+          }
+
+          csvPlayers.push({
+            naam,
+            email,
+            telefoon,
+            lidnummer,
+            normalizedName: normalizePlayerName(naam),
+          });
+        }
+
+        if (csvPlayers.length === 0) {
+          showPlayerFeedback(
+            "❌ Geen bruikbare spelers in het CSV-bestand gevonden.",
+            "error"
+          );
+          return;
+        }
+
+        // Controle op dubbele namen in CSV
+        const csvNameCounts = new Map();
+
+        csvPlayers.forEach((p) => {
+          csvNameCounts.set(
+            p.normalizedName,
+            (csvNameCounts.get(p.normalizedName) || 0) + 1
+          );
+        });
+
+        const matches = [];
+        const notFound = [];
+        const duplicates = [];
+        const invalidLidnummers = [];
+
+        for (const csvPlayer of csvPlayers) {
+          if ((csvNameCounts.get(csvPlayer.normalizedName) || 0) > 1) {
+            duplicates.push(csvPlayer.naam);
+            continue;
+          }
+
+          if (
+            csvPlayer.lidnummer &&
+            !/^\d{3}$/.test(csvPlayer.lidnummer)
+          ) {
+            invalidLidnummers.push(csvPlayer.naam);
+            continue;
+          }
+
+          const tournamentPlayer = currentPlayers.find(
+            (player) =>
+              normalizePlayerName(player.naam) === csvPlayer.normalizedName
+          );
+
+          if (!tournamentPlayer) {
+            notFound.push(csvPlayer.naam);
+            continue;
+          }
+
+          matches.push({
+            tournamentPlayer,
+            csvPlayer,
+          });
+        }
+
+        let message =
+          `Import controleren\n\n` +
+          `${csvPlayers.length} regels in CSV\n` +
+          `${matches.length} spelers gevonden\n` +
+          `${notFound.length} spelers niet gevonden\n` +
+          `${duplicates.length} dubbele namen in CSV\n` +
+          `${invalidLidnummers.length} ongeldig lidnummer`;
+
+        if (notFound.length) {
+          message +=
+            `\n\nNiet gevonden:\n- ` +
+            notFound.join("\n- ");
+        }
+
+        if (duplicates.length) {
+          message +=
+            `\n\nDubbele namen in CSV:\n- ` +
+            [...new Set(duplicates)].join("\n- ");
+        }
+
+        if (invalidLidnummers.length) {
+          message +=
+            `\n\nOngeldig lidnummer:\n- ` +
+            invalidLidnummers.join("\n- ");
+        }
+
+        if (matches.length === 0) {
+          alert(message + "\n\nEr zijn geen spelers om bij te werken.");
+          return;
+        }
+
+        message +=
+          `\n\n${matches.length} speler(s) bijwerken?\n\n` +
+          `Alleen e-mail, telefoon en lidnummer worden gewijzigd.\n` +
+          `Naam en caramboles blijven ongewijzigd.`;
+
+        const ok = confirm(message);
+
+        if (!ok) return;
+
+        const batch = writeBatch(db);
+
+        matches.forEach(({ tournamentPlayer, csvPlayer }) => {
+          const playerRef = doc(
+            db,
+            "toernooien",
+            activeTournamentId,
+            "spelers",
+            tournamentPlayer.id
+          );
+
+          batch.set(
+            playerRef,
+            {
+              email: csvPlayer.email,
+              telefoon: csvPlayer.telefoon,
+              lidnummer: csvPlayer.lidnummer,
+            },
+            { merge: true }
+          );
+        });
+
+        await batch.commit();
+
+        await loadPlayersFromFirestore();
+
+        showPlayerFeedback(
+          `✅ ${matches.length} speler(s) aangevuld met e-mail, telefoon en lidnummer.`,
+          "success"
+        );
+      } catch (error) {
+        console.error("Fout bij importeren spelersgegevens:", error);
+
+        showPlayerFeedback(
+          "❌ De spelersgegevens konden niet worden geïmporteerd.",
+          "error"
+        );
+      }
+    }
+
+    importPlayerDataBtn.addEventListener("click", () => {
+      if (!activeTournamentId) {
+        showPlayerFeedback(
+          "⚠️ Selecteer eerst een toernooi.",
+          "error"
+        );
+        return;
+      }
+
+      importPlayerDataFile.value = "";
+      importPlayerDataFile.click();
+    });
+
+    importPlayerDataFile.addEventListener("change", async () => {
+      const file = importPlayerDataFile.files?.[0];
+
+      if (!file) return;
+
+      await importPlayerDataFromCsv(file);
+    });
 
     function renderPlayersTable() {
       playerTableBody.innerHTML = "";
@@ -4648,32 +5000,29 @@
       rows.forEach((player) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-                                                      <td>${player.naam || ""
-          }</td>
-                                                      <td>${player.email || ""
-          }</td>
-                                                      <td>${player.telefoon || ""
-          }</td>
-                                                      <td class="num">${player.caramboles ?? ""
-          }</td>
-                                                      <td class="actions">
-                                                        <button
-                                                          class="edit-player-btn btn btn-secondary btn-icon-only"
-                                                          title="Wijzig speler"
-                                                        >
-                                                          <span class="btn-icon" aria-hidden="true">✏️</span>
-                                                        </button>
-                                                        <button
-                                                          class="btn btn-delete delete-player-btn btn-icon-only"
-                                                          title="Verwijder speler"
-                                                        >
-                                                          <span class="btn-icon" aria-hidden="true">🗑️</span>
-                                                        </button>
-                                                      </td>
-                                                    `;
+              <td class="num" style="width: 70px;">${player.lidnummer || ""}</td>
+              <td>${player.naam || ""}</td>
+              <td>${player.email || ""}</td>
+              <td>${player.telefoon || ""}</td>
+              <td class="num">${player.caramboles ?? ""}</td>
+              <td class="actions">
+              <button
+                class="edit-player-btn btn btn-secondary btn-icon-only"
+                title="Wijzig speler"
+              >
+                <span class="btn-icon" aria-hidden="true">✏️</span>
+              </button>
+              <button
+                class="btn btn-delete delete-player-btn btn-icon-only"
+                title="Verwijder speler"
+              >
+                <span class="btn-icon" aria-hidden="true">🗑️</span>
+              </button>
+            </td>
+          `;
         // Toon een subtiele indicatie wanneer bij de speler een opmerking is opgeslagen
         if ((player.opmerking || "").trim()) {
-          const nameCell = tr.cells[0];
+          const nameCell = tr.cells[1];
 
           const infoIcon = document.createElement("span");
           infoIcon.textContent = "ⓘ";
@@ -9233,7 +9582,12 @@
         "r1_wedstrijden",
         matchId,
       );
-      await updateDoc(ref, update);
+
+      await updateDoc(ref, {
+        ...update,
+        uitslagOpgeslagenOp: serverTimestamp(),
+      });
+
       await loadR1MatchesFromFirestore();
     }
 
@@ -9257,6 +9611,7 @@
         puntenY: null,
         afgerond: false,
         resultaat: null,
+        uitslagOpgeslagenOp: null,
       });
       showPopupMessage("🗑️ Uitslag verwijderd", false);
       await loadR1MatchesFromFirestore();
@@ -10945,7 +11300,10 @@
       );
 
       // 1) Updaten in Firestore
-      await updateDoc(ref, update);
+      await updateDoc(ref, {
+        ...update,
+        uitslagOpgeslagenOp: serverTimestamp(),
+      });
 
       // 2) Lokale cache bijwerken
       if (Array.isArray(r2Matches)) {
@@ -10983,6 +11341,7 @@
         puntenY: null,
         afgerond: false,
         resultaat: null,
+        uitslagOpgeslagenOp: null,
       });
 
       // 2) Lokale cache resetten

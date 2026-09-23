@@ -360,7 +360,12 @@
     <!-- TAB 2: 1e RONDE uitslagen -->
     <div id="tab-r1u" class="tab-panel active">
       <div class="card">
-        <div class="round-section-title">1e ronde – uitslagen</div>
+
+        <div class="round-section-title">
+          1e ronde – uitslagen
+          <span id="r1LaatsteUitslag" style="font-size: 0.85rem; font-weight: normal; margin-left: 12px;"></span>
+        </div>
+
         <div class="round-section-sub">
           Klik op een poule om de stand en alle wedstrijden te tonen of te
           verbergen.
@@ -403,7 +408,12 @@
     <!-- TAB 5: 2e RONDE uitslagen-->
     <div id="tab-r2u" class="tab-panel">
       <div class="card">
-        <div class="round-section-title">2e ronde – uitslagen</div>
+
+        <div class="round-section-title">
+          2e ronde – uitslagen
+          <span id="r2LaatsteUitslag" style="font-size: 0.85rem; font-weight: normal; margin-left: 12px;"></span>
+        </div>
+
         <div class="round-section-sub">
           Klik op een poule om de stand en alle wedstrijden te tonen of te
           verbergen.
@@ -759,6 +769,29 @@
       const pouleBlocks = $("r1PouleBlocks");
       const globalStandContainer = $("r1GlobalStandContainer");
 
+      const uitslagDatums = r1Matches
+        .filter((m) => m.afgerond && m.uitslagOpgeslagenOp)
+        .map((m) => m.uitslagOpgeslagenOp.toDate())
+        .filter((datum) => !Number.isNaN(datum.getTime()));
+
+      const laatsteUitslagEl = $("r1LaatsteUitslag");
+
+      if (uitslagDatums.length) {
+        const laatsteDatum = new Date(
+          Math.max(...uitslagDatums.map((datum) => datum.getTime()))
+        );
+        const datumTekst = new Intl.DateTimeFormat("nl-NL", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          timeZone: "Europe/Amsterdam",
+        }).format(laatsteDatum);
+
+        laatsteUitslagEl.textContent = `Laatst bijgewerkt op ${datumTekst}`;
+      } else {
+        laatsteUitslagEl.textContent = "";
+      }
+
       const r1Played = r1Matches.filter((m) => m.afgerond).length;
       const r1Total = r1Matches.length;
       const r1Percentage = r1Total
@@ -962,6 +995,29 @@
       const indelingContainer = $("r2IndelingContainer");
       const pouleBlocks = $("r2PouleBlocks");
       const globalStandContainer = $("r2GlobalStandContainer");
+
+      const uitslagDatums = r2Matches
+        .filter((m) => m.afgerond && m.uitslagOpgeslagenOp)
+        .map((m) => m.uitslagOpgeslagenOp.toDate())
+        .filter((datum) => !Number.isNaN(datum.getTime()));
+
+      const laatsteUitslagEl = $("r2LaatsteUitslag");
+
+      if (uitslagDatums.length) {
+        const laatsteDatum = new Date(
+          Math.max(...uitslagDatums.map((datum) => datum.getTime()))
+        );
+        const datumTekst = new Intl.DateTimeFormat("nl-NL", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          timeZone: "Europe/Amsterdam",
+        }).format(laatsteDatum);
+
+        laatsteUitslagEl.textContent = `Laatst bijgewerkt op ${datumTekst}`;
+      } else {
+        laatsteUitslagEl.textContent = "";
+      }
 
       const r2Played = r2Matches.filter((m) => m.afgerond).length;
       const r2Total = r2Matches.length;
