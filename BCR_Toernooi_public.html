@@ -9,8 +9,8 @@
     :root {
       --kleur-accent: #8d0c00;
       --kleur-accent-licht: #f4e5e3;
-      --kleur-bg: #f7f7f7;
-      --kleur-bg-page: #fffff;
+      --kleur-bg: #ffffff;
+      --kleur-bg-page: #f6f6f6;
       --kleur-rand: #d0d0d0;
       --kleur-tekst: #212529;
       --kleur-tekst-muted: #6c757d;
@@ -413,6 +413,109 @@
       margin-bottom: 4px;
       font-size: 0.85rem;
       color: var(--kleur-tekst-muted);
+    }
+
+    /* Houd de pagina binnen het iframe; brede tabellen scrollen afzonderlijk. */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    #bcr-public-app {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .tab-panel,
+    .card,
+    .poule-block {
+      min-width: 0;
+    }
+
+    .tabs {
+      max-width: 100%;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-btn {
+      flex: 0 0 auto;
+    }
+
+    .poule-body,
+    #r1GlobalStandContainer,
+    #r2GlobalStandContainer,
+    .openstaande-partijen>div {
+      max-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    @media (max-width: 600px) {
+      #bcr-public-app {
+        margin: 10px auto 24px;
+        padding: 10px;
+      }
+
+      .card {
+        padding: 10px;
+      }
+
+      .poule-body {
+        padding: 8px 6px 10px;
+      }
+
+      .tabs {
+        margin-top: 14px;
+      }
+
+      .tab-btn {
+        padding: 8px 10px;
+        font-size: 0.88rem;
+      }
+
+      table.stand-table {
+        width: max-content;
+        min-width: 100%;
+        border-collapse: collapse;
+      }
+
+      table.stand-table th,
+      table.stand-table td {
+        font-size: 0.82rem;
+        padding: 5px 4px;
+        white-space: nowrap;
+      }
+
+      table.stand-table th:nth-child(2),
+      table.stand-table td:nth-child(2) {
+        min-width: 115px;
+        max-width: 150px;
+        white-space: normal;
+      }
+
+      table.stand-table.matches-table th:nth-child(1),
+      table.stand-table.matches-table td:nth-child(1),
+      table.stand-table.matches-table th:nth-child(2),
+      table.stand-table.matches-table td:nth-child(2) {
+        min-width: 110px;
+        max-width: 150px;
+        white-space: normal;
+      }
+
+      .openstaande-partijen>div {
+        padding: 8px;
+      }
+
+      .openstaande-partijen .open-tabel {
+        min-width: 360px;
+      }
+
+      .poule-indeling-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
     }
   </style>
 </head>
@@ -1915,34 +2018,24 @@
       });
     });
   </script>
-
-
-
   <script>
     (() => {
       const app = document.getElementById("bcr-public-app");
       if (!app) return;
-
       function stuurHoogte() {
         const onderkant = app.getBoundingClientRect().bottom + window.scrollY;
         const ondermarge = parseFloat(getComputedStyle(app).marginBottom) || 0;
-        const hoogte = Math.ceil(onderkant + ondermarge);
-
         window.parent.postMessage(
-          { type: "bcr-public-hoogte", hoogte },
+          { type: "bcr-public-hoogte", hoogte: Math.ceil(onderkant + ondermarge) },
           "https://www.bcraalte.nl"
         );
       }
-
-      const observer = new ResizeObserver(stuurHoogte);
-      observer.observe(app);
-
+      new ResizeObserver(stuurHoogte).observe(app);
       window.addEventListener("load", stuurHoogte);
       window.addEventListener("resize", stuurHoogte);
       stuurHoogte();
     })();
   </script>
-
 </body>
 
 </html>
