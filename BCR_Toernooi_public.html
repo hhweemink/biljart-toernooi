@@ -10,7 +10,7 @@
       --kleur-accent: #8d0c00;
       --kleur-accent-licht: #f4e5e3;
       --kleur-bg: #ffffff;
-      --kleur-bg-page: #f7f7f7;
+      --kleur-bg-page: #fffff;
       --kleur-rand: #d0d0d0;
       --kleur-tekst: #212529;
       --kleur-tekst-muted: #6c757d;
@@ -1915,6 +1915,34 @@
       });
     });
   </script>
+
+
+
+  <script>
+    (() => {
+      const app = document.getElementById("bcr-public-app");
+      if (!app) return;
+
+      function stuurHoogte() {
+        const onderkant = app.getBoundingClientRect().bottom + window.scrollY;
+        const ondermarge = parseFloat(getComputedStyle(app).marginBottom) || 0;
+        const hoogte = Math.ceil(onderkant + ondermarge);
+
+        window.parent.postMessage(
+          { type: "bcr-public-hoogte", hoogte },
+          "https://www.bcraalte.nl"
+        );
+      }
+
+      const observer = new ResizeObserver(stuurHoogte);
+      observer.observe(app);
+
+      window.addEventListener("load", stuurHoogte);
+      window.addEventListener("resize", stuurHoogte);
+      stuurHoogte();
+    })();
+  </script>
+
 </body>
 
 </html>
