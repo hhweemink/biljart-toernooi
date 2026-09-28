@@ -203,6 +203,138 @@
       padding: 8px 10px 10px;
     }
 
+    .openstaande-partijen {
+      margin-top: 22px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .openstaande-partijen summary {
+      padding: 9px 12px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: #666;
+      background: #fafafa;
+      border-radius: 8px;
+    }
+
+    .openstaande-partijen[open] summary {
+      border-bottom: 1px solid #ddd;
+      border-radius: 8px 8px 0 0;
+    }
+
+    .openstaande-partijen>div {
+      padding: 10px 12px 14px;
+    }
+
+    .openstaande-partijen .open-tabel {
+      width: auto;
+      border-collapse: collapse;
+    }
+
+    .openstaande-partijen .open-tabel th,
+    .openstaande-partijen .open-tabel td {
+      white-space: nowrap;
+    }
+
+    .openstaande-partijen .open-tabel th,
+    .openstaande-partijen .open-tabel td {
+      padding: 4px 5px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      font-size: 0.9rem;
+      font-weight: 400;
+    }
+
+    .openstaande-partijen .open-tabel th {
+      background: #f8f9fa;
+      font-weight: 600;
+    }
+
+    .openstaande-partijen .open-tabel td:first-child {
+      color: #666;
+      width: 80px;
+    }
+
+    .uitslagen-bovenbalk {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .speler-zoeken {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .speler-zoeken label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .speler-zoeken input {
+      width: 210px;
+      max-width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #aaa;
+      border-radius: 5px;
+      font-size: 0.9rem;
+    }
+
+    .speler-zoekvak {
+      position: relative;
+    }
+
+    .speler-suggesties {
+      position: absolute;
+      z-index: 20;
+      top: calc(100% + 3px);
+      left: 0;
+      right: 0;
+      max-height: 220px;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #aaa;
+      border-radius: 5px;
+      box-shadow: 0 4px 10px #0002;
+    }
+
+    .speler-suggesties[hidden] {
+      display: none;
+    }
+
+    .speler-suggesties button {
+      display: block;
+      width: 100%;
+      padding: 8px 10px;
+      border: 0;
+      background: white;
+      color: #222;
+      text-align: left;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .speler-suggesties button:hover,
+    .speler-suggesties button:focus {
+      background: #f3e5e5;
+    }
+
+    .speler-gemarkeerd {
+      background: #fff1a8;
+      color: #222;
+      font-weight: 700;
+      border-radius: 3px;
+      padding: 1px 3px;
+    }
+
     .poule-header-left {
       display: flex;
       align-items: center;
@@ -361,9 +493,19 @@
     <div id="tab-r1u" class="tab-panel active">
       <div class="card">
 
-        <div class="round-section-title">
-          1e ronde – uitslagen
-          <span id="r1LaatsteUitslag" style="font-size: 0.85rem; font-weight: normal; margin-left: 12px;"></span>
+        <div class="uitslagen-bovenbalk">
+          <div class="round-section-title">
+            1e ronde – uitslagen
+            <span id="r1LaatsteUitslag" style="font-size: 0.85rem; font-weight: normal; margin-left: 12px;"></span>
+          </div>
+          <div class="speler-zoeken">
+            <label for="r1ZoekSpeler">Zoek speler</label>
+            <div class="speler-zoekvak">
+              <input id="r1ZoekSpeler" type="search" placeholder="Typ een naam" autocomplete="off"
+                aria-label="Zoek speler in de 1e ronde">
+              <div id="r1SpelerSuggesties" class="speler-suggesties" hidden></div>
+            </div>
+          </div>
         </div>
 
         <div class="round-section-sub">
@@ -371,6 +513,10 @@
           verbergen.
         </div>
         <div id="r1PouleBlocks"></div>
+        <details class="openstaande-partijen">
+          <summary>Nog te spelen partijen (<span id="r1OpenAantal">0</span>)</summary>
+          <div id="r1OpenPartijen"></div>
+        </details>
       </div>
     </div>
 
@@ -409,9 +555,19 @@
     <div id="tab-r2u" class="tab-panel">
       <div class="card">
 
-        <div class="round-section-title">
-          2e ronde – uitslagen
-          <span id="r2LaatsteUitslag" style="font-size: 0.85rem; font-weight: normal; margin-left: 12px;"></span>
+        <div class="uitslagen-bovenbalk">
+          <div class="round-section-title">
+            2e ronde – uitslagen
+            <span id="r2LaatsteUitslag" style="font-size: 0.85rem; font-weight: normal; margin-left: 12px;"></span>
+          </div>
+          <div class="speler-zoeken">
+            <label for="r2ZoekSpeler">Zoek speler</label>
+            <div class="speler-zoekvak">
+              <input id="r2ZoekSpeler" type="search" placeholder="Typ een naam" autocomplete="off"
+                aria-label="Zoek speler in de 2e ronde">
+              <div id="r2SpelerSuggesties" class="speler-suggesties" hidden></div>
+            </div>
+          </div>
         </div>
 
         <div class="round-section-sub">
@@ -419,6 +575,10 @@
           verbergen.
         </div>
         <div id="r2PouleBlocks"></div>
+        <details class="openstaande-partijen">
+          <summary>Nog te spelen partijen (<span id="r2OpenAantal">0</span>)</summary>
+          <div id="r2OpenPartijen"></div>
+        </details>
       </div>
     </div>
 
@@ -488,6 +648,132 @@
     function $(id) {
       return document.getElementById(id);
     }
+
+    function verwijderSpelerMarkering(container) {
+      container.querySelectorAll(".speler-gemarkeerd").forEach((markering) => {
+        markering.replaceWith(document.createTextNode(markering.textContent));
+      });
+    }
+
+    function markeerSpelerNaam(cel) {
+      const markering = document.createElement("mark");
+      markering.className = "speler-gemarkeerd";
+      markering.textContent = cel.textContent;
+      cel.replaceChildren(markering);
+    }
+
+    function openPouleVanSpeler(ronde, gekozen) {
+      const container = $(`${ronde}PouleBlocks`);
+      verwijderSpelerMarkering(container);
+
+      const pouleBlock = [...container.querySelectorAll(".poule-block")]
+        .find((block) => block.dataset.poule === gekozen.poule);
+      if (!pouleBlock) return;
+
+      const body = pouleBlock.querySelector(".poule-body");
+      const header = pouleBlock.querySelector(".poule-header");
+      body.style.display = "block";
+      header.style.borderRadius = "8px 8px 0 0";
+
+      pouleBlock.querySelectorAll("table.stand-table tbody tr").forEach((rij) => {
+        const tabel = rij.closest("table");
+        const naamCellen = tabel.classList.contains("matches-table")
+          ? [rij.cells[0], rij.cells[1]]
+          : [rij.cells[1]];
+
+        naamCellen.forEach((cel) => {
+          if (cel && cel.textContent.trim().toLocaleLowerCase("nl") ===
+            gekozen.naam.toLocaleLowerCase("nl")) {
+            markeerSpelerNaam(cel);
+          }
+        });
+      });
+
+      pouleBlock.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function stelSpelerZoekenIn(ronde) {
+      const input = $(`${ronde}ZoekSpeler`);
+      const suggesties = $(`${ronde}SpelerSuggesties`);
+      let spelers = [];
+
+      function sluitSuggesties() {
+        suggesties.hidden = true;
+        suggesties.replaceChildren();
+      }
+
+      function toonSuggesties() {
+        const zoektekst = input.value.trim().toLocaleLowerCase("nl");
+        suggesties.replaceChildren();
+
+        if (!zoektekst) {
+          suggesties.hidden = true;
+          return;
+        }
+
+        const treffers = spelers.filter((speler) =>
+          speler.naam.toLocaleLowerCase("nl").includes(zoektekst)
+        );
+
+        treffers.forEach((speler) => {
+          const knop = document.createElement("button");
+          knop.type = "button";
+          knop.textContent = speler.naam;
+          knop.addEventListener("click", () => {
+            input.value = speler.naam;
+            sluitSuggesties();
+            openPouleVanSpeler(ronde, speler);
+          });
+          suggesties.appendChild(knop);
+        });
+
+        suggesties.hidden = treffers.length === 0;
+      }
+
+      input.addEventListener("input", toonSuggesties);
+      input.addEventListener("focus", toonSuggesties);
+
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          sluitSuggesties();
+        } else if (event.key === "ArrowDown" && !suggesties.hidden) {
+          event.preventDefault();
+          suggesties.querySelector("button")?.focus();
+        }
+      });
+
+      suggesties.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          sluitSuggesties();
+          input.focus();
+        }
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!input.contains(event.target) &&
+          !suggesties.contains(event.target)) {
+          sluitSuggesties();
+        }
+      });
+
+      return function vulSpelers() {
+        const poules = ronde === "r1" ? r1Poules : r2Poules;
+        spelers = poules.flatMap((poule) =>
+          (poule.spelers || [])
+            .filter((speler) => speler.naam)
+            .map((speler) => ({
+              naam: speler.naam,
+              poule: poule.id
+            }))
+        ).sort((a, b) => a.naam.localeCompare(b.naam, "nl"));
+
+        input.value = "";
+        sluitSuggesties();
+      };
+    }
+
+    const vulR1SpelerSuggesties = stelSpelerZoekenIn("r1");
+    const vulR2SpelerSuggesties = stelSpelerZoekenIn("r2");
 
     function hideTournamentSelector() {
       const wrap = document.getElementById("tournamentSelectorWrap");
@@ -762,6 +1048,73 @@
       return html;
     }
 
+    function renderOpenPartijen(ronde, matches) {
+      const container = $(`${ronde}OpenPartijen`);
+      const aantalEl = $(`${ronde}OpenAantal`);
+      const openMatches = matches.filter((m) => !m.afgerond);
+
+      aantalEl.textContent = String(openMatches.length);
+      container.replaceChildren();
+
+      if (openMatches.length === 0) {
+        const melding = document.createElement("p");
+        melding.textContent = matches.length
+          ? "Alle partijen zijn gespeeld."
+          : "Er zijn nog geen partijen ingepland.";
+        container.appendChild(melding);
+        return;
+      }
+
+      // Eerst op poule ordenen; binnen elke poule dezelfde
+      // wedstrijdvolgorde gebruiken als in het pouleoverzicht.
+      const perPoule = new Map();
+      openMatches.forEach((match) => {
+        const pouleNaam = match.poule || "Poule onbekend";
+        if (!perPoule.has(pouleNaam)) perPoule.set(pouleNaam, []);
+        perPoule.get(pouleNaam).push(match);
+      });
+
+      const tabel = document.createElement("table");
+      tabel.className = "open-tabel";
+
+      const thead = document.createElement("thead");
+      const kopRij = document.createElement("tr");
+
+      ["Poule", "Speler 1", "Speler 2"].forEach((tekst) => {
+        const th = document.createElement("th");
+        th.textContent = tekst;
+        kopRij.appendChild(th);
+      });
+
+      thead.appendChild(kopRij);
+      tabel.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+
+      [...perPoule.keys()]
+        .sort((a, b) => a.localeCompare(b, "nl", { numeric: true }))
+        .forEach((pouleNaam) => {
+          sortHomeAway(perPoule.get(pouleNaam)).forEach((match) => {
+            const rij = document.createElement("tr");
+
+            [
+              pouleNaam,
+              match.spelerX?.naam || "",
+              match.spelerY?.naam || ""
+            ].forEach((tekst) => {
+              const cel = document.createElement("td");
+              cel.textContent = tekst;
+              rij.appendChild(cel);
+            });
+
+            tbody.appendChild(rij);
+          });
+        });
+
+      tabel.appendChild(tbody);
+      container.appendChild(tabel);
+    }
+
     // ====== RENDER FUNCTIES PER RONDE ======
     function renderRound1() {
       const indelingNotice = $("r1IndelingNotice");
@@ -804,6 +1157,8 @@
       indelingContainer.innerHTML = "";
       pouleBlocks.innerHTML = "";
       globalStandContainer.innerHTML = "";
+
+      renderOpenPartijen("r1", r1Matches);
 
       if (!r1Poules.length) {
         indelingNotice.textContent =
@@ -1031,6 +1386,8 @@
       indelingContainer.innerHTML = "";
       pouleBlocks.innerHTML = "";
       globalStandContainer.innerHTML = "";
+
+      renderOpenPartijen("r2", r2Matches);
 
       if (!r2Poules.length) {
         indelingNotice.textContent =
@@ -1328,6 +1685,10 @@
         r2Matches = [];
         renderRound1();
         renderRound2();
+        $("r1ZoekSpeler").value = "";
+        $("r2ZoekSpeler").value = "";
+        vulR1SpelerSuggesties();
+        vulR2SpelerSuggesties();
         return;
       }
 
@@ -1384,6 +1745,8 @@
 
         renderRound1();
         renderRound2();
+        vulR1SpelerSuggesties();
+        vulR2SpelerSuggesties();
       } catch (err) {
         console.error(err);
         errorEl.style.display = "block";
