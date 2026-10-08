@@ -7194,10 +7194,17 @@
           ];
 
           // Spelersregels
+          // Spelersregels
           const playerRows = spelers.map((speler, idx) => {
             const nummer = (idx + 1).toString();
             const naam = speler.naam || "";
-            const telefoon = speler.telefoon || "";
+
+            // Haal het actuele telefoonnummer op uit de spelerslijst.
+            const spelerDoc = Array.isArray(currentPlayers)
+              ? currentPlayers.find((p) => p.id === speler.id)
+              : null;
+
+            const telefoon = spelerDoc?.telefoon ?? speler.telefoon ?? "";
             const car = (speler.carambolesR2 ?? "").toString();
 
             return new TableRow({
