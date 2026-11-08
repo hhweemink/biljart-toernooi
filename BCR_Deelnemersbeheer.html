@@ -1,0 +1,1522 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BC Raalte 90 · Deelnemersbeheer</title>
+<style>
+  :root { color-scheme: light; --rood:#8d0c00; --rand:#ddd4d2; --zacht:#f7f3f2; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--zacht); color:#242020; font:16px/1.5 system-ui,sans-serif; }
+  header { background:var(--rood); color:white; padding:22px max(20px, calc((100% - 1080px)/2)); }
+  header p { margin:0; } h1,h2,h3 { line-height:1.2; } h1 { margin:.2em 0 0; }
+  main { max-width:1120px; margin:auto; padding:20px; }
+  section, details.setup { background:white; border:1px solid var(--rand); border-radius:10px; padding:20px; margin-bottom:18px; }
+  h2 { margin-top:0; } .row { display:flex; flex-wrap:wrap; gap:12px; align-items:end; }
+  .split { justify-content:space-between; align-items:center; }
+  #viewNav { margin-bottom:16px; }
+  label { display:grid; gap:4px; font-weight:600; }
+  input, select, button { font:inherit; border:1px solid #887b79; border-radius:5px; padding:8px 10px; min-height:42px; max-width:100%; }
+  input, select { background:white; color:inherit; } button { background:var(--rood); color:white; border-color:var(--rood); cursor:pointer; }
+  button.secondary { color:var(--rood); background:white; } button:disabled { opacity:.55; cursor:default; }
+  :focus-visible { outline:3px solid #2362a2; outline-offset:2px; }
+  .table { overflow:auto; } table { border-collapse:collapse; width:100%; }
+  caption { text-align:left; font-weight:600; margin-bottom:8px; }
+  th,td { padding:9px; text-align:left; border-bottom:1px solid var(--rand); vertical-align:middle; }
+  th { background:var(--zacht); } .muted { color:#5d5150; } .check { display:flex; align-items:center; gap:8px; }
+  #status, #importSaveStatus { white-space:pre-wrap; overflow-wrap:anywhere; }
+  #status.error, #importSaveStatus.error { color:var(--rood); font-weight:600; }
+  #importSaveStatus:empty { margin:0; }
+  dialog { border:1px solid var(--rand); border-radius:10px; padding:22px; max-width:min(690px,calc(100% - 30px)); }
+  #dossier { width:960px; max-width:calc(100% - 30px); }
+  #mergePreview label { margin-top:12px; }
+  dialog::backdrop { background:#0006; } fieldset { border:1px solid var(--rand); margin:12px 0; }
+  input[type=number] { width:130px; } pre { white-space:pre-wrap; overflow-wrap:anywhere; background:var(--zacht); padding:12px; }
+  [hidden] { display:none !important; } summary { cursor:pointer; font-weight:600; }
+</style>
+</head>
+<body>
+<header><p>BC Raalte 90</p><h1>Deelnemersbeheer</h1></header>
+<main>
+  <noscript>Schakel JavaScript in om deze app te gebruiken.</noscript>
+  <p id="status" role="status" aria-live="polite">Firebase wordt geladen…</p>
+  <section id="login">
+    <h2>Inloggen</h2>
+    <form id="loginForm" class="row">
+      <label>Gebruikersnaam <input name="username" autocomplete="username" required pattern="[a-zA-Z0-9._\-]+"></label>
+      <label>Wachtwoord <input name="password" type="password" autocomplete="current-password" required></label>
+      <button>Inloggen</button>
+    </form>
+  </section>
+  <div id="workspace" hidden>
+    <p class="row split"><span id="account"></span><button id="logout" class="secondary">Uitloggen</button></p>
+    <nav id="viewNav" class="row" aria-label="Overzichten">
+      <button type="button" id="showPlayers" aria-controls="playersView" aria-pressed="true">Deelnemers</button>
+      <button type="button" id="showTournaments" class="secondary" aria-controls="tournamentsView" aria-pressed="false">Toernooien</button>
+    </nav>
+    <div id="playersView">
+    <section>
+      <h2>Deelnemers</h2>
+      <div class="row">
+        <label>Zoeken <input id="search" type="search" placeholder="Naam, contactgegevens, scorebordnummer of ID"></label>
+        <button id="addPlayer">Deelnemer toevoegen</button>
+      </div>
+      <p id="count" class="muted"></p>
+      <div class="table"><table>
+        <thead><tr><th>Naam</th><th>E-mail</th><th>Telefoon</th><th>Scorebordnummer</th><th>Dossier</th></tr></thead>
+        <tbody id="players"></tbody>
+      </table></div>
+    </section>
+    <section>
+      <h2>Toernooi-export importeren</h2>
+      <p>Maak via <strong>Admin</strong> in de toernooi-app een ZIP met <strong>Toernooi</strong>, <strong>Deelnemers</strong> en de wedstrijden van beide rondes. Neem de moyenne-tabel mee als die aan het toernooi is gekoppeld. De finalegegevens staan al in het deelnemersbestand.</p>
+      <form id="readZip" class="row">
+        <label>ZIP-bestand <input id="zip" type="file" accept=".zip,application/zip" required></label>
+        <button>Import controleren</button>
+      </form>
+      <form id="confirmImport" novalidate hidden>
+        <h3 id="importTitle"></h3>
+        <p id="importInfo"></p>
+        <p>Controleer elke koppeling. Bij een leeg contactveld wordt de waarde uit de ZIP toegevoegd. Kies bij verschillen welke waarde je wilt bewaren. Controleer na import de naamindeling van nieuwe deelnemers in hun dossier.</p>
+        <div class="table"><table>
+          <thead><tr><th>Naam in export</th><th>E-mail / telefoon</th><th>Koppeling</th><th>Contactgegevens</th><th>CarNieuw</th></tr></thead>
+          <tbody id="importRows"></tbody>
+        </table></div>
+        <p><label class="check"><input type="checkbox" id="replaceResults"> Bestaande resultaten van dit toernooi vervangen door de import</label></p>
+        <button type="submit">Bevestigde regels opslaan</button>
+        <button type="button" id="cancelImport" class="secondary">Annuleren</button>
+      </form>
+      <p id="importSaveStatus" role="status"></p>
+    </section>
+    <section>
+      <h2>Historische finaleplaatsen importeren</h2>
+      <p>Kies het Excel-overzicht van de drie clubtoernooien. Controleer en bewaar de resultaten per editie. Afwijkingen worden gemeld. Bestaande waarden worden alleen aangevuld waar gegevens ontbreken.</p>
+      <form id="readHistoryExcel" class="row">
+        <label>Excel-bestand <input id="historyExcel" type="file" accept=".xlsx" required></label>
+        <button>Excel controleren</button>
+      </form>
+      <p id="historyImportStatus" role="status"></p>
+      <form id="saveHistoryExcel" hidden>
+        <label>Editie <select id="historyEdition"></select></label>
+        <div class="table"><table>
+          <thead><tr><th>Naam in Excel</th><th>Finaleplaats</th><th>Spelersdossier</th><th>Controle</th></tr></thead>
+          <tbody id="historyImportRows"></tbody>
+        </table></div>
+        <p><button type="submit">Editie opslaan</button></p>
+      </form>
+      <p id="historySaveStatus" role="status"></p>
+    </section>
+    </div>
+    <section id="tournamentsView" hidden>
+      <h2>Toernooien</h2>
+      <div class="row">
+        <label>Toernooi <select id="tournamentSelect" disabled></select></label>
+        <button type="button" id="addTournament" disabled>Toernooi toevoegen</button>
+      </div>
+      <p id="tournamentStatus" role="status"></p>
+      <div id="tournamentDetails" hidden>
+        <p>Toernooi-ID <code id="tournamentId"></code></p>
+        <div class="row" id="linkTournamentPlayer">
+          <label>Deelnemer <select id="tournamentPlayerSelect"></select></label>
+          <button type="button" id="addTournamentPlayer" class="secondary">Deelname toevoegen</button>
+        </div>
+        <p id="tournamentCount" class="muted"></p>
+        <div class="table"><table>
+          <caption>Deelnemers aan dit toernooi</caption>
+          <thead><tr><th>Naam</th><th>Deelname</th><th>Finaleplaats</th><th>Dossier</th></tr></thead>
+          <tbody id="tournamentPlayers"></tbody>
+        </table></div>
+      </div>
+    </section>
+  </div>
+  <details class="setup">
+    <summary>Eenmalige Firebase-inrichting</summary>
+    <p>Deze module gebruikt dezelfde Firebase-aanmelding als de toernooi-app. Het account heeft de Firebase-claim <code>role: "admin"</code> of <code>admin: true</code> nodig. Voeg de volgende regels toe binnen <code>match /databases/{database}/documents</code> in het project <code>bcr-toernooi</code>.</p>
+    <pre>function isDeelnemersAdmin() {
+  return request.auth != null &amp;&amp; (
+    request.auth.token.get('role', '') == 'admin' ||
+    request.auth.token.get('admin', false) == true
+  );
+}
+
+match /deelnemers/{spelerId} {
+  allow read, create, update, delete: if isDeelnemersAdmin();
+  match /toernooien/{toernooiId} {
+    allow read, create, update, delete: if isDeelnemersAdmin();
+  }
+}
+
+match /deelnemersImports/{toernooiId} {
+  allow read, create, update: if isDeelnemersAdmin();
+}</pre>
+    <p>Voor samenvoegen is <code>delete</code> nodig op deelnemers en hun toernooiresultaten. Voeg dit ook toe als je de regels eerder hebt ingesteld.</p>
+    <p>Controleer ook of bredere regels toegang geven tot deze paden. Test in de Firebase Rules Playground dat uitgelogde gebruikers en gewone gebruikers geen deelnemersgegevens kunnen lezen of wijzigen.</p>
+  </details>
+</main>
+<dialog id="tournamentDialog" aria-labelledby="tournamentTitle">
+  <form id="tournamentForm">
+    <h2 id="tournamentTitle">Toernooi toevoegen</h2>
+    <div class="row">
+      <label>Toernooinaam <input name="naam" maxlength="180" required></label>
+      <label>Jaar <input name="jaar" type="number" min="1900" max="2200" required></label>
+    </div>
+    <p class="row"><button>Opslaan</button><button type="button" data-close class="secondary">Annuleren</button></p>
+    <p role="status"></p>
+  </form>
+</dialog>
+<dialog id="dossier" aria-labelledby="playerTitle">
+      <h2 id="playerTitle"></h2>
+      <p>Voornaam <strong id="dossierVoornaam"></strong><br>Tussenvoegsel <strong id="dossierTussenvoegsel"></strong><br>Achternaam <strong id="dossierAchternaam"></strong><br>E-mail <strong id="dossierEmail"></strong><br>Telefoon <strong id="dossierTelefoon"></strong></p>
+      <p>Spelers-ID <code id="playerId"></code></p>
+      <p>Scorebordnummer <strong id="dossierScorebordNummer"></strong></p>
+      <div class="row"><button id="editPlayer" class="secondary">Persoonsgegevens wijzigen</button>
+      <button id="openMerge" class="secondary">Samenvoegen</button>
+      <button type="button" data-close class="secondary">Sluiten</button></div>
+      <p id="dossierStatus" role="status"></p>
+      <details id="dossierHistory"><summary>Toernooigeschiedenis</summary>
+      <p><button id="addResult" class="secondary">Toernooiresultaat toevoegen</button></p>
+      <p id="historyStatus" class="muted"></p>
+      <div class="table"><table>
+        <caption>Toernooigeschiedenis · caramboles / beurten</caption>
+        <thead><tr><th>Toernooi</th><th>Jaar</th><th>1e ronde</th><th>2e ronde</th><th>Finale</th><th>Eindresultaat</th><th>CarNieuw</th><th>Bewerken</th></tr></thead>
+        <tbody id="history"></tbody>
+      </table></div>
+  </details>
+</dialog>
+<dialog id="mergeDialog" aria-labelledby="mergeTitle">
+  <form id="mergeForm">
+    <h2 id="mergeTitle">Deelnemers samenvoegen</h2>
+    <p id="mergeTarget"></p>
+    <label>Dubbele vermelding die verdwijnt <select id="mergeSource" required></select></label>
+    <div id="mergePreview"></div>
+    <p id="mergeStatus" role="status"></p>
+    <div class="row">
+      <button id="mergeConfirm" type="submit" disabled>Definitief samenvoegen</button>
+      <button type="button" data-close class="secondary">Annuleren</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="playerDialog">
+  <form id="playerForm">
+    <h2 id="playerDialogTitle">Deelnemer</h2>
+    <div class="row">
+      <label>Voornaam <input name="voornaam" maxlength="100"></label>
+      <label>Tussenvoegsel <input name="tussenvoegsel" maxlength="60"></label>
+      <label>Achternaam <input name="achternaam" maxlength="100" required></label>
+      <label>E-mailadres <input name="email" type="email" maxlength="250"></label>
+      <label>Telefoonnummer <input name="telefoon" type="tel" maxlength="60"></label>
+      <label>Scorebordnummer <input name="scorebordNummer" type="text" maxlength="60"></label>
+    </div>
+    <p class="row"><button>Opslaan</button><button type="button" data-close class="secondary">Annuleren</button></p>
+    <p class="muted" role="status"></p>
+  </form>
+</dialog>
+<dialog id="resultDialog">
+  <form id="resultForm">
+    <h2 id="resultTitle">Toernooiresultaat</h2>
+    <div class="row">
+      <label>Toernooi-ID <input name="toernooiId" maxlength="200" required></label>
+      <label>Toernooinaam <input name="naam" maxlength="200" required></label>
+      <label>Jaar <input name="jaar" type="number" min="1900" max="2200" required></label>
+    </div>
+    <div id="roundFields"></div>
+    <div class="row">
+      <label>Deelname <select name="status">
+        <option value="deelgenomen">Deelgenomen</option><option value="finale">In de finale</option>
+        <option value="afgemeld">Afgemeld</option><option value="onbekend">Onbekend</option>
+      </select></label>
+      <label>Positie finale <input name="positie" type="number" min="1" max="9999"></label>
+      <label>CarNieuw <input name="carNieuw" type="number" min="1" max="99999"></label>
+    </div>
+    <p class="muted">Laat onbekende waarden leeg. Vul CarNieuw handmatig in als je de rondetotalen wijzigt.</p>
+    <p class="row"><button>Opslaan</button><button type="button" data-close class="secondary">Annuleren</button></p>
+    <p class="muted" role="status"></p>
+  </form>
+</dialog>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, doc, getDocFromServer, getDocsFromServer, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+      apiKey: "AIzaSyAsg63E-lGgECsCxIfRJTFcTWB7LEGWNGc",
+      authDomain: "bcr-toernooi.firebaseapp.com",
+      projectId: "bcr-toernooi",
+      storageBucket: "bcr-toernooi.firebasestorage.app",
+      messagingSenderId: "856805712309",
+      appId: "1:856805712309:web:8adb4158d825630ce079fc",
+      measurementId: "G-ELH9TVY15L",
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const participants = collection(db, "deelnemers");
+const playerRef = id => doc(participants, id);
+const resultsRef = id => collection(playerRef(id), "toernooien");
+const imports = collection(db, "deelnemersImports");
+const importRef = id => doc(imports, id);
+const $ = id => document.getElementById(id);
+const rounds = { r1:"1e ronde", r2:"2e ronde", finale:"Finale" };
+const statuses = { deelgenomen:"Deelgenomen", finale:"In de finale", afgemeld:"Afgemeld", onbekend:"Onbekend" };
+const profileFields = ["voornaam", "tussenvoegsel", "achternaam", "email", "telefoon", "scorebordNummer"];
+const name = p => [p.voornaam, p.tussenvoegsel, p.achternaam].filter(Boolean).join(" ");
+const norm = s => String(s ?? "").trim().replace(/\s+/g, " ").toLocaleLowerCase("nl");
+const phone = s => (s || "").replace(/\D/g, "").replace(/^(0031|31)(?=\d{9}$)/, "0");
+const roundText = r => r?.car == null && r?.brt == null ? "—" : `${r.car ?? "?"} / ${r.brt ?? "?"}`;
+let players = new Map();
+let history = new Map();
+let selectedId = null;
+let historyRequest = 0;
+let session = 0;
+let pending = null;
+let historicalImport = null;
+let busy = false;
+
+function message(value, error = false) {
+  $("status").textContent = value;
+  $("status").classList.toggle("error", error);
+}
+
+function friendly(error) {
+  if (error.code === "permission-denied") return "Geen toegang tot Firestore. Controleer de adminclaim en de regels onder ‘Eenmalige Firebase-inrichting’.";
+  if (error.code?.startsWith("auth/")) return "Inloggen mislukt. Controleer je gebruikersnaam en wachtwoord.";
+  return error.message || "Er ging iets mis.";
+}
+
+function button(label, action) {
+  const el = document.createElement("button");
+  el.type = "button";
+  el.className = "secondary";
+  el.textContent = label;
+  el.addEventListener("click", action);
+  return el;
+}
+
+function row(body, cells) {
+  const tr = body.insertRow();
+  for (const value of cells) {
+    const td = tr.insertCell();
+    if (value instanceof Node) td.append(value);
+    else td.textContent = value ?? "—";
+  }
+}
+
+async function action(event, task, dialog = null, reportError = null) {
+  event.preventDefault();
+  if (busy) return;
+  const feedback = dialog?.querySelector('[role="status"]');
+  if (feedback) feedback.textContent = "";
+  busy = true;
+  const controls = [...document.querySelectorAll("button"), $("zip"), $("historyExcel"), $("historyEdition")];
+  const enabled = controls.filter(el => !el.disabled);
+  enabled.forEach(el => { el.disabled = true; });
+  try {
+    await task();
+  } catch (error) {
+    if (reportError) reportError(friendly(error));
+    else if (feedback && dialog.open) feedback.textContent = friendly(error);
+    else message(friendly(error), true);
+  } finally {
+    busy = false;
+    enabled.forEach(el => { el.disabled = false; });
+  }
+}
+
+function renderPlayers() {
+  const query = norm($("search").value);
+  const ordered = [...players.values()].sort((a,b) =>
+    a.achternaam.localeCompare(b.achternaam, "nl") || name(a).localeCompare(name(b), "nl"));
+  const shown = ordered.filter(p => norm([name(p), p.email, p.telefoon, p.scorebordNummer, p.spelerId].join(" ")).includes(query));
+  $("players").replaceChildren();
+  for (const p of shown) row($("players"), [
+    name(p), p.email || "—", p.telefoon || "—", p.scorebordNummer || "—",
+    button("Openen", () => showDossier(p.spelerId)),
+  ]);
+  $("count").textContent = `${shown.length} van ${players.size} deelnemers`;
+}
+
+async function loadPlayers() {
+  const stamp = session;
+  const snap = await getDocsFromServer(participants);
+  if (stamp !== session) return;
+  players = new Map(snap.docs.map(d => [d.id, { ...d.data(), spelerId:d.id }]));
+  renderPlayers();
+}
+
+async function showDossier(id) {
+  const p = players.get(id);
+  if (!p) return;
+  const request = ++historyRequest;
+  selectedId = id;
+  history.clear();
+  $("dossierStatus").textContent = "";
+  if (!$("dossier").open) {
+    $("dossierHistory").open = false;
+    $("dossier").showModal();
+  }
+  for (const key of profileFields) {
+    $(`dossier${key[0].toUpperCase()}${key.slice(1)}`).textContent = p[key] || "—";
+  }
+  $("playerTitle").textContent = name(p);
+  $("playerId").textContent = id;
+  $("history").replaceChildren();
+  $("historyStatus").textContent = "Toernooiresultaten laden…";
+  try {
+    const snap = await getDocsFromServer(resultsRef(id));
+    if (request !== historyRequest) return;
+    history = new Map(snap.docs.map(d => [d.id, { ...d.data(), toernooiId:d.id }]));
+    const ordered = [...history.values()].sort((a,b) => b.jaar - a.jaar || a.naam.localeCompare(b.naam, "nl"));
+    for (const r of ordered) row($("history"), [
+      r.naam, r.jaar, ...Object.keys(rounds).map(key => roundText(r[key])),
+      [r.positie ? `Finale · plaats ${r.positie}` : statuses[r.status],r.historischeFinaleOpmerking].filter(Boolean).join(" · "), r.carNieuw,
+      button("Wijzigen", () => openResult(r)),
+    ]);
+    $("historyStatus").textContent = ordered.length ? "" : "Voor deze deelnemer zijn nog geen resultaten opgeslagen.";
+  } catch (error) {
+    if (request === historyRequest) $("historyStatus").textContent = friendly(error);
+  }
+}
+
+function openPlayer(p = null) {
+  const form = $("playerForm");
+  form.dataset.id = p?.spelerId || "";
+  $("playerDialogTitle").textContent = p ? "Persoonsgegevens wijzigen" : "Deelnemer toevoegen";
+  for (const key of profileFields) form.elements[key].value = p?.[key] ?? "";
+  form.querySelector('[role="status"]').textContent = "";
+  $("playerDialog").showModal();
+}
+
+function openResult(r = null, tournament = null, playerId = selectedId) {
+  const form = $("resultForm");
+  form.reset();
+  form.dataset.player = playerId;
+  form.dataset.result = r?.toernooiId || "";
+  $("resultTitle").textContent = `Toernooiresultaat · ${name(players.get(playerId) || {})}`;
+  const values = r ?? tournament;
+  for (const key of ["toernooiId", "naam", "jaar", "status", "positie", "carNieuw"]) {
+    if (values?.[key] != null) form.elements[key].value = values[key];
+  }
+  form.elements.toernooiId.readOnly = Boolean(values);
+  form.elements.naam.readOnly = Boolean(tournament);
+  form.elements.jaar.readOnly = Boolean(tournament);
+  for (const key of Object.keys(rounds)) {
+    form.elements[key + "Car"].value = r?.[key]?.car ?? "";
+    form.elements[key + "Brt"].value = r?.[key]?.brt ?? "";
+  }
+  form.querySelector('[role="status"]').textContent = "";
+  $("resultDialog").showModal();
+}
+
+function validId(id) {
+  return id && id.length <= 200 && id !== "." && id !== ".." && !id.includes("/") && !/^__.*__$/.test(id);
+}
+
+for (const [key, label] of Object.entries(rounds)) {
+  $("roundFields").insertAdjacentHTML("beforeend", `
+    <fieldset><legend>${label}</legend><div class="row">
+    <label>Gemaakte caramboles <input type="number" name="${key}Car" min="0" max="999999"></label>
+    <label>Beurten <input type="number" name="${key}Brt" min="0" max="999999"></label>
+    </div></fieldset>`);
+}
+for (const el of document.querySelectorAll("[data-close]")) {
+  el.addEventListener("click", () => el.closest("dialog").close());
+}
+for (const dialog of document.querySelectorAll("dialog")) {
+  dialog.addEventListener("cancel", e => { if (busy) e.preventDefault(); });
+}
+
+$("search").addEventListener("input", renderPlayers);
+$("addPlayer").onclick = () => openPlayer();
+$("editPlayer").onclick = () => openPlayer(players.get(selectedId));
+$("addResult").onclick = () => openResult();
+
+let tournaments = new Map();
+let tournamentRequest = 0;
+let selectedTournamentId = "";
+
+function setTournamentView(show) {
+  $("playersView").hidden = show;
+  $("tournamentsView").hidden = !show;
+  $("showPlayers").setAttribute("aria-pressed", !show);
+  $("showTournaments").setAttribute("aria-pressed", show);
+  $("showPlayers").classList.toggle("secondary", show);
+  $("showTournaments").classList.toggle("secondary", !show);
+  if (show) loadTournaments();
+  else tournamentRequest++;
+}
+
+function tournamentIndex(registry, results) {
+  const index = new Map();
+  for (const entry of registry) {
+    if (entry.naam) index.set(entry.toernooiId, { ...entry, deelnemers:new Map() });
+  }
+  for (const [playerId, result] of results) {
+    const { toernooiId, naam, jaar } = result;
+    if (!index.has(toernooiId)) index.set(toernooiId, { toernooiId, naam, jaar, deelnemers:new Map() });
+    index.get(toernooiId).deelnemers.set(playerId,result);
+  }
+  return index;
+}
+
+async function fetchTournamentIndex(isCurrent) {
+  await loadPlayers();
+  if (!isCurrent()) return;
+  const registry = await getDocsFromServer(imports);
+  const playerIds = [...players.keys()];
+  const results = [];
+  for (let i = 0; i < playerIds.length; i += 12) {
+    if (!isCurrent()) return;
+    const batch = await Promise.all(playerIds.slice(i,i + 12).map(async id => {
+      const snap = await getDocsFromServer(resultsRef(id));
+      return snap.docs.map(d => [id,{ ...d.data(), toernooiId:d.id }]);
+    }));
+    for (const items of batch) results.push(...items);
+  }
+  if (!isCurrent()) return;
+  return tournamentIndex(registry.docs.map(d => {
+    const { naam, jaar } = d.data();
+    return { toernooiId:d.id, naam, jaar };
+  }),results);
+}
+
+async function loadTournaments() {
+  const request = ++tournamentRequest;
+  $("tournamentStatus").textContent = "Toernooien en deelnemers laden…";
+  $("tournamentSelect").disabled = true;
+  $("addTournament").disabled = true;
+  $("tournamentDetails").hidden = true;
+  try {
+    const index = await fetchTournamentIndex(() => request === tournamentRequest);
+    if (!index || request !== tournamentRequest) return;
+    tournaments = index;
+    const ordered = [...tournaments.values()].sort((a,b) =>
+      b.jaar - a.jaar || String(a.naam).localeCompare(String(b.naam), "nl"));
+    const select = $("tournamentSelect");
+    select.replaceChildren(new Option("Kies een toernooi…", ""));
+    for (const t of ordered) select.add(new Option(`${t.jaar ?? "—"} · ${t.naam || t.toernooiId}`,t.toernooiId));
+    select.value = tournaments.has(selectedTournamentId) ? selectedTournamentId : "";
+    select.disabled = !ordered.length;
+    $("addTournament").disabled = false;
+    $("tournamentStatus").textContent = ordered.length ? `${ordered.length} toernooien` : "Er zijn nog geen toernooien vastgelegd.";
+    renderTournament();
+  } catch (error) {
+    if (request === tournamentRequest) $("tournamentStatus").textContent = friendly(error);
+  }
+}
+
+function renderTournament() {
+  selectedTournamentId = $("tournamentSelect").value;
+  const tournament = tournaments.get(selectedTournamentId);
+  $("tournamentDetails").hidden = !tournament;
+  if (!tournament) return;
+  $("tournamentId").textContent = tournament.toernooiId;
+  const body = $("tournamentPlayers");
+  body.replaceChildren();
+  const picker = $("tournamentPlayerSelect");
+  picker.replaceChildren(new Option("Kies een deelnemer…", ""));
+  const ordered = [...players.values()].sort((a,b) =>
+    a.achternaam.localeCompare(b.achternaam, "nl") || name(a).localeCompare(name(b), "nl"));
+  let count = 0;
+  for (const p of ordered) {
+    const result = tournament.deelnemers.get(p.spelerId);
+    if (result) {
+      row(body, [name(p),statuses[result.status] ?? statuses.onbekend,result.positie,
+        button("Openen", () => showDossier(p.spelerId))]);
+      count++;
+    } else {
+      picker.add(new Option(name(p),p.spelerId));
+    }
+  }
+  $("linkTournamentPlayer").hidden = picker.options.length < 2;
+  $("tournamentCount").textContent = count ? `${count} geregistreerde deelnemers` : "Bij dit toernooi zijn nog geen deelnemers vastgelegd.";
+}
+
+$("showPlayers").onclick = () => setTournamentView(false);
+$("showTournaments").onclick = () => setTournamentView(true);
+$("tournamentSelect").onchange = renderTournament;
+$("addTournamentPlayer").onclick = () => {
+  const t = tournaments.get(selectedTournamentId);
+  const picker = $("tournamentPlayerSelect");
+  const playerId = picker.value;
+  if (!playerId) {
+    picker.focus();
+    return;
+  }
+  if (t && players.has(playerId) && !t.deelnemers.has(playerId)) openResult(null,t,playerId);
+};
+$("addTournament").onclick = () => {
+  const form = $("tournamentForm");
+  form.reset();
+  form.elements.jaar.value = new Date().getFullYear();
+  form.querySelector('[role="status"]').textContent = "";
+  $("tournamentDialog").showModal();
+};
+
+$("tournamentForm").onsubmit = e => action(e, async () => {
+  const form = $("tournamentForm");
+  const naam = form.elements.naam.value.trim();
+  const jaar = Number(form.elements.jaar.value);
+  const toernooiId = `${naam}_${jaar}`.replace(/\s+/g, "_");
+  if (!naam || !validId(toernooiId)) throw new Error("Vul een geldige toernooinaam in, zonder schuine streep.");
+  if ([...tournaments.values()].some(t => Number(t.jaar) === jaar && norm(t.naam) === norm(naam))) {
+    throw new Error("Er staat al een toernooi met deze naam en dit jaar in het overzicht.");
+  }
+  const ref = importRef(toernooiId);
+  await runTransaction(db, async tx => {
+    const existing = await tx.get(ref);
+    if (existing.exists()) throw new Error("Er bestaat al een toernooi met dit ID.");
+    tx.set(ref, { toernooiId, naam, jaar, bijgewerktOp:serverTimestamp() });
+  });
+  selectedTournamentId = toernooiId;
+  $("tournamentDialog").close();
+  await loadTournaments();
+  message("Toernooi toegevoegd.");
+}, $("tournamentDialog"));
+
+let mergePreview = null;
+
+function mergeChoice(labelText, targetText, sourceText) {
+  const label = document.createElement("label");
+  label.textContent = labelText;
+  const select = document.createElement("select");
+  select.required = true;
+  select.add(new Option("Kies welke waarde je bewaart…", ""));
+  select.add(new Option(targetText, "target"));
+  select.add(new Option(sourceText, "source"));
+  label.append(select);
+  $("mergePreview").append(label);
+  return select;
+}
+
+function resultDescription(result) {
+  return [...Object.keys(rounds).map(key => roundText(result[key])),
+    result.positie ? `plaats ${result.positie}` : statuses[result.status],
+    `CarNieuw ${result.carNieuw ?? "—"}`].filter(Boolean).join(" · ");
+}
+
+$("openMerge").onclick = () => {
+  const target = players.get(selectedId);
+  const source = $("mergeSource");
+  const label = p => `${name(p)} · ${p.spelerId}`;
+  $("mergeTarget").textContent = `Dit dossier blijft bestaan: ${label(target)}`;
+  source.replaceChildren(new Option("Kies een deelnemer…", ""));
+  const key = nameKey(name(target));
+  const candidates = [...players.values()].filter(p => p.spelerId !== selectedId)
+    .sort((a,b) => Number(nameKey(name(b)) === key) - Number(nameKey(name(a)) === key) ||
+      name(a).localeCompare(name(b), "nl"));
+  for (const p of candidates) source.add(new Option(label(p), p.spelerId));
+  $("mergeDialog").showModal();
+  source.onchange();
+};
+
+$("mergeSource").onchange = async () => {
+  const sourceId = $("mergeSource").value;
+  const targetId = selectedId;
+  const preview = { sourceId, targetId };
+  mergePreview = preview;
+  $("mergePreview").replaceChildren();
+  $("mergeStatus").textContent = "";
+  $("mergeConfirm").disabled = true;
+  if (!sourceId) return;
+  try {
+    $("mergeStatus").textContent = "Dossiers vergelijken…";
+    const [source, target] = await Promise.all([sourceId, targetId].map(id => getDocFromServer(playerRef(id))));
+    if (!source.exists() || !target.exists()) throw new Error("Een van de dossiers bestaat niet meer.");
+    const [sourceResults, targetResults] = await Promise.all([sourceId, targetId].map(id => getDocsFromServer(resultsRef(id))));
+    if (mergePreview !== preview || !$("mergeDialog").open) return;
+    Object.assign(preview, { source, target, sourceResults, targetResults:new Map(targetResults.docs.map(d => [d.id,d])) });
+    preview.contacts = contactReview({ profile:source.data() }, target.data(),
+      { ...contactLabels, scorebordNummer:"Scorebordnummer" });
+    for (const change of preview.contacts) {
+      if (change.conflict) change.select = mergeChoice(change.label, `Behouden: ${change.existing}`, `Overnemen: ${change.incoming}`);
+    }
+    preview.results = new Map();
+    for (const result of sourceResults.docs) {
+      const existing = preview.targetResults.get(result.id);
+      if (!existing) continue;
+      preview.results.set(result.id, mergeChoice(
+        `${result.data().naam} ${result.data().jaar ?? ""} · 1e ronde / 2e ronde / finale`,
+        `Behouden: ${resultDescription(existing.data())}`,
+        `Overnemen: ${resultDescription(result.data())}`));
+    }
+    $("mergeStatus").textContent = `${sourceResults.size - preview.results.size} toernooiresultaten worden overgenomen. Kies bij dubbele resultaten welk resultaat blijft. De dubbele vermelding verdwijnt na bevestiging.`;
+    $("mergeConfirm").disabled = false;
+  } catch (error) {
+    if (mergePreview === preview) $("mergeStatus").textContent = friendly(error);
+  }
+};
+
+$("mergeDialog").addEventListener("close", () => { mergePreview = null; });
+
+function sameProfileRevision(current, preview) {
+  const revision = current.data()?.bijgewerktOp;
+  const reviewed = preview.data()?.bijgewerktOp;
+  return current.exists() && (revision == null ? reviewed == null : reviewed != null && revision.isEqual(reviewed));
+}
+
+$("mergeForm").onsubmit = e => action(e, async () => {
+  const preview = mergePreview;
+  if (!preview?.source) return;
+  const { source, target, sourceResults, targetId, sourceId } = preview;
+  const updates = Object.fromEntries(preview.contacts.filter(change =>
+    !change.conflict || change.select.value === "source").map(change => [change.field,change.incoming]));
+  const copies = sourceResults.docs.filter(result =>
+    !preview.results.has(result.id) || preview.results.get(result.id).value === "source");
+  $("mergeSource").disabled = true;
+  try {
+    $("mergeStatus").textContent = "Dossiers samenvoegen…";
+    await runTransaction(db, async tx => {
+      const [currentSource, currentTarget] = await Promise.all([tx.get(source.ref),tx.get(target.ref)]);
+      if (!sameProfileRevision(currentSource, source) || !sameProfileRevision(currentTarget, target)) {
+        throw new Error("Een dossier is intussen gewijzigd. Open Samenvoegen opnieuw.");
+      }
+      const registry = await getDocsFromServer(imports);
+      const affected = registry.docs.filter(d => d.data().koppelingen?.some(link => link.spelerId === sourceId));
+      if (2 + sourceResults.size + copies.length + affected.length > 500) {
+        throw new Error("Deze dossiers bevatten te veel gegevens om in één keer samen te voegen.");
+      }
+      const links = await Promise.all(affected.map(d => tx.get(d.ref)));
+      for (const result of copies) {
+        tx.set(doc(resultsRef(targetId),result.id), { ...result.data(), bijgewerktOp:serverTimestamp() });
+      }
+      for (const result of sourceResults.docs) tx.delete(result.ref);
+      for (const entry of links) {
+        const current = entry.data()?.koppelingen;
+        if (!current?.some(link => link.spelerId === sourceId)) continue;
+        tx.update(entry.ref, {
+          koppelingen:current.map(link => link.spelerId === sourceId ? { ...link, spelerId:targetId } : link),
+          bijgewerktOp:serverTimestamp(),
+        });
+      }
+      tx.update(target.ref, { ...updates, bijgewerktOp:serverTimestamp() });
+      tx.delete(source.ref);
+    });
+    $("mergeDialog").close();
+    clearImport();
+    await loadPlayers();
+    await showDossier(targetId);
+    $("dossierStatus").textContent = "Deelnemers samengevoegd.";
+    if (!$("tournamentsView").hidden) await loadTournaments();
+  } finally {
+    $("mergeSource").disabled = false;
+  }
+}, $("mergeDialog"), error => {
+  $("mergeStatus").textContent = error.startsWith("Geen toegang tot Firestore")
+    ? "Samenvoegen geweigerd. Controleer de delete-regels onder ‘Eenmalige Firebase-inrichting’."
+    : error;
+});
+
+$("playerForm").onsubmit = e => action(e, async () => {
+  const form = $("playerForm");
+  const oldId = form.dataset.id;
+  const ref = oldId ? playerRef(oldId) : doc(participants);
+  const data = Object.fromEntries(profileFields.map(key => [key, form.elements[key].value.trim()]));
+  if (!data.achternaam) throw new Error("Vul een achternaam in.");
+  await runTransaction(db, async tx => {
+    const current = await tx.get(ref);
+    if (current.exists() !== Boolean(oldId)) throw new Error("Dit dossier is intussen gewijzigd. Open het opnieuw.");
+    tx.set(ref, { ...data, spelerId:ref.id, bijgewerktOp:serverTimestamp(),
+      ...(oldId ? {} : { aangemaaktOp:serverTimestamp() }) }, { merge:true });
+  });
+  $("playerDialog").close();
+  message("Deelnemer opgeslagen.");
+  await loadPlayers();
+  await showDossier(ref.id);
+}, $("playerDialog"));
+
+$("resultForm").onsubmit = e => action(e, async () => {
+  const form = $("resultForm");
+  const data = new FormData(form);
+  const player = form.dataset.player;
+  const id = data.get("toernooiId").trim();
+  const title = data.get("naam").trim();
+  if (!validId(id) || !title) throw new Error("Vul een geldige toernooinaam en een geldig toernooi-ID in.");
+  const result = {
+    toernooiId:id, naam:title, jaar:Number(data.get("jaar")),
+    status:data.get("status"), positie:optionalInt(data.get("positie")),
+    carNieuw:optionalInt(data.get("carNieuw")),
+  };
+  if (result.positie !== null) result.status = "finale";
+  for (const key of Object.keys(rounds)) {
+    result[key] = { car:optionalInt(data.get(key + "Car")), brt:optionalInt(data.get(key + "Brt")) };
+  }
+  const ref = doc(resultsRef(player), id);
+  await runTransaction(db, async tx => {
+    const [parent, existing] = await Promise.all([tx.get(playerRef(player)), tx.get(ref)]);
+    if (!parent.exists()) throw new Error("Dit deelnemersdossier bestaat niet meer.");
+    if (existing.exists() !== Boolean(form.dataset.result)) {
+      throw new Error("Dit resultaat is intussen gewijzigd of bestaat al. Open het vanuit het dossier.");
+    }
+    tx.set(ref, { ...result, bijgewerktOp:serverTimestamp() }, { merge:true });
+    tx.update(parent.ref, { bijgewerktOp:serverTimestamp() });
+  });
+  $("resultDialog").close();
+  message("Toernooiresultaat opgeslagen.");
+  if ($("dossier").open) await showDossier(player);
+  if (!$("tournamentsView").hidden) await loadTournaments();
+}, $("resultDialog"));
+
+$("loginForm").onsubmit = e => action(e, async () => {
+  const form = $("loginForm");
+  const username = form.elements.username.value.trim().toLowerCase();
+  if (!/^[a-z0-9._-]+$/.test(username)) throw new Error("Vul je gebruikersnaam van de toernooi-app in.");
+  await signInWithEmailAndPassword(auth, username + "@bcr.local", form.elements.password.value);
+  form.reset();
+});
+$("logout").onclick = e => action(e, () => signOut(auth));
+
+message("Aanmelding controleren…");
+onAuthStateChanged(auth, async user => {
+  const stamp = ++session;
+  historyRequest++;
+  selectedId = null;
+  players.clear();
+  history.clear();
+  $("players").replaceChildren();
+  $("history").replaceChildren();
+  tournaments.clear();
+  selectedTournamentId = "";
+  $("tournamentPlayers").replaceChildren();
+  $("tournamentSelect").replaceChildren();
+  $("tournamentPlayerSelect").replaceChildren();
+  $("tournamentDetails").hidden = true;
+  setTournamentView(false);
+
+  $("workspace").hidden = true;
+  $("login").hidden = Boolean(user);
+  clearImport();
+  clearHistoryImport();
+  $("search").value = "";
+  $("zip").value = "";
+  for (const dialog of document.querySelectorAll("dialog")) {
+    dialog.close();
+    dialog.querySelector("form")?.reset();
+  }
+  if (!user) {
+    message("Log in met je account van de toernooi-app.");
+    return;
+  }
+  try {
+    message("Beheerrechten en deelnemers laden…");
+    const { claims } = await user.getIdTokenResult(true);
+    if (stamp !== session) return;
+    if (claims.role !== "admin" && claims.admin !== true) {
+      throw new Error("Dit account heeft geen Firebase-adminclaim.");
+    }
+    await loadPlayers();
+    if (stamp !== session) return;
+    $("account").textContent = user.email.replace(/@bcr\.local$/, "");
+    $("viewNav").inert = false;
+    for (const section of $("workspace").querySelectorAll("section")) section.inert = false;
+    $("workspace").hidden = false;
+    message("");
+  } catch (error) {
+    if (stamp !== session) return;
+    $("account").textContent = "Aangemeld";
+    $("viewNav").inert = true;
+    $("workspace").hidden = false;
+    for (const section of $("workspace").querySelectorAll("section")) section.inert = true;
+    message(friendly(error), true);
+  }
+});
+
+function optionalInt(value) {
+  if (value == null || String(value).trim() === "") return null;
+  const number = Number(value);
+  if (!/^\d+$/.test(String(value).trim()) || !Number.isSafeInteger(number)) {
+    throw new Error(`Ongeldig geheel getal: ${value}`);
+  }
+  return number;
+}
+
+function parseCsv(text, file, required) {
+  const input = text.replace(/^\uFEFF/, "");
+  if (!input.trim()) return [];
+  const records = [];
+  let cells = [], field = "", quoted = false, closed = false;
+  for (let i = 0; i < input.length; i++) {
+    const c = input[i];
+    if (quoted) {
+      if (c !== '"') field += c;
+      else if (input[i + 1] === '"') { field += '"'; i++; }
+      else { quoted = false; closed = true; }
+    } else if (c === ";" || c === "\n" || c === "\r") {
+      cells.push(field);
+      field = "";
+      closed = false;
+      if (c !== ";") {
+        if (c === "\r" && input[i + 1] === "\n") i++;
+        records.push(cells);
+        cells = [];
+      }
+    } else if (c === '"' && !field && !closed) {
+      quoted = true;
+    } else {
+      if (closed || c === '"') throw new Error(`Ongeldige CSV-aanhalingstekens in ${file}.`);
+      field += c;
+    }
+  }
+  if (quoted) throw new Error(`Onafgesloten CSV-veld in ${file}.`);
+  records.push([...cells, field]);
+  const [headers, ...rows] = records.filter(record => record.some(cell => cell.trim()));
+  const keys = headers.map(header => header.trim().toLowerCase());
+  if (new Set(keys).size !== keys.length || required.some(key => !keys.includes(key))) {
+    throw new Error(`Onverwachte kolommen in ${file}.`);
+  }
+  return rows.map(record => {
+    if (record.length !== keys.length) throw new Error(`Ongelijk aantal kolommen in ${file}.`);
+    return Object.fromEntries(keys.map((key, i) => [key, record[i].trim()]));
+  });
+}
+
+const particles = new Set(["de", "den", "der", "het", "ten", "ter", "te", "van", "von", "in", "op", "aan", "tot", "'t", "’t", "v/d", "v.d."]);
+
+function splitName(fullName) {
+  const reversed = fullName.match(/^([^,]+),([^,]+)$/);
+  if (reversed && reversed[1].trim() && reversed[2].trim()) {
+    const surname = reversed[1].trim().split(/\s+/);
+    let start = 0;
+    let end = surname.length;
+    while (start < end - 1 && particles.has(norm(surname[start]))) start++;
+    if (start === 0) {
+      while (end > 1 && particles.has(norm(surname[end - 1]))) end--;
+    }
+    return {
+      voornaam:reversed[2].trim(),
+      tussenvoegsel:[...surname.slice(0,start), ...surname.slice(end)].join(" "),
+      achternaam:surname.slice(start,end).join(" "),
+    };
+  }
+  const words = fullName.trim().split(/\s+/);
+  const start = words.findIndex((word, i) => i > 0 && i < words.length - 1 && particles.has(norm(word)));
+  if (start < 0) return { voornaam:words.slice(0,-1).join(" "), tussenvoegsel:"", achternaam:words.at(-1) };
+  let end = start;
+  while (end < words.length - 1 && particles.has(norm(words[end]))) end++;
+  return {
+    voornaam:words.slice(0,start).join(" "), tussenvoegsel:words.slice(start,end).join(" "),
+    achternaam:words.slice(end).join(" "),
+  };
+}
+
+function nameKey(value) {
+  return norm(name(splitName(String(value ?? ""))))
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/[‘’]/g, "'")
+    .replace(/[‐‑]/g, "-");
+}
+
+const isTrue = value => ["true", "1"].includes(norm(value));
+
+function makeImport(tournament, sourcePlayers, r1, r2, table) {
+  const year = optionalInt(tournament?.jaar);
+  if (!validId(tournament?.id) || !tournament.naam || !year) throw new Error("Toernooi-ID, naam of jaar ontbreekt.");
+  const info = { toernooiId:tournament.id, naam:tournament.naam, jaar:year };
+  if (!sourcePlayers.length) throw new Error("spelers.csv bevat geen deelnemers.");
+  const source = new Map();
+  for (const p of sourcePlayers) {
+    const key = norm(p.naam);
+    if (!key || source.has(key)) {
+      throw new Error(`Een deelnemersnaam ontbreekt of is dubbel: ${p.naam || "(leeg)"}. De export koppelt partijen via de naam.`);
+    }
+    const positie = optionalInt(p.finalpos);
+    const finale = { car:optionalInt(p.finalcar), brt:optionalInt(p.finalbrt) };
+    const playedFinal = positie > 0 || optionalInt(p.finalgames) > 0 || finale.brt > 0 || finale.car > 0;
+    source.set(key, {
+      key, exportName:p.naam, importedId:p.spelerid || "",
+      profile:{ ...splitName(p.naam), email:p.email || "", telefoon:p.telefoon || "" },
+      withdrawn:isTrue(p.withdraw),
+      result:{
+        ...info, r1:{ car:null, brt:null }, r2:{ car:null, brt:null }, finale,
+        positie:positie > 0 ? positie : null, status:playedFinal ? "finale" : "onbekend",
+      },
+    });
+  }
+
+  const byName = new Map();
+  for (const item of source.values()) {
+    const key = nameKey(item.exportName);
+    byName.set(key, byName.has(key) ? null : item);
+  }
+  const findPlayer = value => source.get(norm(value)) ?? byName.get(nameKey(value));
+
+  for (const [key, matches] of [["r1", r1], ["r2", r2]]) {
+    for (const match of matches) {
+      if (!isTrue(match.afgerond)) continue;
+      const x = findPlayer(match.spelerx_naam);
+      const y = findPlayer(match.spelery_naam);
+      const beurten = optionalInt(match.beurten);
+      const carX = optionalInt(match.gemaaktex);
+      const carY = optionalInt(match.gemaaktey);
+      if (!x || !y || x === y || !beurten || carX === null || carY === null) {
+        throw new Error(`Controleer deze afgeronde partij in ${rounds[key]}: ${match.spelerx_naam} / ${match.spelery_naam}.`);
+      }
+      for (const [item, car] of [[x, carX], [y, carY]]) {
+        const total = item.result[key];
+        total.car = (total.car ?? 0) + car;
+        total.brt = (total.brt ?? 0) + beurten;
+      }
+    }
+  }
+
+  const moyenne = value => {
+    if (!/^-?\d+(?:[.,]\d+)?$/.test(value || "")) return NaN;
+    return Number(value.replace(",", "."));
+  };
+  const ranges = table.map(r => ({ van:moyenne(r.van), tot:moyenne(r.tot), car:optionalInt(r.car) }))
+    .filter(r => !(r.van === 0 && r.tot === 0 && r.car === 0))
+    .sort((a,b) => a.van - b.van);
+  if (ranges.some(r => !Number.isFinite(r.van) || !Number.isFinite(r.tot) || r.van > r.tot || !r.car)) {
+    throw new Error("moyCarTable.csv bevat een ongeldige rij.");
+  }
+
+  for (const item of source.values()) {
+    const r = item.result;
+    const car = (r.r1.car ?? 0) + (r.r2.car ?? 0) + (r.finale.car ?? 0);
+    const brt = (r.r1.brt ?? 0) + (r.r2.brt ?? 0) + (r.finale.brt ?? 0);
+    const finalIncomplete = r.status === "finale" && (r.finale.car === null || !r.finale.brt);
+    if (r.status !== "finale") {
+      r.status = brt > 0 ? "deelgenomen" : item.withdrawn ? "afgemeld" : "onbekend";
+    }
+    r.carNieuw = brt && !finalIncomplete
+      ? ranges.find(range => car / brt >= range.van && car / brt <= range.tot)?.car ?? null
+      : null;
+  }
+  return { info, items:[...source.values()], hasTable:ranges.length > 0 };
+}
+
+function importSaveMessage(value, error = false) {
+  $("importSaveStatus").textContent = value;
+  $("importSaveStatus").classList.toggle("error", error);
+}
+
+function clearImport() {
+  pending = null;
+  importSaveMessage("");
+  $("importRows").replaceChildren();
+  $("confirmImport").reset();
+  $("confirmImport").hidden = true;
+}
+
+function importChoices(item, previous, ordered, needsReview) {
+  const select = document.createElement("select");
+  select.setAttribute("aria-label", "Koppeling voor " + item.exportName);
+  const option = (value, label) => select.add(new Option(label, value));
+  if (previous) {
+    option(previous, (name(players.get(previous) || {}) || previous) + " · eerder gekoppeld");
+    option("skip", "Deze regel overslaan");
+    return select;
+  }
+  option("", "Kies een koppeling…");
+  option("new", "Nieuwe deelnemer maken");
+  option("skip", "Deze regel overslaan");
+  for (const p of ordered) option(p.spelerId, `${name(p)} · ${p.email || p.telefoon || p.spelerId}`);
+  const exactId = players.get(item.importedId);
+  const { email, telefoon } = item.profile;
+  const key = nameKey(item.exportName);
+  const matches = ordered.filter(p =>
+    nameKey(name(p)) === key ||
+    (email && norm(p.email) === norm(email)) ||
+    (phone(telefoon) && phone(p.telefoon) === phone(telefoon)));
+  if (exactId) select.value = exactId.spelerId;
+  else if (!needsReview && matches.length === 1) select.value = matches[0].spelerId;
+  else if (!needsReview && !matches.length) select.value = "new";
+  return select;
+}
+
+const contactLabels = { email:"E-mailadres", telefoon:"Telefoonnummer" };
+
+function contactReview(item, dossier, labels = contactLabels) {
+  if (!dossier) return [];
+  return Object.entries(labels).flatMap(([field, label]) => {
+    const incoming = item.profile[field];
+    if (!incoming) return [];
+    const existing = String(dossier[field] ?? "");
+    const equivalent = field === "telefoon"
+      ? existing.trim() === incoming.trim() || Boolean(phone(existing) && phone(existing) === phone(incoming))
+      : norm(existing) === norm(incoming);
+    if (equivalent) return [];
+    return [{ field, label, existing, incoming, conflict:Boolean(existing.trim()) }];
+  });
+}
+
+function renderContactReview(item, cell) {
+  item.contactReview = contactReview(item, players.get(item.select.value));
+  cell.replaceChildren();
+  if (!item.contactReview.length) cell.textContent = "—";
+  for (const change of item.contactReview) {
+    if (!change.conflict) {
+      const detail = document.createElement("div");
+      detail.textContent = `${change.label} toevoegen: ${change.incoming}`;
+      cell.append(detail);
+      continue;
+    }
+    const label = document.createElement("label");
+    label.textContent = change.label;
+    cell.append(label);
+    const select = document.createElement("select");
+    select.setAttribute("aria-label", `${change.label} voor ${item.exportName}`);
+    select.add(new Option("Kies welke waarde je bewaart…", ""));
+    select.add(new Option(`Huidig: ${change.existing}`, "keep"));
+    select.add(new Option(`Uit ZIP: ${change.incoming}`, "import"));
+    label.append(select);
+    change.select = select;
+  }
+}
+
+function contactUpdates(item) {
+  const updates = {};
+  for (const change of item.contactReview) {
+    const choice = change.select?.value;
+    if (change.conflict && !choice) {
+      change.select.focus();
+      throw new Error(`${item.exportName} · ${change.label}: kies ‘Huidig’ of ‘Uit ZIP’.`);
+    }
+    if (!change.conflict || choice === "import") updates[change.field] = change.incoming;
+  }
+  return updates;
+}
+
+function sameImportLinks(current, reviewed) {
+  if (current.length !== reviewed.length) return false;
+  const reviewedByName = new Map(reviewed.map(({ exportNaam, spelerId }) => [exportNaam, spelerId]));
+  const currentByName = new Map(current.map(({ exportNaam, spelerId }) => [exportNaam, spelerId]));
+  return currentByName.size === reviewedByName.size &&
+    [...currentByName].every(([name, id]) => reviewedByName.has(name) && reviewedByName.get(name) === id);
+}
+
+$("readZip").onsubmit = e => action(e, async () => {
+  clearImport();
+  const stamp = session;
+  const file = $("zip").files[0];
+  if (!file || file.size > 15 * 1024 * 1024) throw new Error("Kies een ZIP-bestand van maximaal 15 MB.");
+  if (!window.JSZip) throw new Error("De ZIP-lezer kon niet worden geladen. Controleer de internetverbinding.");
+  message("Toernooi-export controleren…");
+  const zip = await JSZip.loadAsync(file);
+  async function csv(filename, fields, required = true) {
+    const entry = zip.file(filename);
+    if (!entry && required) throw new Error(`${filename} ontbreekt. Maak een ZIP met de gevraagde onderdelen.`);
+    if (!entry) return [];
+    const content = await entry.async("string");
+    if (content.length > 8 * 1024 * 1024) throw new Error(`${filename} is te groot.`);
+    return parseCsv(content, filename, fields);
+  }
+  const matchFields = ["spelerx_naam","spelery_naam","gemaaktex","gemaaktey","beurten","afgerond"];
+  const [t, p, r1, r2, table] = await Promise.all([
+    csv("toernooi.csv", ["id","naam","jaar"]),
+    csv("spelers.csv", ["naam","finalpos","finalcar","finalbrt"]),
+    csv("r1_wedstrijden.csv", matchFields),
+    csv("r2_wedstrijden.csv", matchFields),
+    csv("moyCarTable.csv", ["van","tot","car"], false),
+  ]);
+  if (t.length !== 1) throw new Error("toernooi.csv moet precies één toernooi bevatten.");
+  const data = makeImport(t[0], p, r1, r2, table);
+  const registry = await getDocFromServer(importRef(data.info.toernooiId));
+  await loadPlayers();
+  if (stamp !== session) return;
+  const stored = registry.data()?.koppelingen || [];
+  const links = new Map(stored.map(link => [link.exportNaam, link.spelerId]));
+  const ordered = [...players.values()].sort((a,b) => name(a).localeCompare(name(b), "nl"));
+  pending = { ...data, stored };
+  $("importTitle").textContent = `${data.info.naam} · ${data.info.jaar}`;
+  const missing = data.items.filter(item => item.result.carNieuw === null).length;
+  $("importInfo").textContent = `${data.items.length} deelnemersregels. ` +
+    (data.hasTable ? `Bij ${missing} regels kon CarNieuw niet worden bepaald.` : "De moyenne-tabel ontbreekt of is leeg. CarNieuw blijft leeg.");
+  for (const item of data.items) {
+    const key = nameKey(item.exportName);
+    const sameName = data.items.filter(other => nameKey(other.exportName) === key);
+    const previous = stored.filter(link => nameKey(link.exportNaam) === key);
+    const priorIds = new Set(previous.map(link => link.spelerId));
+    const needsReview = sameName.length > 1 || priorIds.size > 1;
+    const previousId = links.get(item.key) || (!needsReview ? previous[0]?.spelerId : undefined);
+    item.select = importChoices(item, previousId, ordered, needsReview);
+    const contactCell = document.createElement("div");
+    item.select.addEventListener("change", () => renderContactReview(item, contactCell));
+    renderContactReview(item, contactCell);
+    row($("importRows"), [
+      item.exportName, [item.profile.email,item.profile.telefoon].filter(Boolean).join(" / ") || "—",
+      item.select, contactCell, item.result.carNieuw,
+    ]);
+  }
+  $("confirmImport").hidden = false;
+  message("ZIP gecontroleerd. Bevestig de koppelingen in het importoverzicht.");
+});
+$("cancelImport").onclick = clearImport;
+$("zip").addEventListener("change", clearImport);
+
+$("confirmImport").onsubmit = e => action(e, async () => {
+  importSaveMessage("");
+  const data = pending;
+  if (!data) return;
+  const replace = $("replaceResults").checked;
+  const plan = [];
+
+  const used = new Set();
+  for (const item of data.items) {
+    const selection = item.select.value;
+    if (!selection) {
+      item.select.focus();
+      throw new Error(`Kies een koppeling voor ${item.exportName}.`);
+    }
+    if (selection === "skip") continue;
+    const create = selection === "new";
+    const ref = create ? doc(participants) : playerRef(selection);
+    const storedNames = data.stored.filter(link => link.spelerId === ref.id).map(link => link.exportNaam);
+    const storedName = storedNames.find(n => n === item.key) ??
+      storedNames.find(n => nameKey(n) === nameKey(item.exportName));
+    if (used.has(ref.id) || (storedNames.length && !storedName)) {
+      throw new Error(`${item.exportName} deelt een koppeling met een andere naam in dit toernooi. Controleer de selectie.`);
+    }
+    used.add(ref.id);
+    const updates = contactUpdates(item);
+    plan.push({ item, ref, create, updates, reviewed:item.contactReview, exportKey:storedName || item.key,
+      resultRef:doc(resultsRef(ref.id), data.info.toernooiId) });
+  }
+  if (!plan.length) throw new Error("Kies minstens één deelnemersregel om op te slaan.");
+  if (1 + 2 * plan.length > 500) {
+    throw new Error("Te veel regels voor één import. Sla een deel over en importeer daarna de overige deelnemers.");
+  }
+  const registry = importRef(data.info.toernooiId);
+  importSaveMessage("Bevestigde regels worden opgeslagen…");
+  const count = await runTransaction(db, async tx => {
+    const snap = await tx.get(registry);
+    const previous = snap.data()?.koppelingen || [];
+    if (!sameImportLinks(previous, data.stored)) {
+      throw new Error("De koppelingen zijn intussen gewijzigd. Controleer de ZIP opnieuw.");
+    }
+    const current = await Promise.all(plan.map(async p => ({
+      p, player:await tx.get(p.ref), result:await tx.get(p.resultRef),
+    })));
+    const links = new Map(previous.map(link => [link.exportNaam, link.spelerId]));
+    let written = 0;
+    let profiles = 0;
+    let contacts = 0;
+    for (const { p, player, result } of current) {
+      if (player.exists() === p.create) throw new Error(`Het dossier van ${p.item.exportName} is intussen gewijzigd.`);
+      if (p.create) {
+        tx.set(p.ref, { ...p.item.profile, spelerId:p.ref.id, aangemaaktOp:serverTimestamp(), bijgewerktOp:serverTimestamp() });
+        profiles++;
+      } else {
+        const currentReview = contactReview(p.item, player.data());
+        const reviewed = p.reviewed;
+        if (currentReview.length !== reviewed.length || currentReview.some((change, i) =>
+          change.field !== reviewed[i].field || change.existing !== reviewed[i].existing)) {
+          throw new Error(`De contactgegevens van ${p.item.exportName} zijn intussen gewijzigd. Controleer de ZIP opnieuw.`);
+        }
+        tx.update(p.ref, { ...p.updates, bijgewerktOp:serverTimestamp() });
+        if (Object.keys(p.updates).length) contacts++;
+      }
+      if (!result.exists() || replace) {
+        tx.set(p.resultRef, { ...p.item.result, bijgewerktOp:serverTimestamp() }, { merge:true });
+        written++;
+      }
+      links.set(p.exportKey, p.ref.id);
+    }
+    tx.set(registry, { ...data.info,
+      koppelingen:[...links].map(([exportNaam, spelerId]) => ({ exportNaam, spelerId })),
+      bijgewerktOp:serverTimestamp(),
+    });
+    return { written, profiles, contacts };
+  });
+  clearImport();
+  $("zip").value = "";
+  const summary = `${count.written} resultaten opgeslagen, ${count.profiles} nieuwe deelnemers, ${count.contacts} bestaande dossiers met bijgewerkte contactgegevens en ${plan.length - count.written} bestaande resultaten behouden.`;
+  importSaveMessage(summary);
+  message(summary);
+  await loadPlayers();
+  if ($("dossier").open && selectedId) await showDossier(selectedId);
+}, null, error => importSaveMessage(error, true));
+const historicalTournamentNames = ["Jan Verhoef Trofee", "Harm Heemstra Trofee", "Henk Valk Trofee"];
+
+function clearHistoryImport() {
+  historicalImport = null;
+  $("historyEdition").replaceChildren();
+  $("historyImportRows").replaceChildren();
+  $("saveHistoryExcel").hidden = true;
+  $("historyImportStatus").textContent = "";
+  $("historySaveStatus").textContent = "";
+}
+
+function historicalEditions(rows, comments) {
+  const columns = new Map();
+  let tournament = "";
+  const headers = new Set();
+  for (const [column, yearText] of rows.get(2) || []) {
+    if (column === "A") continue;
+    const header = rows.get(1)?.get(column);
+    if (header) {
+      tournament = historicalTournamentNames.find(title => norm(title) === norm(header));
+      if (!tournament || headers.has(tournament)) throw new Error(`Onbekende of dubbele toernooikop in ${column}1.`);
+      headers.add(tournament);
+    }
+    if (!tournament || !/^\d{4}$/.test(yearText)) throw new Error(`Ongeldige editie in ${column}2.`);
+    const jaar = Number(yearText);
+    const toernooiId = `${tournament}_${jaar}`.replace(/\s+/g, "_");
+    if ([...columns.values()].some(e => e.toernooiId === toernooiId)) throw new Error(`Dubbele editie in ${column}2.`);
+    columns.set(column,{ naam:tournament, jaar, toernooiId, entries:[], positions:new Set() });
+  }
+  if (headers.size !== historicalTournamentNames.length || norm(rows.get(2)?.get("A")) !== "naam") {
+    throw new Error("Verwacht de drie toernooikoppen op rij 1 en Naam en jaartallen op rij 2.");
+  }
+  const names = new Map();
+  for (const [rowNumber, cells] of rows) {
+    if (rowNumber < 3) continue;
+    const exportName = cells.get("A");
+    const values = [...cells].filter(([column]) => column !== "A");
+    if (!exportName && values.every(([,v]) => /^(W|T6|T8|W\+F|NG)$/.test(v))) continue;
+    if (!exportName) throw new Error(`Naam ontbreekt op rij ${rowNumber}.`);
+    const key = nameKey(exportName);
+    names.set(key,(names.get(key) || 0) + 1);
+    for (const [column, value] of values) {
+      const edition = columns.get(column);
+      const cell = column + rowNumber;
+      if (!edition || !/^(f|[1-9]\d*\*?)$/i.test(value)) throw new Error(`Ongeldig resultaat in cel ${cell}: ${value}.`);
+      const positie = /^f$/i.test(value) ? null : Number(value.replace("*",""));
+      if (positie !== null && (!Number.isSafeInteger(positie) || edition.positions.has(positie))) {
+        throw new Error(`Dubbele of ongeldige finaleplaats in cel ${cell}.`);
+      }
+      if (positie !== null) edition.positions.add(positie);
+      edition.entries.push({ rowNumber,exportName,key,positie,
+        note:comments.get(cell) || (value.endsWith("*") ? `Aantekening bij plaats ${value} in Excel (${cell}).` : "") });
+    }
+  }
+  return [...columns.values()].filter(e => e.entries.length).map(e => {
+    for (const entry of e.entries) entry.ambiguous = names.get(entry.key) > 1;
+    return e;
+  });
+}
+
+async function readHistoricalWorkbook(file) {
+  if (!window.JSZip || !file || file.size > 5 * 1024 * 1024) throw new Error("Kies een leesbaar .xlsx-bestand van maximaal 5 MB.");
+  const zip = await JSZip.loadAsync(file);
+  const nodes = (root, tag) => [...root.getElementsByTagNameNS("*",tag)];
+  async function readXml(path) {
+    const entry = zip.file(path);
+    if (!entry) return null;
+    const text = await entry.async("string");
+    if (text.length > 8 * 1024 * 1024) throw new Error("Het Excel-werkblad is te groot.");
+    const xml = new DOMParser().parseFromString(text,"application/xml");
+    if (nodes(xml,"parsererror").length) throw new Error("Het Excel-bestand bevat onleesbare gegevens.");
+    return xml;
+  }
+  const sheet = await readXml("xl/worksheets/sheet1.xml");
+  if (!sheet) throw new Error("Het eerste Excel-werkblad ontbreekt.");
+  const shared = await readXml("xl/sharedStrings.xml");
+  const strings = shared ? nodes(shared,"si").map(si => nodes(si,"t").map(t => t.textContent).join("")) : [];
+  const comments = new Map();
+  const notes = await readXml("xl/comments1.xml");
+  if (notes) for (const comment of nodes(notes,"comment")) {
+    const raw = nodes(comment,"t").map(t => t.textContent).join("");
+    comments.set(comment.getAttribute("ref"),raw.split(/Opmerking:\s*/).at(-1).trim());
+  }
+  const rows = new Map();
+  for (const cell of nodes(sheet,"c")) {
+    const address = cell.getAttribute("r")?.match(/^([A-Z]+)(\d+)$/);
+    if (!address) continue;
+    if (nodes(cell,"f").length) throw new Error(`Zet de formule in ${address[0]} eerst om naar een vaste waarde.`);
+    const raw = nodes(cell,"v")[0]?.textContent;
+    const type = cell.getAttribute("t");
+    const value = (type === "s" ? strings[Number(raw)] :
+      type === "inlineStr" ? nodes(cell,"t").map(t => t.textContent).join("") : raw)?.trim();
+    if (!value) continue;
+    const rowNumber = Number(address[2]);
+    if (!rows.has(rowNumber)) rows.set(rowNumber,new Map());
+    rows.get(rowNumber).set(address[1],value);
+  }
+  return historicalEditions(rows,comments);
+}
+
+function historicalResultChange(existing, entry, edition) {
+  if (!existing) return {
+    label:"Nieuw resultaat",
+    patch:{ toernooiId:edition.toernooiId,naam:edition.naam,jaar:edition.jaar,status:"finale",positie:entry.positie,
+      r1:{car:null,brt:null},r2:{car:null,brt:null},finale:{car:null,brt:null},carNieuw:null,
+      ...(entry.note ? { historischeFinaleOpmerking:entry.note } : {}) },
+  };
+  const differences = [];
+  if (existing.status && !["finale","onbekend"].includes(existing.status)) {
+    differences.push(`Database: ${statuses[existing.status] || existing.status}; Excel: finalist`);
+  }
+  if (entry.positie !== null && existing.positie != null && existing.positie !== "" &&
+    Number(existing.positie) !== entry.positie) {
+    differences.push(`Database: plaats ${existing.positie}; Excel: plaats ${entry.positie}`);
+  }
+  if (entry.note && existing.historischeFinaleOpmerking && existing.historischeFinaleOpmerking !== entry.note) {
+    differences.push("De finale-aantekening wijkt af");
+  }
+  if (differences.length) return { label:`${differences.join(" · ")}. Database behouden.`, conflict:true };
+  const patch = {};
+  if (!existing.status || existing.status === "onbekend") patch.status = "finale";
+  if (entry.positie !== null && (existing.positie == null || existing.positie === "")) patch.positie = entry.positie;
+  if (entry.note && !existing.historischeFinaleOpmerking) patch.historischeFinaleOpmerking = entry.note;
+  return Object.keys(patch).length ? { label:"Ontbrekende gegevens aanvullen",patch } : { label:"Bestaand resultaat behouden" };
+}
+
+function historicalEditionTarget(edition,index) {
+  const matches = [...index.values()].filter(t => Number(t.jaar) === edition.jaar && norm(t.naam) === norm(edition.naam));
+  if (matches.length > 1) throw new Error("Er bestaan meerdere toernooien met deze naam en dit jaar. Los de dubbele editie eerst op.");
+  if (!matches.length && index.has(edition.toernooiId)) throw new Error("Het toernooi-ID is al in gebruik voor een andere editie.");
+  return matches.length ? { ...matches[0],jaar:edition.jaar } : { ...edition,deelnemers:new Map() };
+}
+
+function reviewedHistoricalChange(results, playerId, entry, target) {
+  const occupied = entry.positie !== null && [...results].some(([id,result]) =>
+    id !== playerId && Number(result?.positie) === entry.positie);
+  if (occupied) return { label:`Plaats ${entry.positie} is al aan een andere speler gekoppeld. Database behouden.`, conflict:true };
+  return historicalResultChange(results.get(playerId),entry,target);
+}
+
+function renderHistoricalEdition() {
+  const data = historicalImport;
+  const edition = data?.editions[Number($("historyEdition").value)];
+  $("historyImportRows").replaceChildren();
+  const submit = $("saveHistoryExcel").querySelector("button");
+  if (!edition) return;
+  try {
+    const target = historicalEditionTarget(edition,data.index);
+    const ordered = [...players.values()].sort((a,b) => name(a).localeCompare(name(b),"nl"));
+    for (const entry of edition.entries) {
+      const select = document.createElement("select");
+      select.setAttribute("aria-label",`Dossier voor ${entry.exportName}`);
+      select.add(new Option("Kies een dossier…",""));
+      select.add(new Option("Nieuwe deelnemer maken","new"));
+      select.add(new Option("Deze regel overslaan","skip"));
+      for (const p of ordered) select.add(new Option(`${name(p)} · ${p.email || p.spelerId}`,p.spelerId));
+      const matching = ordered.filter(p => nameKey(name(p)) === entry.key);
+      const confirmed = data.confirmed.get(entry.rowNumber);
+      if (players.has(confirmed)) select.value = confirmed;
+      else if (!entry.ambiguous && !/^\p{L}\./u.test(entry.exportName) && matching.length === 1) select.value = matching[0].spelerId;
+      const review = document.createElement("span");
+      select.onchange = () => {
+        review.textContent = !select.value ? "Kies een bestaand of nieuw dossier." :
+          select.value === "skip" ? "Wordt overgeslagen" :
+          reviewedHistoricalChange(target.deelnemers,select.value,entry,target).label;
+      };
+      select.onchange();
+      entry.select = select;
+      row($("historyImportRows"),[`${entry.exportName} · rij ${entry.rowNumber}`,
+        [entry.positie ?? "Finalist, positie onbekend",entry.note].filter(Boolean).join(" · "),select,review]);
+    }
+    submit.disabled = false;
+  } catch (error) {
+    submit.disabled = true;
+    $("historySaveStatus").textContent = friendly(error);
+  }
+}
+
+$("historyExcel").addEventListener("change",clearHistoryImport);
+$("historyEdition").onchange = () => {
+  $("historySaveStatus").textContent = "";
+  renderHistoricalEdition();
+};
+$("readHistoryExcel").onsubmit = e => action(e, async () => {
+  clearHistoryImport();
+  const stamp = session;
+  $("historyImportStatus").textContent = "Werkblad en bestaande dossiers controleren…";
+  const editions = await readHistoricalWorkbook($("historyExcel").files[0]);
+  if (!editions.length) throw new Error("Geen finaleplaatsen gevonden in het werkblad.");
+  const index = await fetchTournamentIndex(() => stamp === session);
+  if (!index || stamp !== session) return;
+  historicalImport = { editions,index,confirmed:new Map() };
+  for (const [i,edition] of editions.entries()) {
+    $("historyEdition").add(new Option(`${edition.naam} ${edition.jaar} · ${edition.entries.length} regels`,String(i)));
+  }
+  $("historyEdition").value = "0";
+  $("saveHistoryExcel").hidden = false;
+  $("historyImportStatus").textContent = `${editions.length} edities gevonden. Controleer de koppelingen en sla per editie op.`;
+  renderHistoricalEdition();
+},null,error => { $("historyImportStatus").textContent = error; });
+
+$("saveHistoryExcel").onsubmit = e => action(e, async () => {
+  const data = historicalImport;
+  if (!data) return;
+  const edition = data.editions[Number($("historyEdition").value)];
+  const target = historicalEditionTarget(edition,data.index);
+  const plan = [];
+  const used = new Set();
+  for (const entry of edition.entries) {
+    const choice = entry.select.value;
+    if (!choice) {
+      entry.select.focus();
+      throw new Error(`Kies een spelersdossier voor ${entry.exportName}, rij ${entry.rowNumber}.`);
+    }
+    if (choice === "skip") continue;
+    const create = choice === "new";
+    const ref = create ? doc(participants) : playerRef(choice);
+    if (used.has(ref.id)) throw new Error(`Meer dan één Excel-regel is gekoppeld aan ${name(players.get(ref.id) || {})} in deze editie.`);
+    used.add(ref.id);
+    plan.push({ entry,ref,create,resultRef:doc(resultsRef(ref.id),target.toernooiId) });
+  }
+  if (!plan.length) throw new Error("Kies minstens één regel om te verwerken.");
+  if (1 + 2 * plan.length > 500) throw new Error("Te veel deelnemers voor één opslagactie.");
+  $("historySaveStatus").textContent = "Editie verwerken…";
+  const registryRef = importRef(target.toernooiId);
+  const outcome = await runTransaction(db, async tx => {
+    const registry = await tx.get(registryRef);
+    const meta = registry.data();
+    if (meta?.naam && (norm(meta.naam) !== norm(target.naam) || Number(meta.jaar) !== target.jaar)) {
+      throw new Error("De editie in de database is intussen gewijzigd. Controleer het Excel-bestand opnieuw.");
+    }
+    const current = await Promise.all(plan.map(async p => ({
+      p,player:await tx.get(p.ref),result:await tx.get(p.resultRef),
+    })));
+    const storedResults = new Map(current.map(({ p,result }) => [p.ref.id,result.data()]));
+    const unchecked = [...target.deelnemers.keys()].filter(id => !storedResults.has(id));
+    await Promise.all(unchecked.map(async id => {
+      const result = await tx.get(doc(resultsRef(id),target.toernooiId));
+      storedResults.set(id,result.data());
+    }));
+    const reports = [];
+    const processed = [];
+    let written = 0;
+    for (const { p,player,result } of current) {
+      if (player.exists() === p.create) throw new Error(`Het dossier van ${p.entry.exportName} is intussen gewijzigd.`);
+      const existing = result.data();
+      const change = reviewedHistoricalChange(storedResults,p.ref.id,p.entry,target);
+      if (change.conflict) reports.push(`${p.entry.exportName} · ${change.label}`);
+      if (change.patch) {
+        if (p.create) {
+          tx.set(p.ref,{ ...splitName(p.entry.exportName),email:"",telefoon:"",spelerId:p.ref.id,
+            aangemaaktOp:serverTimestamp(),bijgewerktOp:serverTimestamp() });
+        } else {
+          tx.update(p.ref,{ bijgewerktOp:serverTimestamp() });
+        }
+        tx.set(p.resultRef,{ ...change.patch,bijgewerktOp:serverTimestamp() },{ merge:true });
+        written++;
+      }
+      processed.push({ playerId:p.ref.id,rowNumber:p.entry.rowNumber,
+        result:existing || change.patch ? { ...existing,...change.patch } : null });
+    }
+    if (!registry.exists() && written) tx.set(registryRef,{
+      toernooiId:target.toernooiId,naam:target.naam,jaar:target.jaar,bijgewerktOp:serverTimestamp(),
+    });
+    return { reports,processed,written };
+  });
+  for (const item of outcome.processed) {
+    if (!item.result) continue;
+    data.confirmed.set(item.rowNumber,item.playerId);
+    target.deelnemers.set(item.playerId,item.result);
+  }
+  data.index.set(target.toernooiId,target);
+  const status = $("historySaveStatus");
+  status.textContent = `${target.naam} ${target.jaar} · ${outcome.written} resultaten opgeslagen of aangevuld, ${outcome.processed.length - outcome.written} behouden, ${edition.entries.length - plan.length} overgeslagen.`;
+  for (const report of outcome.reports) {
+    const line = document.createElement("div");
+    line.textContent = report;
+    status.append(line);
+  }
+  await loadPlayers();
+  if (historicalImport === data) renderHistoricalEdition();
+},null,error => { $("historySaveStatus").textContent = error; });
+</script>
+<script>
+  window.addEventListener("load", () => {
+    const status = document.getElementById("status");
+    if (status.textContent === "Firebase wordt geladen…") {
+      status.textContent = "Firebase kon niet worden geladen. Open het bestand via een lokale webserver of HTTPS en controleer je internetverbinding.";
+    }
+  });
+</script>
+</body>
+</html>
