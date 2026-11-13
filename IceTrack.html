@@ -1,0 +1,1277 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>IceTrack · Wedstrijdbeheer</title>
+    <style>
+      :root {
+        font-family:
+          Inter,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          sans-serif;
+        color: #17263c;
+        background: #f3f6fb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      .shell {
+        display: grid;
+        grid-template-columns: 245px 1fr;
+        min-height: 100vh;
+      }
+      .side {
+        background: #11243b;
+        color: #d5e1f0;
+        padding: 28px 18px;
+      }
+      .brand {
+        font-size: 24px;
+        font-weight: 800;
+        color: white;
+        margin: 0 10px 32px;
+      }
+      .brand span {
+        color: #58c9e7;
+      }
+      .nav {
+        display: block;
+        width: 100%;
+        padding: 13px 15px;
+        margin: 5px 0;
+        border: 0;
+        border-radius: 10px;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+      }
+      .nav.active,
+      .nav:hover {
+        background: #243f5c;
+        color: white;
+      }
+      .main {
+        padding: 30px;
+        max-width: 1450px;
+        width: 100%;
+        margin: auto;
+      }
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 26px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: -0.6px;
+      }
+      h2 {
+        font-size: 18px;
+        margin: 0 0 16px;
+      }
+      .muted {
+        color: #728097;
+        font-size: 13px;
+      }
+      .card {
+        background: white;
+        border: 1px solid #e4eaf2;
+        border-radius: 16px;
+        padding: 22px;
+        box-shadow: 0 5px 22px #122c4b08;
+        margin-bottom: 18px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 15px;
+      }
+      .stat {
+        font-size: 30px;
+        font-weight: 800;
+        color: #173d61;
+      }
+      .btn {
+        border: 0;
+        background: #176eaa;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 9px;
+        font-weight: 650;
+      }
+      .btn:hover {
+        background: #105886;
+      }
+      .btn.alt {
+        background: #eaf2f8;
+        color: #235779;
+      }
+      .btn.danger {
+        background: #fcebed;
+        color: #a92b3b;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        font-weight: 600;
+        font-size: 13px;
+      }
+      .field input,
+      .field select,
+      .search {
+        border: 1px solid #d7e1ec;
+        border-radius: 9px;
+        padding: 11px;
+        background: white;
+        min-width: 0;
+        width: 100%;
+      }
+      .formgrid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px;
+      }
+      .wide {
+        grid-column: 1/-1;
+      }
+      .tablewrap {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14px;
+      }
+      th {
+        text-align: left;
+        background: #f5f8fc;
+        color: #64758a;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      th,
+      td {
+        padding: 12px;
+        border-bottom: 1px solid #eaf0f6;
+        white-space: nowrap;
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      .pill {
+        display: inline-block;
+        background: #e7f4fa;
+        color: #18749b;
+        border-radius: 30px;
+        padding: 5px 10px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .empty {
+        text-align: center;
+        padding: 38px;
+        color: #758399;
+      }
+      .distance {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      .chip {
+        padding: 9px 13px;
+        border: 1px solid #dce6ef;
+        background: white;
+        border-radius: 9px;
+      }
+      .chip.selected {
+        background: #164f7a;
+        color: white;
+      }
+      .resultinput {
+        width: 110px;
+        border: 1px solid #d7e1ec;
+        border-radius: 7px;
+        padding: 8px;
+      }
+      .notice {
+        background: #fff8e8;
+        border: 1px solid #f2dcab;
+        color: #7b5b1e;
+        padding: 13px;
+        border-radius: 10px;
+        font-size: 13px;
+        margin-bottom: 16px;
+      }
+      .link {
+        color: #176eaa;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .small {
+        font-size: 12px;
+      }
+      .hidden {
+        display: none !important;
+      }
+      @media (max-width: 850px) {
+        .shell {
+          display: block;
+        }
+        .side {
+          padding: 14px;
+        }
+        .brand {
+          margin: 0 0 10px;
+        }
+        .menu {
+          display: flex;
+          overflow: auto;
+        }
+        .nav {
+          white-space: nowrap;
+          width: auto;
+        }
+        .main {
+          padding: 16px;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .formgrid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .side {
+        padding: 18px 12px;
+      }
+      .brand {
+        font-size: 21px;
+        margin: 0 8px 18px;
+      }
+      .nav {
+        padding: 9px 12px;
+        margin: 2px 0;
+      }
+      .main {
+        padding: 18px 22px;
+      }
+      .top {
+        margin-bottom: 14px;
+      }
+      h1 {
+        font-size: 24px;
+      }
+      h2 {
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+      .card {
+        padding: 15px;
+        border-radius: 11px;
+        margin-bottom: 11px;
+      }
+      .grid {
+        gap: 10px;
+      }
+      .stat {
+        font-size: 25px;
+      }
+      .btn {
+        padding: 7px 11px;
+        font-size: 13px;
+      }
+      .field {
+        gap: 4px;
+      }
+      .field input,
+      .field select,
+      .search {
+        padding: 8px;
+      }
+      .formgrid {
+        gap: 10px;
+      }
+      th,
+      td {
+        padding: 8px 10px;
+      }
+      .chip {
+        padding: 6px 10px;
+      }
+      .distance {
+        margin-bottom: 10px;
+      }
+      .resultinput {
+        padding: 6px;
+        width: 105px;
+      }
+      .empty {
+        padding: 20px;
+      }
+      .pill {
+        padding: 4px 8px;
+      }
+      @media (max-width: 850px) {
+        .main {
+          padding: 12px;
+        }
+      }
+      .country {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-right: 8px;
+        white-space: nowrap;
+      }
+      .country-flag {
+        width: 21px;
+        height: 14px;
+        object-fit: cover;
+        border: 1px solid #d4dae2;
+        border-radius: 2px;
+      }
+      .country-code {
+        font-size: 11px;
+        font-weight: 700;
+        color: #475569;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="side">
+        <div class="brand">❄ Ice<span>Track</span></div>
+        <div class="menu" id="menu"></div>
+        <p class="muted" style="margin: 35px 10px; color: #9bb1c9">
+          Lokaal wedstrijdbeheer<br />Versie 1.8
+        </p>
+      </aside>
+      <main class="main">
+        <header class="top">
+          <div>
+            <div class="muted">SCHAATSEN · WEDSTRIJDBEHEER</div>
+            <h1 id="heading">Dashboard</h1>
+          </div>
+          <div class="actions">
+            <button class="btn alt" onclick="exportData()">
+              ↓ Exporteer JSON</button
+            ><button
+              class="btn alt"
+              onclick="document.getElementById('importFile').click()"
+            >
+              ↑ Importeer</button
+            ><input
+              hidden
+              type="file"
+              id="importFile"
+              accept=".json,application/json"
+              onchange="importData(event)"
+            />
+          </div>
+        </header>
+        <div id="content"></div>
+      </main>
+    </div>
+    <script>
+      "use strict";
+      const KEY = "icetrack_data_v1",
+        distances = [100, 500, 1000, 1500, 3000, 5000, 10000];
+      let state = { events: [], selected: null },
+        tab = "dashboard",
+        activeDistance = 0;
+      try {
+        let x = JSON.parse(localStorage.getItem(KEY));
+        if (x && Array.isArray(x.events)) state = x;
+      } catch (e) {}
+      function id() {
+        return typeof crypto !== "undefined" &&
+          typeof crypto.randomUUID === "function"
+          ? crypto.randomUUID()
+          : "id-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+      }
+      function resultKey(a, i) {
+        return a + "|r" + i;
+      }
+      function migrateResults(e) {
+        if (e.resultVersion === 2) return;
+        let old = e.results || {},
+          next = {};
+        e.distances.forEach((d, i) => {
+          for (let a of e.athletes || []) {
+            let k = a.id + "|" + d;
+            if (old[k] != null) next[resultKey(a.id, i)] = old[k];
+          }
+        });
+        for (let k of Object.keys(old)) if (/\|r\d+$/.test(k)) next[k] = old[k];
+        e.results = next;
+        e.resultVersion = 2;
+      }
+      state.events.forEach(migrateResults);
+      function save() {
+        try {
+          localStorage.setItem(KEY, JSON.stringify(state));
+        } catch (e) {
+          alert("Lokale opslag mislukt. Exporteer een JSON-back-up.");
+        }
+      }
+      function esc(x) {
+        return String(x ?? "").replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+      function currentEvent() {
+        return state.events.find((x) => x.id === state.selected);
+      }
+      function season(d) {
+        let a = new Date(
+          (d || new Date().toISOString().slice(0, 10)) + "T12:00:00",
+        );
+        let y = a.getFullYear();
+        return (
+          (a.getMonth() >= 6 ? y : y - 1) +
+          "/" +
+          String((a.getMonth() >= 6 ? y : y - 1) + 1).slice(-2)
+        );
+      }
+      function fmt(s) {
+        if (!Number.isFinite(s)) return "—";
+        let m = Math.floor(s / 60),
+          v = (s - m * 60).toFixed(2).padStart(5, "0");
+        return m ? m + ":" + v : v;
+      }
+      function parseTime(v) {
+        v = String(v ?? "")
+          .trim()
+          .replace(",", ".");
+        if (!v) return null;
+        if (/^\d+\.\d{1,2}\.\d{1,2}$/.test(v)) {
+          let a = v.split(".").map(Number);
+          return a[1] < 60 ? a[0] * 60 + a[1] + a[2] / 100 : NaN;
+        }
+        if (/^\d+:\d{1,2}(?:\.\d{1,2})?$/.test(v)) {
+          let [m, sec] = v.split(":");
+          return Number(sec) < 60 ? Number(m) * 60 + Number(sec) : NaN;
+        }
+        if (/^\d+(?:\.\d{1,2})?$/.test(v)) {
+          let n = Number(v);
+          return n > 0 ? n : NaN;
+        }
+        return NaN;
+      }
+      function surname(a) {
+        return (
+          String(a.name || "")
+            .trim()
+            .split(/\s+/)
+            .at(-1) || ""
+        );
+      }
+      function nameSort(a, b) {
+        return (
+          surname(a).localeCompare(surname(b), "nl", { sensitivity: "base" }) ||
+          a.name.localeCompare(b.name, "nl", { sensitivity: "base" })
+        );
+      }
+      const countryCodes = {
+        NED: "NL",
+        GRE: "GR",
+        USA: "US",
+        CAN: "CA",
+        GER: "DE",
+        DEU: "DE",
+        NOR: "NO",
+        SWE: "SE",
+        FIN: "FI",
+        DEN: "DK",
+        DNK: "DK",
+        POL: "PL",
+        JPN: "JP",
+        KOR: "KR",
+        CHN: "CN",
+        ITA: "IT",
+        FRA: "FR",
+        BEL: "BE",
+        GBR: "GB",
+        AUS: "AU",
+        NZL: "NZ",
+        CZE: "CZ",
+        CRO: "HR",
+        HUN: "HU",
+        AUT: "AT",
+        SUI: "CH",
+        CHE: "CH",
+        ESP: "ES",
+        LAT: "LV",
+        LVA: "LV",
+        EST: "EE",
+        LTU: "LT",
+        UKR: "UA",
+        KAZ: "KZ",
+        RUS: "RU",
+        BLR: "BY",
+        ROU: "RO",
+        SVK: "SK",
+        SLO: "SI",
+        TPE: "TW",
+        TWN: "TW",
+        MGL: "MN",
+        MEX: "MX",
+        ARG: "AR",
+        BRA: "BR",
+        IRL: "IE",
+        ISL: "IS",
+        ISR: "IL",
+        TUR: "TR",
+        TUR: "TR",
+        IND: "IN",
+      };
+      function flag(country) {
+        let code = String(country || "")
+            .trim()
+            .toUpperCase(),
+          iso = countryCodes[code] || (code.length === 2 ? code : "");
+        let image =
+          iso && /^[A-Z]{2}$/.test(iso)
+            ? `<img class="country-flag" loading="lazy" alt="" src="https://flagcdn.com/w40/${iso.toLowerCase()}.png" onerror="this.style.display='none'">`
+            : "";
+        return `<span class="country" title="${esc(code)}">${image}<span class="country-code">${esc(code || "—")}</span></span>`;
+      }
+      function go(t) {
+        tab = t;
+        render();
+      }
+      function choose(i) {
+        state.selected = i;
+        save();
+        go("event");
+      }
+      function nav() {
+        let n = [
+          ["dashboard", "▦ Overzicht"],
+          ["events", "◫ Wedstrijden"],
+          ["event", "◷ Wedstrijddetails"],
+          ["athletes", "♙ Deelnemers"],
+          ["results", "▤ Uitslagen"],
+          ["standings", "♜ Klassement"],
+        ];
+        document.getElementById("menu").innerHTML = n
+          .map(
+            ([k, v]) =>
+              `<button class="nav ${tab === k ? "active" : ""}" onclick="go('${k}')">${v}</button>`,
+          )
+          .join("");
+      }
+      function render() {
+        nav();
+        let labels = {
+          dashboard: "Dashboard",
+          events: "Wedstrijden",
+          event: "Wedstrijddetails",
+          athletes: "Deelnemers",
+          results: "Uitslagen",
+          standings: "Klassement",
+        };
+        document.getElementById("heading").textContent = labels[tab];
+        let out = {
+          dashboard,
+          events,
+          eventView,
+          athletes,
+          results,
+          standings,
+        }[{ event: "eventView" }[tab] || tab]();
+        document.getElementById("content").innerHTML = out;
+      }
+      function dashboard() {
+        let e = currentEvent();
+        return `<div class="grid"><div class="card"><div class="muted">Wedstrijden</div><div class="stat">${state.events.length}</div></div><div class="card"><div class="muted">Deelnemers totaal</div><div class="stat">${state.events.reduce((n, e) => n + e.athletes.length, 0)}</div></div><div class="card"><div class="muted">Ingevoerde tijden</div><div class="stat">${state.events.reduce((n, e) => n + Object.keys(e.results).length, 0)}</div></div></div><div class="card"><div class="row"><h2>Recente wedstrijden</h2><button class="btn" onclick="go('events')">+ Nieuwe wedstrijd</button></div>${eventTable()}</div>${e ? `<div class="card"><h2>Geselecteerd: ${esc(e.name)}</h2><p class="muted">${esc(e.date)} · ${esc(e.location)} · ${e.distances.join("m · ")}m</p><button class="btn" onclick="go('results')">Uitslagen invoeren →</button></div>` : ""}`;
+      }
+      function eventTable() {
+        return state.events.length
+          ? `<div class="tablewrap"><table><thead><tr><th>Wedstrijd</th><th>Datum</th><th>Type</th><th>Deelnemers</th><th></th></tr></thead><tbody>${[
+              ...state.events,
+            ]
+              .reverse()
+              .map(
+                (e) =>
+                  `<tr><td><b>${esc(e.name)}</b><div class="muted">${esc(e.location)}</div></td><td>${esc(e.date)}</td><td><span class="pill">${e.distances.length > 1 ? "Meerkamp" : "Losse afstand"}</span></td><td>${e.athletes.length}</td><td><button class="btn alt" onclick="choose('${e.id}')">Open →</button></td></tr>`,
+              )
+              .join("")}</tbody></table></div>`
+          : '<div class="empty">Nog geen wedstrijden. Maak je eerste wedstrijd aan.</div>';
+      }
+      function events() {
+        return `<div class="card"><h2>Nieuwe wedstrijd of meerkamp</h2><form class="formgrid" id="newEventForm"><label class="field">Naam<input name="name" required placeholder="Bijv. Clubkampioenschappen 2026"></label><label class="field">Datum<input name="date" type="date" required value="${new Date().toISOString().slice(0, 10)}"></label><label class="field">Locatie / ijsbaan<input name="location" placeholder="Bijv. Thialf, Heerenveen"></label><label class="field">Type<select name="type" onchange="document.getElementById('distSelect').classList.toggle('hidden',this.value==='single');document.getElementById('singleSelect').classList.toggle('hidden',this.value!=='single')"><option value="single">Losse afstand</option><option value="multi">Meerkamp / meerdere afstanden</option></select></label><label class="field" id="singleSelect">Afstand<select name="single">${distances.map((d) => `<option value="${d}" ${d === 500 ? "selected" : ""}>${d} meter</option>`).join("")}</select></label><div class="field hidden" id="distSelect"><span>Afstanden (volgorde)</span><div class="actions">${distances.map((d) => `<label><input type="checkbox" name="multi" value="${d}" ${[500, 1500, 1000, 5000].includes(d) ? "checked" : ""}> ${d}m</label>`).join("")}</div><span class="muted">De volgorde kun je na het aanmaken aanpassen.</span></div><div class="wide"><button class="btn">Wedstrijd aanmaken</button></div></form></div><div class="card"><h2>Opgeslagen wedstrijden</h2>${eventTable()}</div>`;
+      }
+      function createEvent(form) {
+        let f = new FormData(form),
+          ds =
+            f.get("type") === "single"
+              ? [+f.get("single")]
+              : f.getAll("multi").map(Number);
+        if (!ds.length) {
+          alert("Selecteer een afstand");
+          return false;
+        }
+        let e = {
+          id: id(),
+          name: f.get("name").trim(),
+          date: f.get("date"),
+          location: f.get("location").trim(),
+          distances: ds,
+          athletes: [],
+          results: {},
+        };
+        state.events.push(e);
+        state.selected = e.id;
+        save();
+        go("event");
+        return false;
+      }
+      function need() {
+        return '<div class="card empty">Selecteer eerst een wedstrijd via het tabblad Wedstrijden.</div>';
+      }
+      function eventView() {
+        let e = currentEvent();
+        if (!e) return need();
+        return `<div class="card"><div class="row"><div><h2>${esc(e.name)}</h2><div class="muted">${esc(e.date)} · ${esc(e.location)} · seizoen ${season(e.date)}</div></div><div class="actions"><button class="btn alt" onclick="duplicateEvent()">Dupliceer</button><button class="btn danger" onclick="deleteEvent()">Verwijder</button></div></div><hr style="border:0;border-top:1px solid #eaf0f6;margin:20px 0"><div class="formgrid"><label class="field">Naam<input id="ename" value="${esc(e.name)}"></label><label class="field">Datum<input type="date" id="edate" value="${esc(e.date)}"></label><label class="field">Locatie<input id="elocation" value="${esc(e.location)}"></label><div class="field"><span>Afstanden in wedstrijdvolgorde</span><div class="actions">${e.distances.map((d, i) => `<span class="pill">${d}m · rit ${i + 1} <button class="btn alt small" onclick="moveDistance(${i},-1)">↑</button><button class="btn alt small" onclick="moveDistance(${i},1)">↓</button><button class="btn danger small" onclick="removeDistance(${i})">×</button></span>`).join("")}</div><div class="actions"><select id="newdistance">${distances.map((d) => `<option value="${d}">${d}m</option>`).join("")}</select><button class="btn alt" onclick="addDistance()">+ Afstand</button></div></div><div class="wide"><button class="btn" onclick="updateEvent()">Wijzigingen opslaan</button></div></div></div><div class="grid"><div class="card"><div class="stat">${e.athletes.length}</div><div class="muted">Deelnemers</div><button class="btn alt" onclick="go('athletes')">Beheren →</button></div><div class="card"><div class="stat">${e.distances.length}</div><div class="muted">Afstanden</div><button class="btn alt" onclick="go('results')">Uitslagen →</button></div><div class="card"><div class="stat">${Object.keys(e.results).length}</div><div class="muted">Tijden geregistreerd</div><button class="btn alt" onclick="go('standings')">Klassement →</button></div></div>`;
+      }
+      function updateEvent() {
+        let e = currentEvent();
+        e.name = document.getElementById("ename").value.trim() || e.name;
+        e.date = document.getElementById("edate").value;
+        e.location = document.getElementById("elocation").value;
+        save();
+        render();
+      }
+      function moveDistance(i, k) {
+        let e = currentEvent(),
+          j = i + k;
+        if (j < 0 || j >= e.distances.length) return;
+        [e.distances[i], e.distances[j]] = [e.distances[j], e.distances[i]];
+        for (let a of e.athletes) {
+          let ki = resultKey(a.id, i),
+            kj = resultKey(a.id, j),
+            vi = e.results[ki],
+            vj = e.results[kj];
+          if (vj == null) delete e.results[ki];
+          else e.results[ki] = vj;
+          if (vi == null) delete e.results[kj];
+          else e.results[kj] = vi;
+        }
+        save();
+        render();
+      }
+      function addDistance() {
+        let e = currentEvent(),
+          d = +document.getElementById("newdistance").value;
+        e.distances.push(d);
+        save();
+        render();
+      }
+      function removeDistance(i) {
+        let e = currentEvent();
+        if (e.distances.length === 1)
+          return alert("Minimaal één afstand vereist");
+        let d = e.distances[i];
+        if (!confirm("Afstand " + d + "m verwijderen, inclusief de uitslagen?"))
+          return;
+        e.distances.splice(i, 1);
+        let next = {};
+        for (let [k, v] of Object.entries(e.results)) {
+          let m = k.match(/^(.*)\|r(\d+)$/);
+          if (!m) continue;
+          let idx = +m[2];
+          if (idx !== i) next[resultKey(m[1], idx > i ? idx - 1 : idx)] = v;
+        }
+        e.results = next;
+        save();
+        render();
+      }
+      function duplicateEvent() {
+        let e = currentEvent(),
+          copy = structuredClone(e);
+        copy.id = id();
+        copy.name += " (kopie)";
+        copy.results = {};
+        state.events.push(copy);
+        state.selected = copy.id;
+        save();
+        render();
+      }
+      function deleteEvent() {
+        let e = currentEvent();
+        if (!confirm("Wedstrijd definitief verwijderen?")) return;
+        state.events = state.events.filter((x) => x.id !== e.id);
+        state.selected = state.events[0]?.id || null;
+        save();
+        go("events");
+      }
+      function athletes() {
+        let e = currentEvent();
+        if (!e) return need();
+        return `<div class="card"><h2>Zoek schaatser via SpeedSkatingResults</h2><p class="muted">Zoek op (begin van) achternaam en eventueel voornaam of landcode. Selecteer de juiste schaatser; persoonlijke records worden direct opgehaald. Internet vereist.</p><div class="formgrid"><label class="field">Achternaam<input id="ssfamily" placeholder="Bijv. Leerdam"></label><label class="field">Voornaam (optioneel)<input id="ssgiven" placeholder="Bijv. Jutta"></label><label class="field">Landcode (optioneel)<input id="sscountry" maxlength="3" placeholder="NED"></label><div class="field"><span>Zoeken</span><button class="btn" onclick="searchSkaters()">Zoek schaatsers</button></div></div><div id="ssresults" aria-live="polite"></div></div><div class="card"><h2>Handmatig toevoegen</h2><form class="formgrid" onsubmit="addAthlete(event)"><label class="field">Naam<input name="name" required></label><label class="field">Landcode<input name="country" maxlength="3" placeholder="NED"></label><label class="field">SpeedSkatingResults-ID<input name="srid" placeholder="optioneel"></label><label class="field">Geboortejaar<input name="birth" type="number" min="1900" max="2100"></label><div class="wide"><button class="btn">+ Deelnemer toevoegen</button></div></form></div><div class="card"><h2>Deelnemers (${e.athletes.length})</h2>${e.athletes.length ? `<div class="tablewrap"><table><thead><tr><th>Naam</th><th>LAND</th><th>SSR-ID</th><th>Records</th><th></th></tr></thead><tbody>${e.athletes.map((a) => `<tr><td><b>${esc(a.name)}</b><div class="muted">${esc(a.birth || "")}</div></td><td>${flag(a.country)}</td><td>${a.srid ? `<a class="link" target="_blank" rel="noopener" href="https://speedskatingresults.com/index.php?p=17&s=${encodeURIComponent(a.srid)}">${esc(a.srid)}</a>` : "—"}</td><td><button class="btn alt" onclick="editRecords('${a.id}')">PR / SB</button> ${a.srid ? `<button class="btn alt" onclick="refreshRecords('${a.id}')">↻ PR ophalen</button>` : ""}<div class="muted">${Object.keys(a.records || {}).length} afstanden</div></td><td><button class="btn danger" onclick="removeAthlete('${a.id}')">Verwijder</button></td></tr>`).join("")}</tbody></table></div>` : '<div class="empty">Nog geen deelnemers.</div>'}</div>`;
+      }
+      const SSR = "https://speedskatingresults.com/api/json/";
+      let ssMatches = [];
+      async function ssFetch(endpoint, params) {
+        let url = new URL(SSR + endpoint + ".php");
+        Object.entries(params).forEach(([k, v]) => {
+          if (v !== undefined && v !== null && String(v).trim())
+            url.searchParams.set(k, String(v).trim());
+        });
+        let response = await fetch(url.toString(), {
+          headers: { Accept: "application/json" },
+        });
+        if (!response.ok) throw Error("HTTP " + response.status);
+        return response.json();
+      }
+      async function searchSkaters() {
+        let family = document.getElementById("ssfamily").value.trim(),
+          given = document.getElementById("ssgiven").value.trim(),
+          country = document
+            .getElementById("sscountry")
+            .value.trim()
+            .toUpperCase(),
+          target = document.getElementById("ssresults");
+        if (!family && !given) {
+          target.textContent = "Vul minimaal een voor- of achternaam in.";
+          return;
+        }
+        target.textContent = "Schaatsers zoeken…";
+        try {
+          let data = await ssFetch("skater_lookup", {
+            familyname: family,
+            givenname: given,
+            country,
+          });
+          ssMatches = Array.isArray(data.skaters) ? data.skaters : [];
+          target.innerHTML = ssMatches.length
+            ? `<div class="tablewrap"><table><thead><tr><th>Schaatser</th><th>Land</th><th>Categorie</th><th></th></tr></thead><tbody>${ssMatches.map((a, i) => `<tr><td>${esc(a.givenname)} ${esc(a.familyname)}</td><td>${esc(a.country)}</td><td>${esc(a.category || "—")}</td><td><button class="btn alt" onclick="selectSSSkater(${i})">Selecteer</button></td></tr>`).join("")}</tbody></table></div><p class="muted">De API geeft maximaal 10 resultaten. Verfijn je zoekopdracht als de juiste schaatser ontbreekt.</p>`
+            : "Geen schaatsers gevonden.";
+        } catch (err) {
+          target.textContent =
+            "API-zoekopdracht mislukt: " +
+            err.message +
+            ". Controleer je internetverbinding en de browserconsole.";
+        }
+      }
+      async function selectSSSkater(i) {
+        let sk = ssMatches[i],
+          e = currentEvent(),
+          target = document.getElementById("ssresults");
+        if (!sk || !e) return;
+        let sid = String(sk.id);
+        if (e.athletes.some((a) => String(a.srid) === sid)) {
+          target.textContent = "Deze schaatser is al toegevoegd.";
+          return;
+        }
+        target.textContent = "Persoonlijke records ophalen…";
+        try {
+          let data = await ssFetch("personal_records", { skater: sid }),
+            records = {};
+          for (let r of data.records || []) {
+            if (r.distance != null)
+              records[String(r.distance)] = {
+                pr: String(r.time || ""),
+                sb: "",
+                source: "SpeedSkatingResults",
+                prDate: r.date || "",
+                prLocation: r.location || "",
+              };
+          }
+          let a = {
+            id: id(),
+            name: [sk.givenname, sk.familyname].filter(Boolean).join(" "),
+            country: sk.country || "",
+            srid: sid,
+            birth: "",
+            records,
+          };
+          e.athletes.push(a);
+          save();
+          render();
+        } catch (err) {
+          target.innerHTML = `<p class="muted">PR ophalen mislukt: ${esc(err.message)}.</p><button class="btn alt" onclick="addSSWithoutPR(${i})">Toch toevoegen zonder PR</button>`;
+        }
+      }
+      function addSSWithoutPR(i) {
+        let sk = ssMatches[i],
+          e = currentEvent();
+        if (
+          !sk ||
+          !e ||
+          e.athletes.some((a) => String(a.srid) === String(sk.id))
+        )
+          return;
+        e.athletes.push({
+          id: id(),
+          name: [sk.givenname, sk.familyname].filter(Boolean).join(" "),
+          country: sk.country || "",
+          srid: String(sk.id),
+          birth: "",
+          records: {},
+        });
+        save();
+        render();
+      }
+      async function refreshRecords(i) {
+        let e = currentEvent(),
+          a = e?.athletes.find((x) => x.id === i);
+        if (!a?.srid) return;
+        try {
+          let data = await ssFetch("personal_records", { skater: a.srid });
+          for (let r of data.records || []) {
+            let d = String(r.distance);
+            a.records[d] = {
+              ...(a.records[d] || {}),
+              pr: String(r.time || ""),
+              prDate: r.date || "",
+              prLocation: r.location || "",
+              source: "SpeedSkatingResults",
+            };
+          }
+          save();
+          render();
+          alert("Persoonlijke records bijgewerkt.");
+        } catch (err) {
+          alert("Ophalen mislukt: " + err.message);
+        }
+      }
+      function addAthlete(ev) {
+        ev.preventDefault();
+        let f = new FormData(ev.target),
+          e = currentEvent(),
+          name = f.get("name").trim(),
+          srid = String(f.get("srid")).trim();
+        if (
+          e.athletes.some(
+            (a) =>
+              (srid && a.srid === srid) ||
+              a.name.toLowerCase() === name.toLowerCase(),
+          )
+        )
+          return alert("Deze deelnemer bestaat al");
+        e.athletes.push({
+          id: id(),
+          name,
+          country: String(f.get("country")).toUpperCase(),
+          srid,
+          birth: f.get("birth"),
+          records: {},
+        });
+        save();
+        render();
+      }
+      function removeAthlete(i) {
+        if (!confirm("Deelnemer en uitslagen verwijderen?")) return;
+        let e = currentEvent();
+        e.athletes = e.athletes.filter((a) => a.id !== i);
+        for (let k of Object.keys(e.results))
+          if (k.startsWith(i + "|")) delete e.results[k];
+        save();
+        render();
+      }
+      function editRecords(i) {
+        let e = currentEvent(),
+          a = e.athletes.find((x) => x.id === i);
+        let d = prompt(
+          "Afstand in meters (" + e.distances.join(", ") + ")",
+          String(e.distances[0]),
+        );
+        if (d === null) return;
+        d = +d;
+        if (!distances.includes(d)) return alert("Ongeldige afstand");
+        let pr = prompt(
+          "Persoonlijk record (bijv. 1:12.34); leeg = onbekend",
+          a.records[d]?.pr || "",
+        );
+        if (pr === null) return;
+        let sb = prompt(
+          "Seizoensbeste (bijv. 1:13.45); leeg = onbekend",
+          a.records[d]?.sb || "",
+        );
+        if (sb === null) return;
+        if (
+          (pr.trim() && !Number.isFinite(parseTime(pr))) ||
+          (sb.trim() && !Number.isFinite(parseTime(sb)))
+        )
+          return alert("Ongeldige tijd");
+        a.records[d] = {
+          pr: pr.trim(),
+          sb: sb.trim(),
+          season: season(e.date),
+          source: "handmatig",
+        };
+        save();
+        render();
+      }
+      function distanceButtons(e) {
+        if (activeDistance >= e.distances.length) activeDistance = 0;
+        return `<div class="distance">${e.distances.map((d, i) => `<button class="chip ${activeDistance === i ? "selected" : ""}" onclick="activeDistance=${i};render()">${d}m · rit ${i + 1}</button>`).join("")}</div>`;
+      }
+      function results() {
+        let e = currentEvent();
+        if (!e) return need();
+        let d = e.distances[Math.min(activeDistance, e.distances.length - 1)];
+        
+let ordered = e.athletes.map(a => ({
+    a,
+    v: e.results[resultKey(a.id, activeDistance)],
+    t: parseTime(e.results[resultKey(a.id, activeDistance)]),
+    pr: parseTime(a.records?.[d]?.pr)
+})).sort((x, y) => {
+
+    const xHasTime = Number.isFinite(x.t);
+    const yHasTime = Number.isFinite(y.t);
+
+    // 1. Schaatsers met gereden tijd: snelste eerst
+    if (xHasTime && yHasTime) {
+        return x.t - y.t || nameSort(x.a, y.a);
+    }
+
+    // Gereden tijden altijd bovenaan
+    if (xHasTime) return -1;
+    if (yHasTime) return 1;
+
+    // 2. Schaatsers zonder tijd: sorteren op PR
+    const xHasPR = Number.isFinite(x.pr);
+    const yHasPR = Number.isFinite(y.pr);
+
+    if (xHasPR && yHasPR) {
+        return x.pr - y.pr || nameSort(x.a, y.a);
+    }
+
+    // Schaatsers met PR boven schaatsers zonder PR
+    if (xHasPR) return -1;
+    if (yHasPR) return 1;
+
+    // 3. Geen tijd en geen PR: alfabetisch
+    return nameSort(x.a, y.a);
+});
+
+        let rank = 0,
+          previous = null;
+        return `<div class="card"><h2>CSV-uitslagen importeren</h2><p class="muted">Gebruik kolommen <b>naam,afstand,tijd</b> (scheidingsteken komma of puntkomma). Optioneel: <b>srid</b> en <b>rit</b> (volgnummer bij dubbele afstanden). Bestaande tijden worden alleen na bevestiging overschreven.</p><input type="file" accept=".csv,text/csv" onchange="importCSV(event)"><button class="btn alt" onclick="downloadCSVTemplate()">↓ CSV-voorbeeld</button></div><div class="card"><h2>Uitslagen invoeren · ${esc(e.name)}</h2>${distanceButtons(e)}<div class="muted" style="margin-bottom:10px">Tijden: 38.42, 1:15.23 of 6.32.24 (= 6:32.24). Bevestig met Enter of Tab. Gereden tijden worden direct op rang gesorteerd; lege tijden staan alfabetisch op achternaam onderaan.</div>${
+          ordered.length
+            ? `<div class="tablewrap"><table><thead><tr><th>Pos.</th><th>Deelnemer</th><th>LAND</th><th>PR</th><th>SB</th><th>Gereden tijd</th><th>Punten</th></tr></thead><tbody>${ordered
+                .map((r, i) => {
+                  let { a, v, t } = r,
+                    valid = Number.isFinite(t);
+                  if (valid) {
+                    if (previous === null || t !== previous) rank = i + 1;
+                    previous = t;
+                  }
+                  return `<tr><td>${valid ? `<b>${rank}</b>` : "—"}</td><td><b>${esc(a.name)}</b></td><td>${flag(a.country)}</td><td>${esc(a.records[d]?.pr || "—")}</td><td>${esc(a.records[d]?.sb || "—")}</td><td><input class="resultinput" aria-label="Tijd ${esc(a.name)}" value="${esc(v || "")}" data-athlete-id="${esc(a.id)}" onchange="setResult('${a.id}',${activeDistance},this.value,this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"></td><td>${valid ? ((t * 500) / d).toFixed(3) : "—"}</td></tr>`;
+                })
+                .join("")}</tbody></table></div>`
+            : '<div class="empty">Voeg eerst deelnemers toe.</div>'
+        }</div><div class="card"><button class="btn" onclick="go('standings')">Bekijk ranglijst →</button></div>`;
+      }
+      function setResult(i, round, v, input) {
+        let p = parseTime(v);
+        if (v.trim() && !Number.isFinite(p)) {
+          alert("Ongeldige tijd. Gebruik 39.45, 1:15.23 of 6.32.24");
+          input?.focus();
+          return;
+        }
+        let e = currentEvent(),
+          k = resultKey(i, round),
+          all = [...document.querySelectorAll(".resultinput")],
+          index = all.findIndex((x) => x.dataset.athleteId === i),
+          next = [...all.slice(index + 1), ...all.slice(0, index)].find(
+            (x) => !x.value.trim(),
+          ),
+          nextId = next?.dataset.athleteId;
+        if (!v.trim()) delete e.results[k];
+        else e.results[k] = fmt(p);
+        save();
+        render();
+        if (nextId) {
+          let target = [...document.querySelectorAll(".resultinput")].find(
+            (x) => x.dataset.athleteId === nextId,
+          );
+          if (target) {
+            target.focus();
+            target.select();
+          }
+        }
+      }
+      function standings() {
+        let e = currentEvent();
+        if (!e) return need();
+        let rows = e.athletes
+          .map((a) => {
+            let times = e.distances.map((d, i) =>
+              parseTime(e.results[resultKey(a.id, i)]),
+            );
+            let count = times.filter(
+              (x) => x != null && Number.isFinite(x),
+            ).length;
+            let points = times.reduce(
+              (sum, t, i) =>
+                sum +
+                (t != null && Number.isFinite(t)
+                  ? (t * 500) / e.distances[i]
+                  : 0),
+              0,
+            );
+            return { a, times, count, points };
+          })
+          .sort((a, b) => b.count - a.count || a.points - b.points);
+        return `<div class="card"><div class="row"><h2>${e.distances.length > 1 ? "Meerkampklassement" : "Uitslag " + e.distances[0] + "m"} · ${esc(e.name)}</h2><button class="btn alt" onclick="window.print()">Afdrukken</button></div><p class="muted">Meerkamp: 500-meterpunten per afstand, totaal oplopend. Onvolledige deelnemers staan onder volledige deelnemers; dit is een voorlopig klassement, zonder automatische toepassing van alle ISU-regels rond diskwalificaties en plaatsingen.</p>${rows.length ? `<div class="tablewrap"><table><thead><tr><th>Pos.</th><th>Deelnemer</th><th>LAND</th>${e.distances.map((d, i) => `<th>${d}m (${i + 1})</th>`).join("")}<th>Afstanden</th><th>${e.distances.length > 1 ? "Totaal punten" : "500m-punten"}</th></tr></thead><tbody>${rows.map((r, i) => `<tr><td><b>${i + 1}</b></td><td><b>${esc(r.a.name)}</b></td><td>${flag(r.a.country)}</td>${r.times.map((t) => `<td>${t == null || !Number.isFinite(t) ? "—" : fmt(t)}</td>`).join("")}<td>${r.count}/${e.distances.length}</td><td><b>${r.count ? r.points.toFixed(3) : "—"}</b></td></tr>`).join("")}</tbody></table></div>` : '<div class="empty">Nog geen deelnemers.</div>'}</div>`;
+      }
+      function parseCSV(text) {
+        let lines = text
+          .replace(/^\uFEFF/, "")
+          .trim()
+          .split(/\r?\n/);
+        let delim =
+          lines[0].split(";").length > lines[0].split(",").length ? ";" : ",";
+        function split(line) {
+          let out = [],
+            v = "",
+            q = false;
+          for (let i = 0; i < line.length; i++) {
+            let c = line[i];
+            if (c === '"') {
+              if (q && line[i + 1] === '"') {
+                v += '"';
+                i++;
+              } else q = !q;
+            } else if (c === delim && !q) {
+              out.push(v.trim());
+              v = "";
+            } else v += c;
+          }
+          out.push(v.trim());
+          return out;
+        }
+        let heads = split(lines.shift()).map((x) => x.toLowerCase().trim());
+        return lines
+          .filter((x) => x.trim())
+          .map((line) => {
+            let cells = split(line),
+              r = {};
+            heads.forEach((h, i) => (r[h] = cells[i] || ""));
+            return r;
+          });
+      }
+      async function importCSV(ev) {
+        let f = ev.target.files[0];
+        if (!f) return;
+        try {
+          let rows = parseCSV(await f.text()),
+            e = currentEvent(),
+            changes = [],
+            errors = [];
+          for (let [i, r] of rows.entries()) {
+            let d = Number(r.afstand),
+              t = (r.tijd || "").trim(),
+              a =
+                e.athletes.find((a) => r.srid && a.srid === r.srid) ||
+                e.athletes.find(
+                  (a) => a.name.toLowerCase() === (r.naam || "").toLowerCase(),
+                );
+            if (
+              !a ||
+              !e.distances.includes(d) ||
+              !Number.isFinite(parseTime(t))
+            ) {
+              errors.push(i + 2);
+              continue;
+            }
+            let round = r.rit ? Number(r.rit) - 1 : e.distances.indexOf(d);
+            if (
+              round < 0 ||
+              round >= e.distances.length ||
+              e.distances[round] !== d
+            ) {
+              errors.push(i + 2);
+              continue;
+            }
+            changes.push([resultKey(a.id, round), t]);
+          }
+          if (!changes.length)
+            throw Error(
+              "Geen geldige regels. Controleer naam, afstand en tijd.",
+            );
+          if (
+            !confirm(
+              changes.length +
+                " tijden importeren?" +
+                (errors.length
+                  ? " Ongeldige regels: " + errors.join(", ")
+                  : ""),
+            )
+          )
+            return;
+          for (let [k, t] of changes) e.results[k] = t;
+          save();
+          render();
+          alert(
+            changes.length +
+              " tijden geïmporteerd." +
+              (errors.length
+                ? " Overgeslagen regels: " + errors.join(", ")
+                : ""),
+          );
+        } catch (err) {
+          alert("CSV-import mislukt: " + err.message);
+        } finally {
+          ev.target.value = "";
+        }
+      }
+      function downloadCSVTemplate() {
+        let e = currentEvent(),
+          rows = [
+            "naam;afstand;tijd;srid;rit",
+            ...e.athletes
+              .slice(0, 3)
+              .map((a) =>
+                [a.name, e.distances[0], "", a.srid || "", 1].join(";"),
+              ),
+          ],
+          blob = new Blob(["\uFEFF" + rows.join("\r\n")], {
+            type: "text/csv;charset=utf-8",
+          }),
+          u = URL.createObjectURL(blob),
+          a = document.createElement("a");
+        a.href = u;
+        a.download = "icetrack-uitslagen-voorbeeld.csv";
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(u), 1000);
+      }
+      function exportData() {
+        let blob = new Blob(
+            [
+              JSON.stringify(
+                {
+                  format: "icetrack-v1",
+                  exported: new Date().toISOString(),
+                  ...state,
+                },
+                null,
+                2,
+              ),
+            ],
+            { type: "application/json" },
+          ),
+          url = URL.createObjectURL(blob),
+          a = document.createElement("a");
+        a.href = url;
+        a.download =
+          "icetrack-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+      async function importData(ev) {
+        let f = ev.target.files[0];
+        if (!f) return;
+        try {
+          let x = JSON.parse(await f.text());
+          if (
+            !Array.isArray(x.events) ||
+            x.events.some(
+              (e) =>
+                !e.id ||
+                !Array.isArray(e.athletes) ||
+                !Array.isArray(e.distances) ||
+                !e.results ||
+                typeof e.results !== "object",
+            )
+          )
+            throw Error("Ongeldig bestand");
+          if (
+            !confirm(
+              "Huidige lokale wedstrijden vervangen door " +
+                x.events.length +
+                " geïmporteerde wedstrijden?",
+            )
+          )
+            return;
+          state = {
+            events: x.events,
+            selected: x.events.some((e) => e.id === x.selected)
+              ? x.selected
+              : x.events[0]?.id || null,
+          };
+          save();
+          go("dashboard");
+        } catch (e) {
+          alert("Importeren mislukt: " + e.message);
+        } finally {
+          ev.target.value = "";
+        }
+      }
+      document.addEventListener("keydown", function (ev) {
+        if (
+          ev.key === "Enter" &&
+          ev.target &&
+          ["ssfamily", "ssgiven", "sscountry"].includes(ev.target.id)
+        ) {
+          ev.preventDefault();
+          searchSkaters();
+        }
+      });
+      document.addEventListener("submit", function (ev) {
+        if (ev.target && ev.target.id === "newEventForm") {
+          ev.preventDefault();
+          try {
+            createEvent(ev.target);
+          } catch (err) {
+            console.error("Aanmaken wedstrijd:", err);
+            alert("Wedstrijd aanmaken mislukt: " + err.message);
+          }
+        }
+      });
+      render();
+    </script>
+    <footer style="text-align: center; padding: 12px; color: #64748b">
+      Schaatsergegevens:
+      <a href="https://speedskatingresults.com/" target="_blank" rel="noopener"
+        >SpeedSkatingResults.com</a
+      >
+    </footer>
+  </body>
+</html>
