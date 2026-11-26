@@ -1792,6 +1792,28 @@
       }
     }
 
+    async function readRoundMatches(tournamentRef, round) {
+      let snapshot;
+      try {
+        snapshot = await getDoc(doc(tournamentRef, "ronde_wedstrijden", round));
+      } catch (error) {
+        if (error.code !== "permission-denied") throw error;
+      }
+
+      if (snapshot?.exists()) {
+        const { versie, partijen } = snapshot.data();
+        if (versie !== 1 || !partijen || typeof partijen !== "object" || Array.isArray(partijen)) {
+          throw new Error(`Ongeldig wedstrijddocument voor ${round}.`);
+        }
+        // Gebruik dezelfde volgorde op wedstrijd-ID als bij de losse documenten.
+        return Object.keys(partijen).sort().map((id) => ({ ...partijen[id], id }));
+      }
+
+      // Oudere toernooien kunnen per ronde nog zonder verzameldocument bestaan.
+      const legacy = await getDocs(collection(tournamentRef, `${round}_wedstrijden`));
+      return legacy.docs.map((entry) => ({ id: entry.id, ...entry.data() }));
+    }
+
     async function loadTournament(tournamentId) {
       const request = ++tournamentRequest;
       navigationChanged = false;
@@ -1833,17 +1855,12 @@
           ? { id: tournSnap.id, ...tournSnap.data() }
           : null;
 
-        const [r1PoulesSnap, r1MatchesSnap, r2PoulesSnap, r2MatchesSnap] =
-          await Promise.all([
-            getDocs(collection(db, "toernooien", tournamentId, "poules_r1")),
-            getDocs(
-              collection(db, "toernooien", tournamentId, "r1_wedstrijden")
-            ),
-            getDocs(collection(db, "toernooien", tournamentId, "poules_r2")),
-            getDocs(
-              collection(db, "toernooien", tournamentId, "r2_wedstrijden")
-            ),
-          ]);
+        const [r1PoulesSnap, r1Rows, r2PoulesSnap, r2Rows] = await Promise.all([
+          getDocs(collection(tournRef, "poules_r1")),
+          readRoundMatches(tournRef, "r1"),
+          getDocs(collection(tournRef, "poules_r2")),
+          readRoundMatches(tournRef, "r2"),
+        ]);
 
         if (request !== tournamentRequest) return;
         activeTournamentDoc = tournament;
@@ -1851,18 +1868,12 @@
           id: d.id,
           ...d.data(),
         }));
-        r1Matches = r1MatchesSnap.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-        }));
+        r1Matches = r1Rows;
         r2Poules = r2PoulesSnap.docs.map((d) => ({
           id: d.id,
           ...d.data(),
         }));
-        r2Matches = r2MatchesSnap.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-        }));
+        r2Matches = r2Rows;
 
         const naam = activeTournamentDoc?.naam || tournamentId;
         const jaar = activeTournamentDoc?.jaar
